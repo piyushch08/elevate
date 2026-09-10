@@ -95,12 +95,26 @@ if (auth) {
 }
 
 // Login
-if (btnLogin && auth) {
+if (btnLogin) {
   btnLogin.addEventListener("click", () => {
     const errEl = document.getElementById("login-error");
-    if (firebaseConfig.apiKey === "YOUR_API_KEY") {
-      errEl.textContent = "Please update firebaseConfig in js/firebase-app.js with your real Firebase config.";
-      errEl.style.display = "block";
+    if (firebaseConfig.apiKey === "YOUR_API_KEY" || !auth) {
+      // Mock login for demonstration
+      currentUser = {
+        uid: "mock-user-123",
+        displayName: "Guest User",
+        photoURL: "https://ui-avatars.com/api/?name=Guest+User&background=0D8ABC&color=fff"
+      };
+      
+      if(loginModal) loginModal.style.display = "none";
+      const uNameEl = document.getElementById("u-name");
+      const sAvatarEl = document.querySelector(".s-avatar");
+      if (uNameEl) uNameEl.textContent = currentUser.displayName;
+      if (sAvatarEl) {
+        sAvatarEl.innerHTML = `<img src="${currentUser.photoURL}" alt="Profile" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+      }
+      
+      toast("Logged in as Guest (Cloud Sync disabled)", "info");
       return;
     }
     
@@ -113,8 +127,15 @@ if (btnLogin && auth) {
 }
 
 // Logout
-if (btnLogout && auth) {
+if (btnLogout) {
   btnLogout.addEventListener("click", () => {
+    if (firebaseConfig.apiKey === "YOUR_API_KEY" || !auth) {
+      currentUser = null;
+      localStorage.removeItem("elevate2");
+      window.location.reload();
+      return;
+    }
+
     signOut(auth).then(() => {
       localStorage.removeItem("elevate2");
       window.location.reload(); 
