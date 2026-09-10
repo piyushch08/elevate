@@ -1,0 +1,123 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+// TODO: Replace with your actual Firebase configuration from the Firebase Console
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "your-project.firebaseapp.com",
+  projectId: "your-project",
+  storageBucket: "your-project.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:abcdef"
+};
+
+// Initialize Firebase
+let app, auth, db, provider;
+try {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+  provider = new GoogleAuthProvider();
+} catch (e) {
+  console.error("Firebase initialization failed. Please update firebaseConfig in js/firebase-app.js", e);
+  const errEl = document.getElementById("login-error");
+  if (errEl) {
+    errEl.textContent = "Firebase is not configured. Please open js/firebase-app.js and insert your config.";
+    errEl.style.display = "block";
+  }
+}
+
+let currentUser = null;
+
+// Override global save to also sync with Firestore
+const originalSave = window.save;
+window.save = async function() {
+  // Always save locally first
+  if (typeof originalSave === 'function') originalSave();
+  else {
+    try { localStorage.setItem('elevate2', JSON.stringify(window.D)); } catch(e){}
+  }
+
+  // Then sync to Firestore if logged in
+  if (currentUser && db) {
+    try {
+      await setDoc(doc(db, "users", currentUser.uid), window.D);
+    } catch (error) {
+      console.error("Error syncing to Firestore:", error);
+    }
+  }
+};
+
+// DOM Elements
+const btnLogin = document.getElementById("btn-login");
+const btnLogout = document.getElementById("btn-logout");
+const loginModal = document.getElementById("m-login");
+
+// Auth State Observer
+if (auth) {
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      currentUser = user;
+      if(loginModal) loginModal.style.display = "none";
+      
+      // Update UI with user info
+      const uNameEl = document.getElementById("u-name");
+      const sAvatarEl = document.querySelector(".s-avatar");
+      if (uNameEl) uNameEl.textContent = user.displayName || "User";
+      if (sAvatarEl && user.photoURL) {
+        sAvatarEl.innerHTML = `<img src="${user.photoURL}" alt="Profile" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+      }
+      
+      // Fetch user data from Firestore
+      try {
+        const docSnap = await getDoc(doc(db, "users", user.uid));
+        if (docSnap.exists()) {
+          // Merge data into global D state
+          const remoteData = docSnap.data();
+          Object.assign(window.D, remoteData);
+          
+          // Trigger UI re-render
+          if (typeof window.renderAll === "function") window.renderAll();
+        } else {
+          // New user, save initial local state to Firestore
+          await setDoc(doc(db, "users", user.uid), window.D);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    } else {
+      // User is signed out
+      currentUser = null;
+      if(loginModal) loginModal.style.display = "flex";
+    }
+  });
+}
+
+// Login
+if (btnLogin && auth) {
+  btnLogin.addEventListener("click", () => {
+    const errEl = document.getElementById("login-error");
+    if (firebaseConfig.apiKey === "YOUR_API_KEY") {
+      errEl.textContent = "Please update firebaseConfig in js/firebase-app.js with your real Firebase config.";
+      errEl.style.display = "block";
+      return;
+    }
+    
+    signInWithPopup(auth, provider).catch((error) => {
+      console.error("Login failed", error);
+      errEl.textContent = "Login failed: " + error.message;
+      errEl.style.display = "block";
+    });
+  });
+}
+
+// Logout
+if (btnLogout && auth) {
+  btnLogout.addEventListener("click", () => {
+    signOut(auth).then(() => {
+      localStorage.removeItem("elevate2");
+      window.location.reload(); 
+    });
+  });
+}
