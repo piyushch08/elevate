@@ -114,7 +114,7 @@ if (btnLogin) {
         sAvatarEl.innerHTML = `<img src="${currentUser.photoURL}" alt="Profile" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
       }
       
-      toast("Logged in as Guest (Cloud Sync disabled)", "info");
+      if (window.toast) window.toast("Logged in as Guest (Cloud Sync disabled)", "info");
       return;
     }
     
