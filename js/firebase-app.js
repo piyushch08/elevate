@@ -4,12 +4,13 @@ import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/fireb
 
 // TODO: Replace with your actual Firebase configuration from the Firebase Console
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-project",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abcdef"
+  apiKey: "YAIzaSyBJ9jzkBl3zLcS2nu-O5AZL7oN_pcj68-k",
+  authDomain: "elevate-8d5c4.firebaseapp.com",
+  projectId: "elevate-8d5c4",
+  storageBucket: "elevate-8d5c4.firebasestorage.app",
+  messagingSenderId: "585275355133",
+  appId: "1:585275355133:web:551755e08cc5e2c75d7394",
+  measurementId: "G-WY38RFZ4FX"
 };
 
 // Initialize Firebase
@@ -32,11 +33,11 @@ let currentUser = null;
 
 // Override global save to also sync with Firestore
 const originalSave = window.save;
-window.save = async function() {
+window.save = async function () {
   // Always save locally first
   if (typeof originalSave === 'function') originalSave();
   else {
-    try { localStorage.setItem('elevate2', JSON.stringify(window.D)); } catch(e){}
+    try { localStorage.setItem('elevate2', JSON.stringify(window.D)); } catch (e) { }
   }
 
   // Then sync to Firestore if logged in
@@ -59,8 +60,8 @@ if (auth) {
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       currentUser = user;
-      if(loginModal) loginModal.style.display = "none";
-      
+      if (loginModal) loginModal.style.display = "none";
+
       // Update UI with user info
       const uNameEl = document.getElementById("u-name");
       const sAvatarEl = document.querySelector(".s-avatar");
@@ -68,7 +69,7 @@ if (auth) {
       if (sAvatarEl && user.photoURL) {
         sAvatarEl.innerHTML = `<img src="${user.photoURL}" alt="Profile" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
       }
-      
+
       // Fetch user data from Firestore
       try {
         const docSnap = await getDoc(doc(db, "users", user.uid));
@@ -76,7 +77,7 @@ if (auth) {
           // Merge data into global D state
           const remoteData = docSnap.data();
           Object.assign(window.D, remoteData);
-          
+
           // Trigger UI re-render
           if (typeof window.renderAll === "function") window.renderAll();
         } else {
@@ -89,7 +90,7 @@ if (auth) {
     } else {
       // User is signed out
       currentUser = null;
-      if(loginModal) loginModal.style.display = "flex";
+      if (loginModal) loginModal.style.display = "flex";
     }
   });
 }
@@ -105,19 +106,19 @@ if (btnLogin) {
         displayName: "Guest User",
         photoURL: "https://ui-avatars.com/api/?name=Guest+User&background=0D8ABC&color=fff"
       };
-      
-      if(loginModal) loginModal.style.display = "none";
+
+      if (loginModal) loginModal.style.display = "none";
       const uNameEl = document.getElementById("u-name");
       const sAvatarEl = document.querySelector(".s-avatar");
       if (uNameEl) uNameEl.textContent = currentUser.displayName;
       if (sAvatarEl) {
         sAvatarEl.innerHTML = `<img src="${currentUser.photoURL}" alt="Profile" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
       }
-      
+
       if (window.toast) window.toast("Logged in as Guest (Cloud Sync disabled)", "info");
       return;
     }
-    
+
     signInWithPopup(auth, provider).catch((error) => {
       console.error("Login failed", error);
       errEl.textContent = "Login failed: " + error.message;
@@ -138,7 +139,7 @@ if (btnLogout) {
 
     signOut(auth).then(() => {
       localStorage.removeItem("elevate2");
-      window.location.reload(); 
+      window.location.reload();
     });
   });
 }
