@@ -4,7 +4,7 @@ import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/fireb
 
 // TODO: Replace with your actual Firebase configuration from the Firebase Console
 const firebaseConfig = {
-  apiKey: "YAIzaSyBJ9jzkBl3zLcS2nu-O5AZL7oN_pcj68-k",
+  apiKey: "AIzaSyBJ9jzkBl3zLcS2nu-O5AZL7oN_pcj68-k",
   authDomain: "elevate-8d5c4.firebaseapp.com",
   projectId: "elevate-8d5c4",
   storageBucket: "elevate-8d5c4.firebasestorage.app",
