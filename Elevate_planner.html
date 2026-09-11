@@ -35,45 +35,7 @@
       --rs: 12px;
     }
 
-    [data-theme=aurora] {
-      --bg-a: #0b1f1e;
-      --bg-b: #1a4040;
-      --bg-c: #2a6b5c;
-      --blob1: #28ffb5;
-      --blob2: #4facfe;
-      --accent: #28ffb5;
-      --glow: rgba(40, 255, 181, .35)
-    }
-
-    [data-theme=ocean] {
-      --bg-a: #0d1b4b;
-      --bg-b: #1a2f7a;
-      --bg-c: #2e4b9a;
-      --blob1: #4facfe;
-      --blob2: #b721ff;
-      --accent: #4facfe;
-      --glow: rgba(79, 172, 254, .35)
-    }
-
-    [data-theme=sunset] {
-      --bg-a: #1a0533;
-      --bg-b: #461539;
-      --bg-c: #7a2b44;
-      --blob1: #ff9a44;
-      --blob2: #fc6076;
-      --accent: #ff9a44;
-      --glow: rgba(255, 154, 68, .35)
-    }
-
-    [data-theme=rose] {
-      --bg-a: #1a0a0a;
-      --bg-b: #3d1515;
-      --bg-c: #6b2a2a;
-      --blob1: #ff6b9d;
-      --blob2: #c44dff;
-      --accent: #ff6b9d;
-      --glow: rgba(255, 107, 157, .35)
-    }
+    /* Removed extra themes */
 
     [data-theme=light] {
       --bg-a: #c9d6ff;
@@ -98,6 +60,9 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0
+    }
+    html {
+      scroll-behavior: smooth
     }
 
     ::-webkit-scrollbar {
@@ -572,19 +537,7 @@
       inset: 0;
       z-index: 0;
       background: linear-gradient(135deg, var(--bg-a), var(--bg-b), var(--bg-c));
-      background-size: 200% 200%;
-      animation: bgS 18s ease infinite alternate;
       transition: background .6s
-    }
-
-    @keyframes bgS {
-      0% {
-        background-position: 0 0
-      }
-
-      100% {
-        background-position: 100% 100%
-      }
     }
 
     .blob {
@@ -592,7 +545,6 @@
       border-radius: 50%;
       filter: blur(90px);
       opacity: .5;
-      animation: blobF 22s ease-in-out infinite alternate;
       transition: background .6s
     }
 
@@ -707,24 +659,9 @@
       font-weight: 900;
       font-size: 1.35rem;
       letter-spacing: .1em;
-      background: linear-gradient(90deg, #00f2fe 0%, #fff 50%, #00f2fe 100%);
-      background-size: 200% auto;
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: shimmerFlow 3s linear infinite;
+      color: #00f2fe;
       display: inline-block;
       filter: drop-shadow(0 0 6px rgba(0, 242, 254, .4));
-    }
-
-    @keyframes shimmerFlow {
-      0% {
-        background-position: 200% center
-      }
-
-      100% {
-        background-position: -200% center
-      }
     }
 
     .tb-logo i {
@@ -1058,12 +995,7 @@
       font-weight: 900;
       font-size: 1.55rem;
       letter-spacing: .12em;
-      background: linear-gradient(90deg, #00f2fe 0%, #fff 35%, #00f2fe 50%, #b721ff 70%, #ff477e 85%, #00f2fe 100%);
-      background-size: 200% auto;
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: shimmerFlow 3s linear infinite;
+      color: #00f2fe;
       display: inline-block;
       filter: drop-shadow(0 0 8px rgba(0, 242, 254, .5));
     }
@@ -1197,7 +1129,9 @@
       overflow-y: auto;
       padding: 2rem 2.5rem;
       display: flex;
-      flex-direction: column
+      flex-direction: column;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch
     }
 
     .mobile-bar {
@@ -1262,11 +1196,11 @@
     }
 
     .g2 {
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr))
     }
 
     .g3 {
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr))
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr))
     }
 
     .g1 {
@@ -2412,6 +2346,34 @@
       .tb-bread {
         display: none
       }
+
+      .widget, .sidebar, .topbar, .bottom-nav, .modal, .notif-panel, .search-drop {
+        backdrop-filter: blur(10px);
+      }
+
+      .blob {
+        filter: blur(60px);
+      }
+    }
+
+    @media(max-width:480px) {
+      .timer-disp { font-size: 2.5rem }
+      .splash-name { font-size: 2.2rem }
+      .splash-ring { width: 110px; height: 110px }
+      .splash-orbit:nth-child(1) { width: 140px; height: 140px }
+      .splash-orbit:nth-child(2) { width: 170px; height: 170px }
+      .splash-orbit:nth-child(3) { width: 200px; height: 200px }
+      .rings-row { gap: 0.5rem }
+      .cal-cell { font-size: .75rem }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
     }
   </style>
 </head>
@@ -3027,18 +2989,6 @@
               <div class="theme-grid">
                 <div class="theme-card on" data-t="space" onclick="applyTheme('space',this)">
                   <div class="th-dot" style="background:linear-gradient(135deg,#00f2fe,#ff477e)"></div>Deep Space
-                </div>
-                <div class="theme-card" data-t="aurora" onclick="applyTheme('aurora',this)">
-                  <div class="th-dot" style="background:linear-gradient(135deg,#28ffb5,#4facfe)"></div>Aurora
-                </div>
-                <div class="theme-card" data-t="ocean" onclick="applyTheme('ocean',this)">
-                  <div class="th-dot" style="background:linear-gradient(135deg,#4facfe,#b721ff)"></div>Ocean
-                </div>
-                <div class="theme-card" data-t="sunset" onclick="applyTheme('sunset',this)">
-                  <div class="th-dot" style="background:linear-gradient(135deg,#ff9a44,#fc6076)"></div>Sunset
-                </div>
-                <div class="theme-card" data-t="rose" onclick="applyTheme('rose',this)">
-                  <div class="th-dot" style="background:linear-gradient(135deg,#ff6b9d,#c44dff)"></div>Rose
                 </div>
                 <div class="theme-card" data-t="light" onclick="applyTheme('light',this)">
                   <div class="th-dot" style="background:linear-gradient(135deg,#667eea,#764ba2)"></div>Light Glass
