@@ -5,7 +5,9 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
 import {
@@ -128,6 +130,18 @@ window.saveToFirestore = async function () {
 const btnLogin =
   document.getElementById("btn-login");
 
+const btnEmailLogin =
+  document.getElementById("btn-email-login");
+
+const btnEmailSignup =
+  document.getElementById("btn-email-signup");
+
+const loginEmailInp =
+  document.getElementById("login-email");
+
+const loginPasswordInp =
+  document.getElementById("login-password");
+
 const btnLogout =
   document.getElementById("btn-logout");
 
@@ -194,6 +208,77 @@ if (btnLogin && auth) {
 
 
 // =====================================================
+// EMAIL / PASSWORD LOGIN
+// =====================================================
+
+if (btnEmailLogin && auth) {
+  btnEmailLogin.addEventListener("click", async () => {
+    const errEl = document.getElementById("login-error");
+    if (errEl) { errEl.style.display = "none"; errEl.textContent = ""; }
+
+    const email = loginEmailInp ? loginEmailInp.value.trim() : "";
+    const password = loginPasswordInp ? loginPasswordInp.value : "";
+
+    if (!email || !password) {
+      if (errEl) { errEl.textContent = "Please enter email and password."; errEl.style.display = "block"; }
+      return;
+    }
+
+    try {
+      btnEmailLogin.disabled = true;
+      btnEmailLogin.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Signing in...';
+
+      await signInWithEmailAndPassword(auth, email, password);
+      console.log("Email sign-in successful");
+    } catch (error) {
+      console.error("Email login failed:", error);
+      if (errEl) {
+        errEl.textContent = "Login failed: " + error.message;
+        errEl.style.display = "block";
+      }
+      btnEmailLogin.disabled = false;
+      btnEmailLogin.innerHTML = 'Sign In';
+    }
+  });
+}
+
+// =====================================================
+// EMAIL / PASSWORD SIGNUP
+// =====================================================
+
+if (btnEmailSignup && auth) {
+  btnEmailSignup.addEventListener("click", async () => {
+    const errEl = document.getElementById("login-error");
+    if (errEl) { errEl.style.display = "none"; errEl.textContent = ""; }
+
+    const email = loginEmailInp ? loginEmailInp.value.trim() : "";
+    const password = loginPasswordInp ? loginPasswordInp.value : "";
+
+    if (!email || !password) {
+      if (errEl) { errEl.textContent = "Please enter email and password."; errEl.style.display = "block"; }
+      return;
+    }
+
+    try {
+      btnEmailSignup.disabled = true;
+      btnEmailSignup.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Signing up...';
+
+      await createUserWithEmailAndPassword(auth, email, password);
+      console.log("Email sign-up successful");
+    } catch (error) {
+      console.error("Email sign-up failed:", error);
+      if (errEl) {
+        errEl.textContent = "Sign-up failed: " + error.message;
+        errEl.style.display = "block";
+      }
+      btnEmailSignup.disabled = false;
+      btnEmailSignup.innerHTML = 'Sign Up';
+    }
+  });
+}
+
+
+// =====================================================
 // LOGOUT
 // =====================================================
 
@@ -208,6 +293,7 @@ if (btnLogout && auth) {
       await signOut(auth);
 
       console.log("User logged out");
+      window.location.reload();
 
     } catch (error) {
 
@@ -414,6 +500,16 @@ if (auth) {
 
         }
 
+        if (btnEmailLogin) {
+          btnEmailLogin.disabled = false;
+          btnEmailLogin.innerHTML = 'Sign In';
+        }
+
+        if (btnEmailSignup) {
+          btnEmailSignup.disabled = false;
+          btnEmailSignup.innerHTML = 'Sign Up';
+        }
+
       }
 
 
@@ -431,21 +527,38 @@ if (auth) {
 
 
         if (loginModal) {
-
-          loginModal.style.display =
-            "flex";
-
+          loginModal.style.display = "flex";
         }
 
+        const uNameEl = document.getElementById("u-name");
+        if (uNameEl) {
+          uNameEl.textContent = "Guest";
+        }
+
+        const avatarEl = document.querySelector(".s-avatar");
+        if (avatarEl) {
+          avatarEl.innerHTML = '<i class="ri-user-smile-line"></i>';
+        }
 
         if (btnLogin) {
-
           btnLogin.disabled = false;
-
-          btnLogin.innerHTML =
-            '<i class="ri-google-fill"></i> Sign in with Google';
-
+          btnLogin.innerHTML = '<i class="ri-google-fill"></i> Sign in with Google';
         }
+
+        if (btnEmailLogin) {
+          btnEmailLogin.disabled = false;
+          btnEmailLogin.innerHTML = 'Sign In';
+        }
+
+        if (btnEmailSignup) {
+          btnEmailSignup.disabled = false;
+          btnEmailSignup.innerHTML = 'Sign Up';
+        }
+
+        if (loginEmailInp) loginEmailInp.value = '';
+        if (loginPasswordInp) loginPasswordInp.value = '';
+
+        if (btnLogout) btnLogout.disabled = false;
 
       }
 
