@@ -293,6 +293,7 @@ if (btnLogout && auth) {
       await signOut(auth);
 
       console.log("User logged out");
+      try { localStorage.removeItem("elevate2"); } catch (e) {}
       window.location.reload();
 
     } catch (error) {

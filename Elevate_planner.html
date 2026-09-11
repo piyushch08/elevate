@@ -3149,7 +3149,10 @@
       renderStreak(); renderHabits(); renderNotes();
       renderCalendar(); updateRings(); updateMacros(); updateWaterUI();
     }
-    function save() { try { localStorage.setItem('elevate2', JSON.stringify(D)) } catch (e) { } }
+    function save() {
+      try { localStorage.setItem('elevate2', JSON.stringify(D)) } catch (e) { }
+      if (window.saveToFirestore) window.saveToFirestore();
+    }
     function load() {
       try { const s = localStorage.getItem('elevate2'); if (s) Object.assign(D, JSON.parse(s)); } catch (e) { }
       const savedDay = localStorage.getItem('elevate_day');
@@ -3719,6 +3722,12 @@
       signOut,
       onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      setDoc,
+      getDoc
+    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
     // Your Firebase configuration
     const firebaseConfig = {
@@ -3733,14 +3742,10 @@
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-
-    // Initialize Authentication
     const auth = getAuth(app);
-
-    // Google provider
+    const db = getFirestore(app);
     const googleProvider = new GoogleAuthProvider();
 
-    // Make Firebase available to the rest of the page
     window.elevateAuth = auth;
     window.googleProvider = googleProvider;
 
@@ -3750,13 +3755,29 @@
       toast(msg, "error");
     }
 
-    // Email/Password Login
+    let currentUser = null;
+
+    window.saveToFirestore = async function () {
+      if (!currentUser) return;
+      if (!db) return;
+      if (!window.D) return;
+      try {
+        await setDoc(doc(db, "users", currentUser.uid), {
+          planner: window.D,
+          updatedAt: new Date().toISOString()
+        });
+        console.log("Planner saved to Firestore");
+      } catch (error) {
+        console.error("Error saving planner to Firestore:", error);
+      }
+    };
+
     window.loginWithEmail = async function () {
       const email = document.getElementById("login-email").value.trim();
       const password = document.getElementById("login-password").value;
       if(!email || !password) return showError("Please enter email and password.");
       try {
-        const result = await signInWithEmailAndPassword(auth, email, password);
+        await signInWithEmailAndPassword(auth, email, password);
         toast(`Welcome back!`, "success");
       } catch (error) {
         console.error("Email login error:", error);
@@ -3764,13 +3785,12 @@
       }
     };
 
-    // Email/Password Sign Up
     window.signUpWithEmail = async function () {
       const email = document.getElementById("login-email").value.trim();
       const password = document.getElementById("login-password").value;
       if(!email || !password) return showError("Please enter email and password.");
       try {
-        const result = await createUserWithEmailAndPassword(auth, email, password);
+        await createUserWithEmailAndPassword(auth, email, password);
         toast(`Account created successfully!`, "success");
       } catch (error) {
         console.error("Email signup error:", error);
@@ -3778,75 +3798,79 @@
       }
     };
 
-    // Google Login
     window.loginWithGoogle = async function () {
       try {
         const result = await signInWithPopup(auth, googleProvider);
-
-        const user = result.user;
-
-        console.log("Logged in:", user.email);
-
-        toast(`Welcome ${user.displayName || user.email}!`, "success");
-
+        console.log("Logged in:", result.user.email);
+        toast(`Welcome ${result.user.displayName || result.user.email}!`, "success");
       } catch (error) {
         console.error("Google login error:", error);
-
         toast("Login failed. Please try again.", "error");
       }
     };
 
-    // Logout
     window.logoutFromFirebase = async function () {
       try {
         await signOut(auth);
-        toast("You have been logged out.", "success");
+        console.log("User logged out");
+        try { localStorage.removeItem("elevate2"); } catch (e) {}
+        window.location.reload();
       } catch (error) {
         console.error("Logout error:", error);
         toast("Logout failed.", "error");
       }
     };
 
-    // Detect login state
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       const loginModal = document.getElementById("m-login");
 
       if (user) {
+        currentUser = user;
         console.log("Firebase user:", user);
         if (loginModal) loginModal.style.display = "none";
 
-        // Show user's name
         const nameElement = document.getElementById("u-name");
+        if (nameElement) nameElement.textContent = user.displayName || user.email || "User";
 
-        if (nameElement) {
-          nameElement.textContent =
-            user.displayName || user.email || "User";
-        }
-
-        // Show user's email/status
         const statusElement = document.getElementById("u-status");
+        if (statusElement) statusElement.textContent = user.email || "Signed in";
 
-        if (statusElement) {
-          statusElement.textContent =
-            user.email || "Signed in";
+        try {
+          const userRef = doc(db, "users", user.uid);
+          const snapshot = await getDoc(userRef);
+
+          if (snapshot.exists()) {
+            const remoteData = snapshot.data();
+            console.log("Planner data loaded from Firestore");
+            if (remoteData && remoteData.planner && window.D) {
+              Object.assign(window.D, remoteData.planner);
+            }
+            try { localStorage.setItem("elevate2", JSON.stringify(window.D)); } catch (e) { }
+            if (typeof window.renderAll === "function") window.renderAll();
+            if (typeof window.updateGreeting === "function") window.updateGreeting();
+          } else {
+            console.log("New user. Creating Firestore profile...");
+            await setDoc(userRef, {
+              planner: window.D,
+              updatedAt: new Date().toISOString()
+            });
+          }
+        } catch (error) {
+          console.error("Error loading Firestore data:", error);
         }
 
       } else {
-
+        currentUser = null;
         console.log("No user is signed in.");
         if (loginModal) loginModal.style.display = "flex";
 
         const nameElement = document.getElementById("u-name");
-
-        if (nameElement) {
-          nameElement.textContent = "Guest";
-        }
+        if (nameElement) nameElement.textContent = "Guest";
 
         const statusElement = document.getElementById("u-status");
-
-        if (statusElement) {
-          statusElement.textContent = "Not signed in";
-        }
+        if (statusElement) statusElement.textContent = "Not signed in";
+        
+        try { localStorage.removeItem("elevate2"); } catch (e) {}
       }
     });
   </script>
