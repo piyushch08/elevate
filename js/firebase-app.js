@@ -1,8 +1,25 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-// TODO: Replace with your actual Firebase configuration from the Firebase Console
+import {
+  getAuth,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+
+// =====================================================
+// FIREBASE CONFIG
+// =====================================================
+
 const firebaseConfig = {
   apiKey: "AIzaSyBJ9jzkBl3zLcS2nu-O5AZL7oN_pcj68-k",
   authDomain: "elevate-8d5c4.firebaseapp.com",
@@ -13,133 +30,426 @@ const firebaseConfig = {
   measurementId: "G-WY38RFZ4FX"
 };
 
-// Initialize Firebase
-let app, auth, db, provider;
+
+// =====================================================
+// INITIALIZE FIREBASE
+// =====================================================
+
+let app;
+let auth;
+let db;
+let provider;
+
 try {
+
   app = initializeApp(firebaseConfig);
+
   auth = getAuth(app);
+
   db = getFirestore(app);
+
   provider = new GoogleAuthProvider();
-} catch (e) {
-  console.error("Firebase initialization failed. Please update firebaseConfig in js/firebase-app.js", e);
+
+  console.log("Firebase initialized successfully");
+
+} catch (error) {
+
+  console.error("Firebase initialization failed:", error);
+
   const errEl = document.getElementById("login-error");
+
   if (errEl) {
-    errEl.textContent = "Firebase is not configured. Please open js/firebase-app.js and insert your config.";
+    errEl.textContent =
+      "Firebase initialization failed: " + error.message;
+
     errEl.style.display = "block";
   }
 }
 
+
+// =====================================================
+// CURRENT USER
+// =====================================================
+
 let currentUser = null;
 
-// Override global save to also sync with Firestore
-const originalSave = window.save;
-window.save = async function () {
-  // Always save locally first
-  if (typeof originalSave === 'function') originalSave();
-  else {
-    try { localStorage.setItem('elevate2', JSON.stringify(window.D)); } catch (e) { }
+
+// =====================================================
+// FIRESTORE SAVE FUNCTION
+// =====================================================
+//
+// app.js calls this from its normal save() function.
+//
+
+window.saveToFirestore = async function () {
+
+  if (!currentUser) {
+    return;
   }
 
-  // Then sync to Firestore if logged in
-  if (currentUser && db) {
-    try {
-      await setDoc(doc(db, "users", currentUser.uid), window.D);
-    } catch (error) {
-      console.error("Error syncing to Firestore:", error);
-    }
+  if (!db) {
+    console.error("Firestore is not initialized.");
+    return;
   }
+
+  if (!window.D) {
+    console.error("Planner data D is not available.");
+    return;
+  }
+
+  try {
+
+    await setDoc(
+      doc(db, "users", currentUser.uid),
+      {
+        planner: window.D,
+        updatedAt: new Date().toISOString()
+      }
+    );
+
+    console.log("Planner saved to Firestore");
+
+  } catch (error) {
+
+    console.error(
+      "Error saving planner to Firestore:",
+      error
+    );
+
+  }
+
 };
 
-// DOM Elements
-const btnLogin = document.getElementById("btn-login");
-const btnLogout = document.getElementById("btn-logout");
-const loginModal = document.getElementById("m-login");
 
-// Auth State Observer
+// =====================================================
+// DOM ELEMENTS
+// =====================================================
+
+const btnLogin =
+  document.getElementById("btn-login");
+
+const btnLogout =
+  document.getElementById("btn-logout");
+
+const loginModal =
+  document.getElementById("m-login");
+
+
+// =====================================================
+// GOOGLE LOGIN
+// =====================================================
+
+if (btnLogin && auth) {
+
+  btnLogin.addEventListener("click", async () => {
+
+    const errEl =
+      document.getElementById("login-error");
+
+    if (errEl) {
+      errEl.style.display = "none";
+      errEl.textContent = "";
+    }
+
+    try {
+
+      btnLogin.disabled = true;
+
+      btnLogin.innerHTML =
+        '<i class="ri-loader-4-line ri-spin"></i> Signing in...';
+
+      await signInWithPopup(
+        auth,
+        provider
+      );
+
+      console.log("Google sign-in successful");
+
+    } catch (error) {
+
+      console.error(
+        "Google login failed:",
+        error
+      );
+
+      if (errEl) {
+
+        errEl.textContent =
+          "Login failed: " + error.message;
+
+        errEl.style.display = "block";
+
+      }
+
+      btnLogin.disabled = false;
+
+      btnLogin.innerHTML =
+        '<i class="ri-google-fill"></i> Sign in with Google';
+
+    }
+
+  });
+
+}
+
+
+// =====================================================
+// LOGOUT
+// =====================================================
+
+if (btnLogout && auth) {
+
+  btnLogout.addEventListener("click", async () => {
+
+    try {
+
+      btnLogout.disabled = true;
+
+      await signOut(auth);
+
+      console.log("User logged out");
+
+    } catch (error) {
+
+      console.error(
+        "Logout failed:",
+        error
+      );
+
+      btnLogout.disabled = false;
+
+    }
+
+  });
+
+}
+
+
+// =====================================================
+// AUTH STATE
+// =====================================================
+
 if (auth) {
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      currentUser = user;
-      if (loginModal) loginModal.style.display = "none";
 
-      // Update UI with user info
-      const uNameEl = document.getElementById("u-name");
-      const sAvatarEl = document.querySelector(".s-avatar");
-      if (uNameEl) uNameEl.textContent = user.displayName || "User";
-      if (sAvatarEl && user.photoURL) {
-        sAvatarEl.innerHTML = `<img src="${user.photoURL}" alt="Profile" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
-      }
+  onAuthStateChanged(
+    auth,
+    async (user) => {
 
-      // Fetch user data from Firestore
-      try {
-        const docSnap = await getDoc(doc(db, "users", user.uid));
-        if (docSnap.exists()) {
-          // Merge data into global D state
-          const remoteData = docSnap.data();
-          Object.assign(window.D, remoteData);
+      // =================================================
+      // USER IS LOGGED IN
+      // =================================================
 
-          // Trigger UI re-render
-          if (typeof window.renderAll === "function") window.renderAll();
-        } else {
-          // New user, save initial local state to Firestore
-          await setDoc(doc(db, "users", user.uid), window.D);
+      if (user) {
+
+        currentUser = user;
+
+        console.log(
+          "Authenticated user:",
+          user.email
+        );
+
+
+        // Hide login modal
+
+        if (loginModal) {
+          loginModal.style.display = "none";
         }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
+
+
+        // Update username
+
+        const uNameEl =
+          document.getElementById("u-name");
+
+        if (uNameEl) {
+
+          uNameEl.textContent =
+            user.displayName || "User";
+
+        }
+
+
+        // Update avatar
+
+        const avatarEl =
+          document.querySelector(".s-avatar");
+
+        if (avatarEl && user.photoURL) {
+
+          avatarEl.innerHTML = `
+            <img
+              src="${user.photoURL}"
+              alt="Profile"
+              style="
+                width:100%;
+                height:100%;
+                border-radius:50%;
+                object-fit:cover;
+              "
+            >
+          `;
+
+        }
+
+
+        // =================================================
+        // LOAD USER DATA FROM FIRESTORE
+        // =================================================
+
+        try {
+
+          const userRef =
+            doc(db, "users", user.uid);
+
+          const snapshot =
+            await getDoc(userRef);
+
+
+          // Existing user
+
+          if (snapshot.exists()) {
+
+            const remoteData =
+              snapshot.data();
+
+            console.log(
+              "Planner data loaded from Firestore"
+            );
+
+
+            if (
+              remoteData &&
+              remoteData.planner &&
+              window.D
+            ) {
+
+              Object.assign(
+                window.D,
+                remoteData.planner
+              );
+
+            }
+
+
+            // Update local copy
+
+            try {
+
+              localStorage.setItem(
+                "elevate2",
+                JSON.stringify(window.D)
+              );
+
+            } catch (e) { }
+
+
+            // Refresh UI
+
+            if (
+              typeof window.renderAll ===
+              "function"
+            ) {
+
+              window.renderAll();
+
+            }
+
+            if (
+              typeof window.updateGreeting ===
+              "function"
+            ) {
+
+              window.updateGreeting();
+
+            }
+
+          }
+
+
+          // =================================================
+          // NEW USER
+          // =================================================
+
+          else {
+
+            console.log(
+              "New user. Creating Firestore profile..."
+            );
+
+
+            await setDoc(
+              userRef,
+              {
+                planner: window.D,
+                updatedAt:
+                  new Date().toISOString()
+              }
+            );
+
+
+            console.log(
+              "New user profile created"
+            );
+
+          }
+
+        } catch (error) {
+
+          console.error(
+            "Error loading Firestore data:",
+            error
+          );
+
+        }
+
+
+        // Restore login button
+
+        if (btnLogin) {
+
+          btnLogin.disabled = false;
+
+          btnLogin.innerHTML =
+            '<i class="ri-google-fill"></i> Sign in with Google';
+
+        }
+
       }
-    } else {
-      // User is signed out
-      currentUser = null;
-      if (loginModal) loginModal.style.display = "flex";
-    }
-  });
-}
 
-// Login
-if (btnLogin) {
-  btnLogin.addEventListener("click", () => {
-    const errEl = document.getElementById("login-error");
-    if (firebaseConfig.apiKey === "YOUR_API_KEY" || !auth) {
-      // Mock login for demonstration
-      currentUser = {
-        uid: "mock-user-123",
-        displayName: "Guest User",
-        photoURL: "https://ui-avatars.com/api/?name=Guest+User&background=0D8ABC&color=fff"
-      };
 
-      if (loginModal) loginModal.style.display = "none";
-      const uNameEl = document.getElementById("u-name");
-      const sAvatarEl = document.querySelector(".s-avatar");
-      if (uNameEl) uNameEl.textContent = currentUser.displayName;
-      if (sAvatarEl) {
-        sAvatarEl.innerHTML = `<img src="${currentUser.photoURL}" alt="Profile" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+      // =================================================
+      // USER IS LOGGED OUT
+      // =================================================
+
+      else {
+
+        currentUser = null;
+
+        console.log(
+          "No authenticated user"
+        );
+
+
+        if (loginModal) {
+
+          loginModal.style.display =
+            "flex";
+
+        }
+
+
+        if (btnLogin) {
+
+          btnLogin.disabled = false;
+
+          btnLogin.innerHTML =
+            '<i class="ri-google-fill"></i> Sign in with Google';
+
+        }
+
       }
 
-      if (window.toast) window.toast("Logged in as Guest (Cloud Sync disabled)", "info");
-      return;
     }
+  );
 
-    signInWithPopup(auth, provider).catch((error) => {
-      console.error("Login failed", error);
-      errEl.textContent = "Login failed: " + error.message;
-      errEl.style.display = "block";
-    });
-  });
-}
-
-// Logout
-if (btnLogout) {
-  btnLogout.addEventListener("click", () => {
-    if (firebaseConfig.apiKey === "YOUR_API_KEY" || !auth) {
-      currentUser = null;
-      localStorage.removeItem("elevate2");
-      window.location.reload();
-      return;
-    }
-
-    signOut(auth).then(() => {
-      localStorage.removeItem("elevate2");
-      window.location.reload();
-    });
-  });
 }
