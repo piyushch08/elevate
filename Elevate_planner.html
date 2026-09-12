@@ -111,20 +111,17 @@
       0% {
         opacity: 1;
         transform: scale(1);
-        filter: blur(0);
         pointer-events: all
       }
 
       60% {
         opacity: 1;
         transform: scale(1.04);
-        filter: blur(0)
       }
 
       100% {
         opacity: 0;
         transform: scale(1.1);
-        filter: blur(6px);
         pointer-events: none
       }
     }
@@ -327,19 +324,16 @@
       0% {
         transform: scale(0) rotate(-200deg);
         opacity: 0;
-        filter: blur(8px)
       }
 
       70% {
         transform: scale(1.15) rotate(5deg);
         opacity: 1;
-        filter: blur(0)
       }
 
       100% {
         transform: scale(1) rotate(0deg);
         opacity: 1;
-        filter: blur(0)
       }
     }
 
@@ -404,13 +398,11 @@
       0% {
         opacity: 0;
         transform: scale(0.8);
-        filter: blur(10px)
       }
 
       100% {
         opacity: 1;
         transform: scale(1);
-        filter: blur(0)
       }
     }
 
@@ -2315,7 +2307,7 @@
     }
 
     /* ===== RESPONSIVE ===== */
-    @media(max-width:768px) {
+    @media(max-width:1024px) {
       .topbar { display: none !important; }
       .mobile-bar { display: flex !important; }
       
@@ -2561,32 +2553,33 @@
         <div class="tb-avatar" onclick="goTo('personalize')" title="Personalize"><i class="ri-user-smile-line"></i>
         </div>
       </div>
-      <!-- Notif panel -->
-      <div class="notif-panel" id="notif-panel">
-        <div class="np-head"><span>🔔 Notifications</span><button class="x-btn" onclick="toggleNotif()"><i
-              class="ri-close-line"></i></button></div>
-        <div class="np-list">
-          <div class="np-item">
-            <div class="np-ico blue"><i class="ri-timer-line"></i></div>
-            <div class="np-body">
-              <p>Focus timer ready. Time to study! 🎯</p><small>Just now</small>
-            </div>
+    </header>
+
+    <!-- Notif panel -->
+    <div class="notif-panel" id="notif-panel">
+      <div class="np-head"><span>🔔 Notifications</span><button class="x-btn" onclick="toggleNotif()"><i
+            class="ri-close-line"></i></button></div>
+      <div class="np-list">
+        <div class="np-item">
+          <div class="np-ico blue"><i class="ri-timer-line"></i></div>
+          <div class="np-body">
+            <p>Focus timer ready. Time to study! 🎯</p><small>Just now</small>
           </div>
-          <div class="np-item">
-            <div class="np-ico green"><i class="ri-checkbox-circle-line"></i></div>
-            <div class="np-body">
-              <p>Great job! You completed tasks yesterday.</p><small>Yesterday</small>
-            </div>
+        </div>
+        <div class="np-item">
+          <div class="np-ico green"><i class="ri-checkbox-circle-line"></i></div>
+          <div class="np-body">
+            <p>Great job! You completed tasks yesterday.</p><small>Yesterday</small>
           </div>
-          <div class="np-item">
-            <div class="np-ico red"><i class="ri-alarm-warning-line"></i></div>
-            <div class="np-body">
-              <p>Don't forget to log your meals today!</p><small>Today</small>
-            </div>
+        </div>
+        <div class="np-item">
+          <div class="np-ico red"><i class="ri-alarm-warning-line"></i></div>
+          <div class="np-body">
+            <p>Don't forget to log your meals today!</p><small>Today</small>
           </div>
         </div>
       </div>
-    </header>
+    </div>
 
     <!-- APP BODY -->
     <div class="app-body">
@@ -2648,6 +2641,7 @@
             <i class="ri-blaze-line" style="font-size:1.2rem"></i>
             <span class="logo-text">ELEVATE</span>
           </div>
+          <div class="tb-clock" style="font-size:0.9rem; margin-left:auto; margin-right:10px;"><i class="ri-time-line"></i><span id="tb-time-mob">00:00:00</span></div>
           <button class="btn sm prim" onclick="openM('m-task')"><i class="ri-add-line"></i></button>
         </div>
 
@@ -3086,7 +3080,7 @@
       document.addEventListener('click', e => {
         if (!e.target.closest('#notif-btn') && !e.target.closest('#notif-panel')) closePop('notif-panel');
         if (!e.target.closest('.tb-search') && !e.target.closest('#search-drop')) closePop('search-drop');
-        if (!e.target.closest('.sidebar') && window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
+        if (!e.target.closest('.sidebar') && !e.target.closest('.hamburger') && window.innerWidth <= 1024) document.getElementById('sidebar').classList.remove('open');
       });
       // restore theme
       document.documentElement.setAttribute('data-theme', D.theme);
@@ -3132,7 +3126,7 @@
       const pg_el = document.getElementById('page-' + pg);
       if (pg_el) pg_el.classList.add('active');
       const bc = document.getElementById('bc-page'); if (bc) bc.textContent = PAGES[pg] || pg;
-      if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
+      if (window.innerWidth <= 1024) document.getElementById('sidebar').classList.remove('open');
     }
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
 
@@ -3140,8 +3134,11 @@
     let timerInterval;
     function tick() {
       const now = new Date();
+      const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       const el = document.getElementById('tb-time');
-      if (el) el.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      if (el) el.textContent = timeStr;
+      const elMob = document.getElementById('tb-time-mob');
+      if (elMob) elMob.textContent = timeStr;
       if (D.timerOn) { D.timerSec--; if (D.timerSec <= 0) { D.timerSec = 0; D.timerOn = false; const b = document.getElementById('timer-btn'); if (b) b.innerHTML = '<i class="ri-play-fill"></i> Start'; toast('⏰ Timer done! Great work!', 'success'); } }
       const td = document.getElementById('timer-disp'); if (td) td.textContent = fmtSec(D.timerSec);
     }
@@ -3578,7 +3575,7 @@
       /* ---- Particles ---- */
       const pc = document.getElementById('splash-particles');
       const cols = ['#00f2fe', '#ff477e', '#28ffb5', '#ffd166', '#b721ff'];
-      for (let i = 0; i < 40; i++) {
+      for (let i = 0; i < 15; i++) {
         const d = document.createElement('div');
         d.className = 'splash-particle';
         const sz = Math.random() * 5 + 1.5;
@@ -3597,7 +3594,7 @@
       }
 
       /* ---- Shooting stars ---- */
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < 3; i++) {
         const s = document.createElement('div');
         s.className = 'splash-star';
         const w = Math.random() * 120 + 80;
@@ -3613,7 +3610,7 @@
       }
 
       /* ---- Shockwave rings ---- */
-      [0, .15, .35, .6, 1.1].forEach((delay, i) => {
+      [0, .3, .6].forEach((delay, i) => {
         const w = document.createElement('div');
         w.className = 'splash-wave';
         Object.assign(w.style, {
