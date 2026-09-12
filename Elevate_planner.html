@@ -12,6 +12,7 @@
     href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&family=Orbitron:wght@700;900&display=swap"
     rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%94%A5%3C/text%3E%3C/svg%3E">
   <style>
     /* ===== THEMES ===== */
     :root {
@@ -2315,13 +2316,16 @@
 
     /* ===== RESPONSIVE ===== */
     @media(max-width:768px) {
+      .topbar { display: none !important; }
+      .mobile-bar { display: flex !important; }
+      
       .sidebar {
         position: fixed;
         left: -260px;
         top: 0;
         bottom: 0;
         height: 100%;
-        z-index: 50;
+        z-index: 60;
         transition: transform .35s, background .4s
       }
 
@@ -2329,25 +2333,23 @@
         transform: translateX(260px)
       }
 
-      #mobile-menu-btn {
-        display: flex !important
-      }
-
       .main {
-        padding: 1.25rem .9rem 5.5rem
+        padding: 1.25rem .9rem 2rem;
       }
 
       .bottom-nav {
-        display: flex
+        display: none !important;
       }
 
-      .tb-search,
-      .tb-clock,
-      .tb-bread {
-        display: none
+      .notif-panel {
+        top: 70px;
+        left: 1rem;
+        right: 1rem;
+        width: auto;
+        z-index: 70;
       }
 
-      .widget, .sidebar, .topbar, .bottom-nav, .modal, .notif-panel, .search-drop {
+      .widget, .sidebar, .modal, .notif-panel, .search-drop {
         backdrop-filter: blur(10px);
       }
 
@@ -2551,24 +2553,14 @@
         <span class="logo-text">ELEVATE</span>
       </div>
       <div class="tb-bread"><i class="ri-arrow-right-s-line"></i><span id="bc-page">Dashboard</span></div>
-      <div class="tb-search">
-        <i class="ri-search-line"></i>
-        <input type="text" id="global-search" placeholder="Search tasks, notes, habits…" autocomplete="off">
-      </div>
       <div class="tb-spacer"></div>
       <div class="tb-clock"><i class="ri-time-line"></i><span id="tb-time">00:00:00</span></div>
       <div class="tb-actions">
-        <button class="tb-btn" id="notif-btn" onclick="toggleNotif()" title="Notifications"><i
-            class="ri-notification-3-line"></i>
-          <div class="notif-dot" id="notif-dot"></div>
-        </button>
         <button class="tb-btn" onclick="openM('m-settings')" title="Settings"><i
             class="ri-settings-4-line"></i></button>
         <div class="tb-avatar" onclick="goTo('personalize')" title="Personalize"><i class="ri-user-smile-line"></i>
         </div>
       </div>
-      <!-- Search dropdown -->
-      <div class="search-drop" id="search-drop"></div>
       <!-- Notif panel -->
       <div class="notif-panel" id="notif-panel">
         <div class="np-head"><span>🔔 Notifications</span><button class="x-btn" onclick="toggleNotif()"><i
@@ -2604,9 +2596,16 @@
           <i class="ri-blaze-line"></i>
           <span class="s-logo-text">ELEVATE</span>
         </div>
-        <ul class="nav-list">
+        <ul class="nav-list" style="position:relative;">
+          <div class="tb-search" style="max-width:100%; margin-bottom:1rem; position:relative;">
+            <i class="ri-search-line"></i>
+            <input type="text" id="global-search" placeholder="Search tasks, notes, habits…" autocomplete="off">
+            <!-- Search dropdown -->
+            <div class="search-drop" id="search-drop" style="top:115%; left:0; right:0; border-radius:10px;"></div>
+          </div>
           <div class="s-section">Main</div>
           <li class="nav-item active" data-page="dashboard"><i class="ri-dashboard-line"></i> Dashboard</li>
+          <li class="nav-item" id="notif-btn" onclick="toggleNotif()"><i class="ri-notification-3-line"></i> Notifications <div class="notif-dot" id="notif-dot" style="position:static; width:8px; height:8px; display:inline-block; margin-left:auto;"></div></li>
           <li class="nav-item" data-page="todo"><i class="ri-list-check"></i> To-Do List</li>
           <li class="nav-item" data-page="calendar"><i class="ri-calendar-line"></i> Calendar</li>
           <div class="s-section">Health & Growth</div>
