@@ -10,6 +10,17 @@ const D = window.D = {
   calY: new Date().getFullYear(), calM: new Date().getMonth(), calEvents: {},
   timerSec: 25 * 60, timerBase: 25 * 60, timerOn: false, workoutOn: false,
   editNoteId: null, noteColor: '#00f2fe',
+  lastUid: 'guest', lastActiveDate: new Date().toDateString()
+};
+
+window.checkNewDay = function() {
+  const today = new Date().toDateString();
+  if (D.lastActiveDate !== today) {
+    D.today = { study: 0, cal: 0, prot: 0, carb: 0, water: 0 };
+    D.lastActiveDate = today;
+    return true; // indicates it was reset
+  }
+  return false;
 };
 
 const QUOTES = [
@@ -58,6 +69,7 @@ function renderAll() {
   renderCalendar(); updateRings(); updateMacros(); updateWaterUI();
 }
 function save() {
+  D.lastUid = window.currentUserUid || 'guest';
   try {
     localStorage.setItem('elevate2', JSON.stringify(D));
   } catch (e) { }
@@ -69,9 +81,7 @@ function save() {
 }
 function load() {
   try { const s = localStorage.getItem('elevate2'); if (s) Object.assign(D, JSON.parse(s)); } catch (e) { }
-  const savedDay = localStorage.getItem('elevate_day');
-  const today = new Date().toDateString();
-  if (savedDay !== today) { D.today = { study: 0, cal: 0, prot: 0, carb: 0, water: 0 }; localStorage.setItem('elevate_day', today); }
+  window.checkNewDay();
 }
 
 // ===== TOAST =====

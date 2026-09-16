@@ -14,7 +14,8 @@ import {
   getFirestore,
   doc,
   setDoc,
-  getDoc
+  getDoc,
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 
@@ -329,6 +330,7 @@ if (auth) {
       if (user) {
 
         currentUser = user;
+        window.currentUserUid = user.uid;
 
         console.log(
           "Authenticated user:",
@@ -379,114 +381,72 @@ if (auth) {
         }
 
 
-        // =================================================
         // LOAD USER DATA FROM FIRESTORE
-        // =================================================
-
         try {
+          const userRef = doc(db, "users", user.uid);
 
-          const userRef =
-            doc(db, "users", user.uid);
-
-          const snapshot =
-            await getDoc(userRef);
-
-
-          // Existing user
-
-          if (snapshot.exists()) {
-
-            const remoteData =
-              snapshot.data();
-
-            console.log(
-              "Planner data loaded from Firestore"
-            );
-
-
-            if (
-              remoteData &&
-              remoteData.planner &&
-              window.D
-            ) {
-
-              Object.assign(
-                window.D,
-                remoteData.planner
-              );
-
-            }
-
-
-            // Update local copy
-
-            try {
-
-              localStorage.setItem(
-                "elevate2",
-                JSON.stringify(window.D)
-              );
-
-            } catch (e) { }
-
-
-            // Refresh UI
-
-            if (
-              typeof window.renderAll ===
-              "function"
-            ) {
-
-              window.renderAll();
-
-            }
-
-            if (
-              typeof window.updateGreeting ===
-              "function"
-            ) {
-
-              window.updateGreeting();
-
-            }
-
+          if (window.unsubSnapshot) {
+            window.unsubSnapshot();
           }
 
+          window.unsubSnapshot = onSnapshot(userRef, async (snapshot) => {
+            // Existing user
+            if (snapshot.exists()) {
+              const remoteData = snapshot.data();
+              console.log("Planner data loaded from Firestore");
 
-          // =================================================
-          // NEW USER
-          // =================================================
-
-          else {
-
-            console.log(
-              "New user. Creating Firestore profile..."
-            );
-
-
-            await setDoc(
-              userRef,
-              {
-                planner: window.D,
-                updatedAt:
-                  new Date().toISOString()
+              if (remoteData && remoteData.planner && window.D) {
+                Object.assign(window.D, remoteData.planner);
               }
-            );
+              
+              // Apply daily reset logic based on incoming cloud data
+              if (window.checkNewDay && window.checkNewDay()) {
+                if (window.saveToFirestore) window.saveToFirestore();
+              }
 
+              // Update local copy
+              try { localStorage.setItem("elevate2", JSON.stringify(window.D)); } catch (e) { }
 
-            console.log(
-              "New user profile created"
-            );
+              // Refresh UI
+              if (typeof window.renderAll === "function") window.renderAll();
+              if (typeof window.updateGreeting === "function") window.updateGreeting();
+            } 
+            // New user
+            else {
+              console.log("New user. Creating Firestore profile...");
 
-          }
+              // Prevent data leak from another authenticated user
+              if (window.D && window.D.lastUid && window.D.lastUid !== 'guest' && window.D.lastUid !== user.uid) {
+                console.log("Wiping leftover data from previous user.");
+                Object.assign(window.D, {
+                  goals: { study: 120, cal: 2200, prot: 150, carb: 250, water: 2000, weeklyWorkouts: 0 },
+                  today: { study: 0, cal: 0, prot: 0, carb: 0, water: 0 },
+                  tasks: [], events: [], deadlines: [], studyLog: [], meals: [],
+                  exercises: [{ name: 'Bench Press', sets: '4×8', done: false }, { name: 'Overhead Press', sets: '3×10', done: false }, { name: 'Tricep Pushdown', sets: '3×12', done: false }],
+                  streak: [0, 0, 0, 0, 0, 0, 0], habits: [], notes: [],
+                  filter: 'all', theme: 'space',
+                  calY: new Date().getFullYear(), calM: new Date().getMonth(), calEvents: {},
+                  timerSec: 25 * 60, timerBase: 25 * 60, timerOn: false, workoutOn: false,
+                  editNoteId: null, noteColor: '#00f2fe',
+                  lastUid: user.uid, lastActiveDate: new Date().toDateString()
+                });
+              } else if (window.D) {
+                window.D.lastUid = user.uid;
+              }
+
+              await setDoc(userRef, {
+                planner: window.D,
+                updatedAt: new Date().toISOString()
+              });
+
+              console.log("New user profile created");
+            }
+          }, (error) => {
+            console.error("Error in onSnapshot:", error);
+          });
 
         } catch (error) {
-
-          console.error(
-            "Error loading Firestore data:",
-            error
-          );
-
+          console.error("Error setting up Firestore listener:", error);
         }
 
 
@@ -520,7 +480,13 @@ if (auth) {
 
       else {
 
+        if (window.unsubSnapshot) {
+          window.unsubSnapshot();
+          window.unsubSnapshot = null;
+        }
+
         currentUser = null;
+        window.currentUserUid = null;
 
         console.log(
           "No authenticated user"
