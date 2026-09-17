@@ -79,6 +79,9 @@ body{font-family:'Outfit',sans-serif;color:var(--tp);min-height:100vh;overflow:h
   100%{transform:translate(-50%,-50%) scale(60);opacity:0;border-color:transparent}
 }
 /* Main ring */
+.splash-content {
+  display:flex;align-items:center;gap:3rem;position:relative;z-index:3;margin-top:1rem;
+}
 .splash-ring{
   width:150px;height:150px;border-radius:50%;
   border:1.5px solid rgba(0,242,254,.25);
@@ -508,6 +511,11 @@ label{font-size:.78rem;color:var(--ts);display:block;margin-bottom:.35rem}
   .blob { filter: blur(60px); }
 }
 @media(max-width:480px){
+  .splash-content {
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: -2rem;
+  }
   .timer-disp{font-size:2.5rem}
   .splash-name{font-size:2.2rem}
   .splash-ring{width:110px;height:110px}
