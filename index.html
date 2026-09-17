@@ -101,6 +101,18 @@
   </div>
 </div>
 
+<!-- Manage Subjects modal -->
+<div class="modal-bg hide" id="m-subjects">
+  <div class="modal">
+    <div class="m-head"><h2><i class="ri-book-open-line accent"></i> Manage Subjects</h2><button class="x-btn" onclick="closeM('m-subjects')"><i class="ri-close-line"></i></button></div>
+    <div style="display:flex;gap:6px;margin-bottom:1rem">
+      <input type="text" id="new-subj-name" placeholder="New subject name" style="flex:1">
+      <button class="btn prim" onclick="addSubject()"><i class="ri-add-line"></i></button>
+    </div>
+    <ul class="task-list" id="subject-list" style="max-height:200px;overflow-y:auto;"></ul>
+  </div>
+</div>
+
 <!-- Login Modal -->
 <div class="modal-bg" id="m-login" style="z-index:99998; display:flex;">
   <div class="modal" style="text-align:center;">
@@ -305,7 +317,13 @@
           </div>
           <div class="widget">
             <div class="w-title"><i class="ri-edit-line"></i> Log Session</div>
-            <div class="form-row"><label>Subject</label><select id="subj"><option>Mathematics</option><option>Programming</option><option>Physics</option><option>Data Science</option><option>English</option><option>Other</option></select></div>
+            <div class="form-row">
+              <div class="flex-b" style="margin-bottom:.35rem">
+                <label style="margin:0">Subject</label>
+                <button class="btn sm" onclick="openM('m-subjects')" style="padding:2px 6px;font-size:.7rem"><i class="ri-settings-3-line"></i> Manage</button>
+              </div>
+              <select id="subj"></select>
+            </div>
             <div class="form-row"><label>Duration (minutes)</label><input type="number" id="study-mins" placeholder="e.g. 45" min="1"></div>
             <div class="form-row"><label>Notes (optional)</label><input type="text" id="study-notes" placeholder="Topics covered…"></div>
             <button class="btn prim full" onclick="logStudy()"><i class="ri-save-line"></i> Log Session</button>

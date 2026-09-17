@@ -10,7 +10,8 @@ const D = window.D = {
   calY: new Date().getFullYear(), calM: new Date().getMonth(), calEvents: {},
   timerSec: 25 * 60, timerBase: 25 * 60, timerOn: false, workoutOn: false,
   editNoteId: null, noteColor: '#00f2fe',
-  lastUid: 'guest', lastActiveDate: new Date().toDateString()
+  lastUid: 'guest', lastActiveDate: new Date().toDateString(),
+  subjects: ['Mathematics', 'Programming', 'Physics', 'Data Science', 'English', 'Other']
 };
 
 window.checkNewDay = function() {
@@ -69,6 +70,7 @@ function renderAll() {
   renderStudyLog(); renderMeals(); renderExercises();
   renderStreak(); renderHabits(); renderNotes();
   renderCalendar(); updateRings(); updateMacros(); updateWaterUI();
+  renderSubjects();
 }
 function save() {
   D.lastUid = window.currentUserUid || 'guest';
@@ -277,6 +279,30 @@ function setMode(m, btn) { D.timerSec = MODES[m]; D.timerBase = MODES[m]; D.time
 function applyCustomTimer() { const v = parseInt(document.getElementById('custom-min').value); if (!v || v < 1) { toast('Enter valid minutes.', 'error'); return; } D.timerSec = v * 60; D.timerBase = v * 60; D.timerOn = false; const b = document.getElementById('timer-btn'); if (b) b.innerHTML = '<i class="ri-play-fill"></i> Start'; document.querySelectorAll('.mode-btn').forEach(x => x.classList.remove('on')); toast(`Timer set to ${v} min`, 'success'); }
 function toggleTimer() { D.timerOn = !D.timerOn; const b = document.getElementById('timer-btn'); if (b) b.innerHTML = D.timerOn ? '<i class="ri-pause-fill"></i> Pause' : '<i class="ri-play-fill"></i> Resume'; }
 function resetTimer() { D.timerOn = false; D.timerSec = D.timerBase; const b = document.getElementById('timer-btn'); if (b) b.innerHTML = '<i class="ri-play-fill"></i> Start'; }
+
+// Subjects
+function renderSubjects() {
+  const sel = document.getElementById('subj');
+  if (sel) sel.innerHTML = (D.subjects || []).map(s => `<option value="${s}">${s}</option>`).join('');
+  const list = document.getElementById('subject-list');
+  if (list) {
+    list.innerHTML = (D.subjects || []).map((s, i) => `<li class="task-item"><span class="t-name">${s}</span><button class="btn ico dng" onclick="delSubject(${i})"><i class="ri-delete-bin-line"></i></button></li>`).join('');
+  }
+}
+function addSubject() {
+  const name = document.getElementById('new-subj-name').value.trim();
+  if (!name) { toast('Enter subject name.', 'error'); return; }
+  if (!D.subjects) D.subjects = [];
+  if (D.subjects.includes(name)) { toast('Subject already exists.', 'error'); return; }
+  D.subjects.push(name);
+  document.getElementById('new-subj-name').value = '';
+  renderSubjects(); save(); toast('Subject added!', 'success');
+}
+function delSubject(idx) {
+  D.subjects.splice(idx, 1);
+  renderSubjects(); save(); toast('Subject removed.', 'info');
+}
+
 function logStudy() {
   const mins = parseInt(document.getElementById('study-mins').value); const subj = document.getElementById('subj').value; const notes = document.getElementById('study-notes').value;
   if (!mins || mins < 1) { toast('Enter valid duration.', 'error'); return; }
