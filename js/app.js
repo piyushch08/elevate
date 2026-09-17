@@ -55,7 +55,9 @@ window.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', e => {
     if (!e.target.closest('#notif-btn') && !e.target.closest('#notif-panel')) closePop('notif-panel');
     if (!e.target.closest('.tb-search') && !e.target.closest('#search-drop')) closePop('search-drop');
-    if (!e.target.closest('.sidebar') && window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
+    if (!e.target.closest('.sidebar') && !e.target.closest('#mobile-menu-btn') && !e.target.closest('.hamburger') && window.innerWidth <= 768) {
+      document.getElementById('sidebar').classList.remove('open');
+    }
   });
   // restore theme
   document.documentElement.setAttribute('data-theme', D.theme);
