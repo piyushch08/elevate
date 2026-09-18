@@ -241,6 +241,24 @@ if (btnEmailLogin && auth) {
       btnEmailLogin.innerHTML = 'Sign In';
     }
   });
+
+  if (loginPasswordInp) {
+    loginPasswordInp.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        btnEmailLogin.click();
+      }
+    });
+  }
+
+  if (loginEmailInp) {
+    loginEmailInp.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        if (loginPasswordInp) loginPasswordInp.focus();
+      }
+    });
+  }
 }
 
 // =====================================================
