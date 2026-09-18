@@ -1,6 +1,7 @@
 // ===== STATE =====
 const D = window.D = {
   settings: { anim: true, tilt: true, ripple: true, fontSize: 16 },
+  profile: { name: 'Explorer', status: 'On a roll today 🔥' },
   goals: { study: 120, cal: 2200, prot: 150, carb: 250, water: 2000, weeklyWorkouts: 0 },
   today: { study: 0, cal: 0, prot: 0, carb: 0, water: 0 },
   tasks: [], events: [], deadlines: [], studyLog: [], meals: [],
@@ -14,10 +15,23 @@ const D = window.D = {
   subjects: ['Mathematics', 'Programming', 'Physics', 'Data Science', 'English', 'Other']
 };
 
+function getWeekStart(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  d.setDate(diff);
+  d.setHours(0,0,0,0);
+  return d.getTime();
+}
+
 window.checkNewDay = function() {
   const today = new Date().toDateString();
   if (D.lastActiveDate !== today) {
     D.today = { study: 0, cal: 0, prot: 0, carb: 0, water: 0 };
+    if (getWeekStart(new Date()) > getWeekStart(new Date(D.lastActiveDate))) {
+      D.streak = [0, 0, 0, 0, 0, 0, 0];
+      D.habits.forEach(h => h.days = [0, 0, 0, 0, 0, 0, 0]);
+    }
     D.lastActiveDate = today;
     return true; // indicates it was reset
   }
@@ -119,9 +133,31 @@ let timerInterval;
 function tick() {
   const now = new Date();
   const el = document.getElementById('tb-time');
-  if (el) el.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-  if (D.timerOn) { D.timerSec--; if (D.timerSec <= 0) { D.timerSec = 0; D.timerOn = false; const b = document.getElementById('timer-btn'); if (b) b.innerHTML = '<i class="ri-play-fill"></i> Start'; toast('⏰ Timer done! Great work!', 'success'); } }
-  const td = document.getElementById('timer-disp'); if (td) td.textContent = fmtSec(D.timerSec);
+  const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  if (el && el.textContent !== timeStr) el.textContent = timeStr;
+  
+  if (D.timerOn) { 
+    D.timerSec--; 
+    if (D.timerSec <= 0) { 
+      D.timerSec = 0; 
+      D.timerOn = false; 
+      const b = document.getElementById('timer-btn'); 
+      if (b) b.innerHTML = '<i class="ri-play-fill"></i> Start'; 
+      try {
+        const a = new (window.AudioContext || window.webkitAudioContext)();
+        const o = a.createOscillator(), g = a.createGain();
+        o.type = 'sine'; o.frequency.setValueAtTime(523.25, a.currentTime);
+        g.gain.setValueAtTime(0, a.currentTime);
+        g.gain.linearRampToValueAtTime(0.06, a.currentTime + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + 0.5);
+        o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime + 0.5);
+      } catch (e) {}
+      toast('⏰ Timer done! Great work!', 'success'); 
+    } 
+  }
+  const td = document.getElementById('timer-disp'); 
+  const tStr = fmtSec(D.timerSec);
+  if (td && td.textContent !== tStr) td.textContent = tStr;
 }
 function pad(n) { return String(n).padStart(2, '0') }
 function fmtSec(s) { return `${pad(Math.floor(s / 60))}:${pad(s % 60)}` }
@@ -165,12 +201,19 @@ function setupTilt() {
 
 // ===== EDITABLE PROFILE =====
 function setupEditable() {
-  ['u-name', 'u-status'].forEach(id => {
-    const el = document.getElementById(id); if (!el) return;
-    const k = 'aura_' + id; const sv = localStorage.getItem(k); if (sv) el.textContent = sv;
-    el.addEventListener('blur', () => { localStorage.setItem(k, el.textContent); updateGreeting(); toast('Profile updated!', 'success'); });
-    el.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } });
-  });
+  const nameEl = document.getElementById('u-name');
+  if (nameEl && D.profile?.name) nameEl.textContent = D.profile.name;
+  if (nameEl) {
+    nameEl.addEventListener('blur', () => { D.profile = D.profile || {}; D.profile.name = nameEl.textContent; save(); updateGreeting(); toast('Profile updated!', 'success'); });
+    nameEl.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); nameEl.blur(); } });
+  }
+
+  const statusEl = document.getElementById('u-status');
+  if (statusEl && D.profile?.status) statusEl.textContent = D.profile.status;
+  if (statusEl) {
+    statusEl.addEventListener('blur', () => { D.profile = D.profile || {}; D.profile.status = statusEl.textContent; save(); toast('Profile updated!', 'success'); });
+    statusEl.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); statusEl.blur(); } });
+  }
   // quick task enter
   const qi = document.getElementById('quick-input');
   if (qi) qi.addEventListener('keydown', e => { if (e.key === 'Enter' && qi.value.trim()) { D.tasks.push({ id: Date.now(), name: qi.value.trim(), done: false, cat: 'General', pri: 'normal', mins: 0 }); qi.value = ''; renderTasks(); updateRings(); save(); toast('Task added!', 'success'); } });
@@ -466,8 +509,9 @@ function applyTheme(t, card) {
 }
 function saveProfile() {
   const name = document.getElementById('p-name').value.trim(); const status = document.getElementById('p-status').value.trim();
-  if (name) { document.getElementById('u-name').textContent = name; localStorage.setItem('aura_u-name', name); }
-  if (status) { document.getElementById('u-status').textContent = status; localStorage.setItem('aura_u-status', status); }
+  D.profile = D.profile || {};
+  if (name) { document.getElementById('u-name').textContent = name; D.profile.name = name; }
+  if (status) { document.getElementById('u-status').textContent = status; D.profile.status = status; }
   updateGreeting(); save(); toast('Profile saved!', 'success');
 }
 function saveGoals() {
