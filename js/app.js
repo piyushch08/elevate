@@ -86,6 +86,7 @@ function renderAll() {
   renderCalendar(); updateRings(); updateMacros(); updateWaterUI();
   renderSubjects();
 }
+let saveTimeout = null;
 function save() {
   D.lastUid = window.currentUserUid || 'guest';
   try {
@@ -94,7 +95,10 @@ function save() {
 
   // Sync to Firebase if the user is logged in
   if (window.saveToFirestore) {
-    window.saveToFirestore();
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => {
+      window.saveToFirestore();
+    }, 1000);
   }
 }
 function load() {
@@ -188,12 +192,19 @@ function setupRipple() {
 // ===== TILT =====
 function setupTilt() {
   document.querySelectorAll('.widget').forEach(w => {
+    let ticking = false;
     w.addEventListener('mousemove', e => {
       if (!D.settings.tilt) return;
-      const r = w.getBoundingClientRect();
-      const rx = ((e.clientY - r.top) / r.height - .5) * -7;
-      const ry = ((e.clientX - r.left) / r.width - .5) * 7;
-      w.style.transform = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-3px)`;
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const r = w.getBoundingClientRect();
+          const rx = ((e.clientY - r.top) / r.height - .5) * -7;
+          const ry = ((e.clientX - r.left) / r.width - .5) * 7;
+          w.style.transform = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-3px)`;
+          ticking = false;
+        });
+        ticking = true;
+      }
     });
     w.addEventListener('mouseleave', () => w.style.transform = '');
   });
