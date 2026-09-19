@@ -7,7 +7,9 @@ import {
   signOut,
   onAuthStateChanged,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword
+  createUserWithEmailAndPassword,
+  RecaptchaVerifier,
+  signInWithPhoneNumber
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
 import {
@@ -136,6 +138,20 @@ const btnAuthAction = document.getElementById("btn-auth-action");
 const tabLogin = document.getElementById("tab-login");
 const tabSignup = document.getElementById("tab-signup");
 let authMode = 'login';
+
+const btnPhoneStart = document.getElementById("btn-phone-start");
+const authEmailGoogleView = document.getElementById("auth-email-google-view");
+const authPhoneView = document.getElementById("auth-phone-view");
+const btnPhoneBack = document.getElementById("btn-phone-back");
+const loginPhoneInp = document.getElementById("login-phone");
+const btnPhoneSend = document.getElementById("btn-phone-send");
+const phoneStep1 = document.getElementById("phone-step-1");
+const phoneStep2 = document.getElementById("phone-step-2");
+const loginPhoneCodeInp = document.getElementById("login-phone-code");
+const btnPhoneVerify = document.getElementById("btn-phone-verify");
+
+let recaptchaVerifier = null;
+let confirmationResult = null;
 
 const btnLogout =
   document.getElementById("btn-logout");
@@ -300,6 +316,116 @@ if (btnAuthAction && auth) {
     });
   }
 }
+
+// =====================================================
+// PHONE AUTHENTICATION
+// =====================================================
+
+function setupRecaptcha() {
+  if (!recaptchaVerifier) {
+    recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+      'size': 'invisible',
+      'callback': (response) => {
+        // reCAPTCHA solved
+      }
+    });
+  }
+}
+
+if (btnPhoneStart) {
+  btnPhoneStart.addEventListener('click', () => {
+    if (authEmailGoogleView) authEmailGoogleView.style.display = 'none';
+    if (authPhoneView) authPhoneView.style.display = 'flex';
+    const errEl = document.getElementById("login-error");
+    if (errEl) { errEl.style.display = "none"; errEl.textContent = ""; }
+    
+    if (phoneStep1) phoneStep1.style.display = 'flex';
+    if (phoneStep2) phoneStep2.style.display = 'none';
+    if (loginPhoneInp) loginPhoneInp.value = '';
+    if (loginPhoneCodeInp) loginPhoneCodeInp.value = '';
+    
+    setupRecaptcha();
+  });
+}
+
+if (btnPhoneBack) {
+  btnPhoneBack.addEventListener('click', () => {
+    if (authPhoneView) authPhoneView.style.display = 'none';
+    if (authEmailGoogleView) authEmailGoogleView.style.display = 'block';
+    const errEl = document.getElementById("login-error");
+    if (errEl) { errEl.style.display = "none"; errEl.textContent = ""; }
+  });
+}
+
+if (btnPhoneSend && auth) {
+  btnPhoneSend.addEventListener('click', async () => {
+    const errEl = document.getElementById("login-error");
+    if (errEl) { errEl.style.display = "none"; errEl.textContent = ""; }
+
+    const phoneNumber = loginPhoneInp ? loginPhoneInp.value.trim() : "";
+    
+    if (!phoneNumber) {
+      if (errEl) { errEl.textContent = "Please enter a valid phone number."; errEl.style.display = "block"; }
+      return;
+    }
+
+    try {
+      btnPhoneSend.disabled = true;
+      btnPhoneSend.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Sending...';
+
+      confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
+      
+      console.log("SMS sent successfully");
+      
+      if (phoneStep1) phoneStep1.style.display = 'none';
+      if (phoneStep2) phoneStep2.style.display = 'flex';
+      
+    } catch (error) {
+      console.error("SMS sending failed:", error);
+      if (errEl) {
+        errEl.textContent = "Failed to send SMS: " + error.message;
+        errEl.style.display = "block";
+      }
+    } finally {
+      btnPhoneSend.disabled = false;
+      btnPhoneSend.innerHTML = 'Send SMS Code';
+    }
+  });
+}
+
+if (btnPhoneVerify && auth) {
+  btnPhoneVerify.addEventListener('click', async () => {
+    const errEl = document.getElementById("login-error");
+    if (errEl) { errEl.style.display = "none"; errEl.textContent = ""; }
+
+    const code = loginPhoneCodeInp ? loginPhoneCodeInp.value.trim() : "";
+    
+    if (!code) {
+      if (errEl) { errEl.textContent = "Please enter the 6-digit code."; errEl.style.display = "block"; }
+      return;
+    }
+
+    try {
+      btnPhoneVerify.disabled = true;
+      btnPhoneVerify.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Verifying...';
+
+      await confirmationResult.confirm(code);
+      console.log("Phone sign-in successful");
+      
+    } catch (error) {
+      console.error("Phone verification failed:", error);
+      if (errEl) {
+        let msg = error.message;
+        if (error.code === 'auth/invalid-verification-code') msg = "Invalid code. Please try again.";
+        errEl.textContent = "Error: " + msg;
+        errEl.style.display = "block";
+      }
+      btnPhoneVerify.disabled = false;
+      btnPhoneVerify.innerHTML = 'Verify & Login';
+    }
+  });
+}
+
 
 
 // =====================================================
@@ -514,6 +640,9 @@ if (auth) {
         if (loginModal) {
           loginModal.style.display = "flex";
         }
+        
+        if (authEmailGoogleView) authEmailGoogleView.style.display = 'block';
+        if (authPhoneView) authPhoneView.style.display = 'none';
 
         const uNameEl = document.getElementById("u-name");
         if (uNameEl) {

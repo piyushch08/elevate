@@ -120,22 +120,49 @@
     <h2 style="margin:1rem 0;">Welcome to ELEVATE</h2>
     <p class="muted" style="margin-bottom:1.5rem;">Please sign in to access your personal planner and sync your data securely.</p>
     
-    <div style="display:flex; gap:10px; margin-bottom: 1rem;">
-      <button class="btn prim" id="tab-login" style="flex:1; font-size:1rem; padding:0.6rem;">Sign In</button>
-      <button class="btn" id="tab-signup" style="flex:1; font-size:1rem; padding:0.6rem; background:var(--glass); border:1px solid var(--gb); color:var(--tp);">Sign Up</button>
-    </div>
-    
-    <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 1.5rem;">
-      <input type="email" id="login-email" placeholder="Email Address" autocomplete="email" style="padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp);">
-      <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" style="padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp);">
-      <input type="password" id="login-password-confirm" placeholder="Confirm Password" autocomplete="new-password" style="display:none; padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp);">
+    <div id="auth-email-google-view">
+      <div style="display:flex; gap:10px; margin-bottom: 1rem;">
+        <button class="btn prim" id="tab-login" style="flex:1; font-size:1rem; padding:0.6rem;">Sign In</button>
+        <button class="btn" id="tab-signup" style="flex:1; font-size:1rem; padding:0.6rem; background:var(--glass); border:1px solid var(--gb); color:var(--tp);">Sign Up</button>
+      </div>
       
-      <button class="btn prim full" id="btn-auth-action" style="font-size:1rem;padding:0.8rem; margin-top:5px;">Sign In</button>
-    </div>
-    
-    <div class="muted" style="margin-bottom:1.5rem;">— OR —</div>
+      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 1.5rem;">
+        <input type="email" id="login-email" placeholder="Email Address" autocomplete="email" style="padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp);">
+        <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" style="padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp);">
+        <input type="password" id="login-password-confirm" placeholder="Confirm Password" autocomplete="new-password" style="display:none; padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp);">
+        
+        <button class="btn prim full" id="btn-auth-action" style="font-size:1rem;padding:0.8rem; margin-top:5px;">Sign In</button>
+      </div>
+      
+      <div class="muted" style="margin-bottom:1.5rem;">— OR —</div>
 
-    <button class="btn full" id="btn-login" style="font-size:1rem;padding:0.8rem;background:var(--glass);border:1px solid var(--gb);color:var(--tp);"><i class="ri-google-fill" style="color:#DB4437;"></i> Sign in with Google</button>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button class="btn full" id="btn-login" style="font-size:1rem;padding:0.8rem;background:var(--glass);border:1px solid var(--gb);color:var(--tp);"><i class="ri-google-fill" style="color:#DB4437;"></i> Sign in with Google</button>
+        <button class="btn full" id="btn-phone-start" style="font-size:1rem;padding:0.8rem;background:var(--glass);border:1px solid var(--gb);color:var(--tp);"><i class="ri-phone-fill" style="color:var(--accent);"></i> Sign in with Phone</button>
+      </div>
+    </div>
+
+    <!-- Phone Auth View (Hidden by default) -->
+    <div id="auth-phone-view" style="display:none; flex-direction:column; gap:10px; margin-bottom: 1.5rem;">
+      <h3 style="margin: 0 0 1rem 0;">Phone Authentication</h3>
+      
+      <!-- Step 1: Phone Number -->
+      <div id="phone-step-1" style="display:flex; flex-direction:column; gap:10px;">
+        <input type="tel" id="login-phone" placeholder="+1 234 567 8900" autocomplete="tel" style="padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp);">
+        <button class="btn prim full" id="btn-phone-send" style="font-size:1rem;padding:0.8rem; margin-top:5px;">Send SMS Code</button>
+      </div>
+
+      <!-- Step 2: Verification Code -->
+      <div id="phone-step-2" style="display:none; flex-direction:column; gap:10px;">
+        <p class="muted" style="margin:0 0 10px 0;">Enter the 6-digit code sent to your phone.</p>
+        <input type="text" id="login-phone-code" placeholder="123456" style="padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp); letter-spacing: 5px; text-align:center; font-size:1.2rem;">
+        <button class="btn prim full" id="btn-phone-verify" style="font-size:1rem;padding:0.8rem; margin-top:5px;">Verify & Login</button>
+      </div>
+
+      <button class="btn full" id="btn-phone-back" style="font-size:1rem;padding:0.8rem;background:transparent;border:none;color:var(--ts); margin-top:10px;"><i class="ri-arrow-left-line"></i> Back</button>
+    </div>
+
+    <div id="recaptcha-container" style="margin-top: 10px;"></div>
     <p id="login-error" class="muted" style="color:var(--danger);margin-top:1rem;display:none;"></p>
   </div>
 </div>
