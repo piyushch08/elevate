@@ -128,20 +128,14 @@ window.saveToFirestore = async function () {
 // DOM ELEMENTS
 // =====================================================
 
-const btnLogin =
-  document.getElementById("btn-login");
-
-const btnEmailLogin =
-  document.getElementById("btn-email-login");
-
-const btnEmailSignup =
-  document.getElementById("btn-email-signup");
-
-const loginEmailInp =
-  document.getElementById("login-email");
-
-const loginPasswordInp =
-  document.getElementById("login-password");
+const btnLogin = document.getElementById("btn-login");
+const loginEmailInp = document.getElementById("login-email");
+const loginPasswordInp = document.getElementById("login-password");
+const loginPasswordConfirmInp = document.getElementById("login-password-confirm");
+const btnAuthAction = document.getElementById("btn-auth-action");
+const tabLogin = document.getElementById("tab-login");
+const tabSignup = document.getElementById("tab-signup");
+let authMode = 'login';
 
 const btnLogout =
   document.getElementById("btn-logout");
@@ -209,47 +203,93 @@ if (btnLogin && auth) {
 
 
 // =====================================================
-// EMAIL / PASSWORD LOGIN
+// UI TABS FOR AUTH
 // =====================================================
 
-if (btnEmailLogin && auth) {
-  btnEmailLogin.addEventListener("click", async () => {
+function setAuthMode(mode) {
+  authMode = mode;
+  const errEl = document.getElementById("login-error");
+  if (errEl) errEl.style.display = "none";
+
+  if (mode === 'login') {
+    if (tabLogin) { tabLogin.classList.add('prim'); tabLogin.style.background = ''; tabLogin.style.borderColor = ''; tabLogin.style.color = ''; }
+    if (tabSignup) { tabSignup.classList.remove('prim'); tabSignup.style.background = 'var(--glass)'; tabSignup.style.borderColor = 'var(--gb)'; tabSignup.style.color = 'var(--tp)'; }
+    if (loginPasswordConfirmInp) loginPasswordConfirmInp.style.display = 'none';
+    if (btnAuthAction) btnAuthAction.innerHTML = 'Sign In';
+  } else {
+    if (tabSignup) { tabSignup.classList.add('prim'); tabSignup.style.background = ''; tabSignup.style.borderColor = ''; tabSignup.style.color = ''; }
+    if (tabLogin) { tabLogin.classList.remove('prim'); tabLogin.style.background = 'var(--glass)'; tabLogin.style.borderColor = 'var(--gb)'; tabLogin.style.color = 'var(--tp)'; }
+    if (loginPasswordConfirmInp) loginPasswordConfirmInp.style.display = 'block';
+    if (btnAuthAction) btnAuthAction.innerHTML = 'Sign Up';
+  }
+}
+
+if (tabLogin) tabLogin.addEventListener('click', () => setAuthMode('login'));
+if (tabSignup) tabSignup.addEventListener('click', () => setAuthMode('signup'));
+
+// =====================================================
+// EMAIL / PASSWORD ACTION
+// =====================================================
+
+if (btnAuthAction && auth) {
+  btnAuthAction.addEventListener("click", async () => {
     const errEl = document.getElementById("login-error");
     if (errEl) { errEl.style.display = "none"; errEl.textContent = ""; }
 
     const email = loginEmailInp ? loginEmailInp.value.trim() : "";
     const password = loginPasswordInp ? loginPasswordInp.value : "";
+    const passwordConfirm = loginPasswordConfirmInp ? loginPasswordConfirmInp.value : "";
 
     if (!email || !password) {
       if (errEl) { errEl.textContent = "Please enter email and password."; errEl.style.display = "block"; }
       return;
     }
 
-    try {
-      btnEmailLogin.disabled = true;
-      btnEmailLogin.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Signing in...';
+    if (authMode === 'signup') {
+      if (password !== passwordConfirm) {
+        if (errEl) { errEl.textContent = "Passwords do not match."; errEl.style.display = "block"; }
+        return;
+      }
+      if (password.length < 6) {
+        if (errEl) { errEl.textContent = "Password should be at least 6 characters."; errEl.style.display = "block"; }
+        return;
+      }
+    }
 
-      await signInWithEmailAndPassword(auth, email, password);
-      console.log("Email sign-in successful");
+    try {
+      btnAuthAction.disabled = true;
+      btnAuthAction.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> ' + (authMode === 'login' ? 'Signing in...' : 'Signing up...');
+
+      if (authMode === 'login') {
+        await signInWithEmailAndPassword(auth, email, password);
+        console.log("Email sign-in successful");
+      } else {
+        await createUserWithEmailAndPassword(auth, email, password);
+        console.log("Email sign-up successful");
+      }
     } catch (error) {
-      console.error("Email login failed:", error);
+      console.error("Auth failed:", error);
       if (errEl) {
-        errEl.textContent = "Login failed: " + error.message;
+        let msg = error.message;
+        if (error.code === 'auth/invalid-credential') msg = "Invalid email or password.";
+        else if (error.code === 'auth/email-already-in-use') msg = "Email already in use. Please sign in.";
+        errEl.textContent = "Error: " + msg;
         errEl.style.display = "block";
       }
-      btnEmailLogin.disabled = false;
-      btnEmailLogin.innerHTML = 'Sign In';
+      btnAuthAction.disabled = false;
+      btnAuthAction.innerHTML = authMode === 'login' ? 'Sign In' : 'Sign Up';
     }
   });
 
-  if (loginPasswordInp) {
-    loginPasswordInp.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        btnEmailLogin.click();
-      }
-    });
-  }
+  const submitOnEnter = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      btnAuthAction.click();
+    }
+  };
+
+  if (loginPasswordInp) loginPasswordInp.addEventListener("keypress", submitOnEnter);
+  if (loginPasswordConfirmInp) loginPasswordConfirmInp.addEventListener("keypress", submitOnEnter);
 
   if (loginEmailInp) {
     loginEmailInp.addEventListener("keypress", (e) => {
@@ -259,41 +299,6 @@ if (btnEmailLogin && auth) {
       }
     });
   }
-}
-
-// =====================================================
-// EMAIL / PASSWORD SIGNUP
-// =====================================================
-
-if (btnEmailSignup && auth) {
-  btnEmailSignup.addEventListener("click", async () => {
-    const errEl = document.getElementById("login-error");
-    if (errEl) { errEl.style.display = "none"; errEl.textContent = ""; }
-
-    const email = loginEmailInp ? loginEmailInp.value.trim() : "";
-    const password = loginPasswordInp ? loginPasswordInp.value : "";
-
-    if (!email || !password) {
-      if (errEl) { errEl.textContent = "Please enter email and password."; errEl.style.display = "block"; }
-      return;
-    }
-
-    try {
-      btnEmailSignup.disabled = true;
-      btnEmailSignup.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Signing up...';
-
-      await createUserWithEmailAndPassword(auth, email, password);
-      console.log("Email sign-up successful");
-    } catch (error) {
-      console.error("Email sign-up failed:", error);
-      if (errEl) {
-        errEl.textContent = "Sign-up failed: " + error.message;
-        errEl.style.display = "block";
-      }
-      btnEmailSignup.disabled = false;
-      btnEmailSignup.innerHTML = 'Sign Up';
-    }
-  });
 }
 
 
@@ -479,14 +484,9 @@ if (auth) {
 
         }
 
-        if (btnEmailLogin) {
-          btnEmailLogin.disabled = false;
-          btnEmailLogin.innerHTML = 'Sign In';
-        }
-
-        if (btnEmailSignup) {
-          btnEmailSignup.disabled = false;
-          btnEmailSignup.innerHTML = 'Sign Up';
+        if (btnAuthAction) {
+          btnAuthAction.disabled = false;
+          btnAuthAction.innerHTML = authMode === 'login' ? 'Sign In' : 'Sign Up';
         }
 
       }
@@ -530,14 +530,9 @@ if (auth) {
           btnLogin.innerHTML = '<i class="ri-google-fill"></i> Sign in with Google';
         }
 
-        if (btnEmailLogin) {
-          btnEmailLogin.disabled = false;
-          btnEmailLogin.innerHTML = 'Sign In';
-        }
-
-        if (btnEmailSignup) {
-          btnEmailSignup.disabled = false;
-          btnEmailSignup.innerHTML = 'Sign Up';
+        if (btnAuthAction) {
+          btnAuthAction.disabled = false;
+          btnAuthAction.innerHTML = authMode === 'login' ? 'Sign In' : 'Sign Up';
         }
 
         if (loginEmailInp) loginEmailInp.value = '';

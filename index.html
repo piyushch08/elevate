@@ -120,18 +120,22 @@
     <h2 style="margin:1rem 0;">Welcome to ELEVATE</h2>
     <p class="muted" style="margin-bottom:1.5rem;">Please sign in to access your personal planner and sync your data securely.</p>
     
+    <div style="display:flex; gap:10px; margin-bottom: 1rem;">
+      <button class="btn prim" id="tab-login" style="flex:1; font-size:1rem; padding:0.6rem;">Sign In</button>
+      <button class="btn" id="tab-signup" style="flex:1; font-size:1rem; padding:0.6rem; background:var(--glass); border:1px solid var(--gb); color:var(--tp);">Sign Up</button>
+    </div>
+    
     <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 1.5rem;">
       <input type="email" id="login-email" placeholder="Email Address" autocomplete="email" style="padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp);">
       <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" style="padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp);">
-      <div style="display:flex; gap:10px;">
-        <button class="btn prim full" id="btn-email-login" style="font-size:1rem;padding:0.8rem;flex:1;">Sign In</button>
-        <button class="btn full" id="btn-email-signup" style="font-size:1rem;padding:0.8rem;flex:1;background:var(--glass);border:1px solid var(--gb);color:var(--tp);">Sign Up</button>
-      </div>
+      <input type="password" id="login-password-confirm" placeholder="Confirm Password" autocomplete="new-password" style="display:none; padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp);">
+      
+      <button class="btn prim full" id="btn-auth-action" style="font-size:1rem;padding:0.8rem; margin-top:5px;">Sign In</button>
     </div>
     
     <div class="muted" style="margin-bottom:1.5rem;">— OR —</div>
 
-    <button class="btn full" id="btn-login" style="font-size:1rem;padding:0.8rem;background:var(--surface);border:1px solid var(--border);color:var(--text);"><i class="ri-google-fill" style="color:#DB4437;"></i> Sign in with Google</button>
+    <button class="btn full" id="btn-login" style="font-size:1rem;padding:0.8rem;background:var(--glass);border:1px solid var(--gb);color:var(--tp);"><i class="ri-google-fill" style="color:#DB4437;"></i> Sign in with Google</button>
     <p id="login-error" class="muted" style="color:var(--danger);margin-top:1rem;display:none;"></p>
   </div>
 </div>
