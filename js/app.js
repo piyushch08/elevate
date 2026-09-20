@@ -79,8 +79,9 @@ window.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', e => {
     if (!e.target.closest('#notif-btn') && !e.target.closest('#notif-panel')) closePop('notif-panel');
     if (!e.target.closest('.tb-search') && !e.target.closest('#search-drop')) closePop('search-drop');
-    if (!e.target.closest('.sidebar') && !e.target.closest('#mobile-menu-btn') && !e.target.closest('.hamburger') && window.innerWidth <= 768) {
-      document.getElementById('sidebar').classList.remove('open');
+    if (!e.target.closest('.sidebar') && !e.target.closest('.hamburger') && document.getElementById('sidebar').classList.contains('open')) {
+      // Allow the overlay click to handle closing, or close it here safely if overlay isn't clicked
+      if(!e.target.closest('.sidebar-overlay')) toggleSidebar();
     }
   });
   // restore theme
@@ -137,9 +138,13 @@ function goTo(pg) {
   const pg_el = document.getElementById('page-' + pg);
   if (pg_el) pg_el.classList.add('active');
   const bc = document.getElementById('bc-page'); if (bc) bc.textContent = PAGES[pg] || pg;
-  if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
+  if (document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
 }
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+function toggleSidebar() { 
+  document.getElementById('sidebar').classList.toggle('open');
+  const overlay = document.getElementById('sidebar-overlay');
+  if (overlay) overlay.classList.toggle('show');
+}
 
 // ===== CLOCK & GREETING =====
 let timerInterval;

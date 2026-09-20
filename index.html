@@ -201,8 +201,12 @@
     </div>
   </header>
 
-  <!-- APP BODY -->
-  <div class="app-body">
+  <!-- MAIN APP -->
+  <div class="app-body" id="app-body" style="display:none;">
+    
+    <!-- SIDEBAR OVERLAY -->
+    <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
     <!-- SIDEBAR -->
     <nav class="sidebar" id="sidebar">
       <div class="s-logo">
@@ -250,10 +254,10 @@
 
     <!-- MAIN -->
     <main class="main" id="main">
-      <div class="mobile-bar">
+      <div class="top-nav-bar">
         <button class="hamburger" onclick="toggleSidebar()"><i class="ri-menu-4-line"></i></button>
         <div class="tb-logo" style="gap:5px;font-size:.9rem">
-          <i class="ri-blaze-line" style="font-size:1.2rem"></i>
+          <i class="ri-blaze-line" style="font-size:1.2rem; color: var(--accent);"></i>
           <span class="logo-text">ELEVATE</span>
         </div>
         <button class="btn sm prim" onclick="openM('m-task')"><i class="ri-add-line"></i></button>
