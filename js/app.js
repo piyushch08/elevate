@@ -96,17 +96,23 @@ function renderAll() {
   renderCalendar(); updateRings(); updateMacros(); updateWaterUI();
   renderSubjects();
 }
-let saveTimeout = null;
+let localSaveTimeout = null;
+let firestoreSaveTimeout = null;
 function save() {
   D.lastUid = window.currentUserUid || 'guest';
-  try {
-    localStorage.setItem('elevate2', JSON.stringify(D));
-  } catch (e) { }
+  
+  // Debounce localStorage writes (300ms) to prevent micro-stutters
+  clearTimeout(localSaveTimeout);
+  localSaveTimeout = setTimeout(() => {
+    try {
+      localStorage.setItem('elevate2', JSON.stringify(D));
+    } catch (e) { console.error('Error saving state:', e); }
+  }, 300);
 
-  // Sync to Firebase if the user is logged in
+  // Sync to Firebase if the user is logged in (debounced to 1000ms)
   if (window.saveToFirestore) {
-    clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(() => {
+    clearTimeout(firestoreSaveTimeout);
+    firestoreSaveTimeout = setTimeout(() => {
       window.saveToFirestore();
     }, 1000);
   }
@@ -148,11 +154,14 @@ function toggleSidebar() {
 
 // ===== CLOCK & GREETING =====
 let timerInterval;
+let cachedTbTime = null;
 function tick() {
   const now = new Date();
-  const el = document.getElementById('tb-time');
-  const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-  if (el && el.textContent !== timeStr) el.textContent = timeStr;
+  if (!cachedTbTime) cachedTbTime = document.getElementById('tb-time');
+  if (cachedTbTime) {
+    const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    if (cachedTbTime.textContent !== timeStr) cachedTbTime.textContent = timeStr;
+  }
   
   if (D.timerOn) { 
     D.timerSec--; 

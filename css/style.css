@@ -270,9 +270,9 @@ body{font-family:'Outfit',sans-serif;color:var(--tp);min-height:100vh;overflow:h
 .np-body small{font-size:.72rem;color:var(--ts)}
 
 /* ===== SIDEBAR & OVERLAY ===== */
-.sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:40;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(3px)}
+.sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:40;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(3px);will-change:opacity}
 .sidebar-overlay.show{opacity:1;pointer-events:auto}
-.sidebar{position:fixed;left:-260px;top:0;bottom:0;width:240px;height:100%;flex-shrink:0;background:var(--sidebar);border-right:1px solid var(--gb);display:flex;flex-direction:column;padding:1.5rem 1rem;z-index:50;transition:transform .35s ease,background .4s,border-color .4s;overflow-y:auto}
+.sidebar{position:fixed;left:-260px;top:0;bottom:0;width:240px;height:100%;flex-shrink:0;background:var(--sidebar);border-right:1px solid var(--gb);display:flex;flex-direction:column;padding:1.5rem 1rem;z-index:50;transition:transform .35s ease,background .4s,border-color .4s;overflow-y:auto;will-change:transform}
 .sidebar.open{transform:translateX(260px)}
 /* ===== SIDEBAR LOGO ===== */
 .s-logo{
@@ -317,7 +317,7 @@ body{font-family:'Outfit',sans-serif;color:var(--tp);min-height:100vh;overflow:h
 .tb-logo{font-family:'Outfit',sans-serif;font-weight:700;display:flex;align-items:center;gap:6px;}
 
 /* ===== PAGES ===== */
-.page{display:none;animation:pgIn .3s ease}
+.page{display:none;animation:pgIn .3s ease;will-change:opacity,transform}
 .page.active{display:block}
 @keyframes pgIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .page-title{font-size:1.9rem;font-weight:300;margin-bottom:.2rem}
