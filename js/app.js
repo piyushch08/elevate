@@ -86,8 +86,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
   // restore theme
-  document.documentElement.setAttribute('data-theme', D.theme);
-  document.querySelectorAll('.theme-card').forEach(c => c.classList.toggle('on', c.dataset.t === D.theme));
+  applyTheme(D.theme, document.querySelector(`.theme-card[data-t="${D.theme}"]`), true);
 });
 
 function renderAll() {
@@ -215,23 +214,7 @@ function setupRipple() {
 
 // ===== TILT =====
 function setupTilt() {
-  document.querySelectorAll('.widget').forEach(w => {
-    let ticking = false;
-    w.addEventListener('mousemove', e => {
-      if (!D.settings.tilt) return;
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const r = w.getBoundingClientRect();
-          const rx = ((e.clientY - r.top) / r.height - .5) * -7;
-          const ry = ((e.clientX - r.left) / r.width - .5) * 7;
-          w.style.transform = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-3px)`;
-          ticking = false;
-        });
-        ticking = true;
-      }
-    });
-    w.addEventListener('mouseleave', () => w.style.transform = '');
-  });
+  // Tilting effect removed per user request. Simple hover effects are handled in CSS.
 }
 
 // ===== EDITABLE PROFILE =====
@@ -299,7 +282,7 @@ window.updateProgressChart = function() {
       if(s.id >= currWeekStart) {
         let d = new Date(s.id).getDay();
         let day = (d + 6) % 7; // Mon=0
-        focusWeek[day] += s.mins;
+        focusWeek[day] += (s.mins / 60);
       }
     });
     D.habits.forEach(h => {
@@ -317,7 +300,7 @@ window.updateProgressChart = function() {
       if(s.id >= monthStart) {
         let w = Math.floor(new Date(s.id).getDate() / 7);
         if(w > 3) w = 3;
-        data1[w] += s.mins;
+        data1[w] += (s.mins / 60);
         data2[w] += 1; // Count of study sessions
       }
     });
@@ -329,7 +312,7 @@ window.updateProgressChart = function() {
     D.studyLog.forEach(s => {
       if(s.id >= yearStart) {
         let m = new Date(s.id).getMonth();
-        data1[m] += s.mins;
+        data1[m] += (s.mins / 60);
         data2[m] += 1;
       }
     });
@@ -347,7 +330,7 @@ window.updateProgressChart = function() {
         labels: labels,
         datasets: [
           {
-            label: 'Focus Mins',
+            label: 'Focus Hours',
             data: data1,
             backgroundColor: '#0038ff',
             borderRadius: 6,
@@ -374,7 +357,12 @@ window.updateProgressChart = function() {
           y: {
             beginAtZero: true,
             grid: { color: 'rgba(0,0,0,0.05)' },
-            border: { display: false }
+            border: { display: false },
+            ticks: {
+              callback: function(value) {
+                return value + 'h';
+              }
+            }
           },
           x: {
             grid: { display: false },
@@ -740,10 +728,18 @@ function editNote(id) {
 function delNote(id) { D.notes = D.notes.filter(x => x.id !== id); renderNotes(); save(); toast('Note deleted.', 'info'); }
 
 // ===== PERSONALIZE =====
-function applyTheme(t, card) {
+function applyTheme(t, card, silent=false) {
   D.theme = t; document.documentElement.setAttribute('data-theme', t);
   document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('on')); if (card) card.classList.add('on');
-  save(); toast(`Theme: ${t}`, 'success');
+  
+  const icon = document.getElementById('theme-icon');
+  if (icon) icon.className = t === 'dark' ? 'ri-sun-line' : 'ri-moon-line';
+  
+  const tgl = document.getElementById('t-dark');
+  if (tgl) tgl.classList.toggle('on', t === 'dark');
+  
+  save(); 
+  if(!silent) toast(`Theme: ${t}`, 'success');
 }
 function saveProfile() {
   const name = document.getElementById('p-name').value.trim(); const status = document.getElementById('p-status').value.trim();
@@ -774,10 +770,6 @@ function toggleS(el, key) { el.classList.toggle('on'); D.settings[key] = el.clas
 function toggleTheme() {
   const newTheme = D.theme === 'dark' ? 'light' : 'dark';
   applyTheme(newTheme, document.querySelector(`.theme-card[data-t="${newTheme}"]`));
-  const icon = document.getElementById('theme-icon');
-  if (icon) {
-    icon.className = newTheme === 'dark' ? 'ri-sun-line' : 'ri-moon-line';
-  }
 }
 let fontSize = 16;
 function changeFontSize(d) { fontSize = Math.min(22, Math.max(12, fontSize + d)); document.documentElement.style.fontSize = fontSize + 'px'; const l = document.getElementById('fs-label'); if (l) l.textContent = fontSize + 'px'; D.settings.fontSize = fontSize; save(); }
@@ -793,17 +785,61 @@ function closePop(id) { const el = document.getElementById(id); if (el && el.cla
 // ===== SEARCH =====
 function setupSearch() {
   const inp = document.getElementById('global-search'), drop = document.getElementById('search-drop'); if (!inp || !drop) return;
+  
+  // global shortcut
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      inp.focus();
+    }
+  });
+
+  let selectedIndex = -1;
+
   inp.addEventListener('input', () => {
+    selectedIndex = -1;
     const q = inp.value.trim().toLowerCase(); if (!q) { drop.classList.remove('show'); return; } drop.classList.add('show');
     const res = [];
     D.tasks.forEach(t => { if (t.name.toLowerCase().includes(q)) res.push({ ico: 'ri-list-check', label: t.name, sub: 'Task · ' + t.cat, page: 'todo' }); });
     D.notes.forEach(n => { if ((n.title || '').toLowerCase().includes(q) || (n.body || '').toLowerCase().includes(q)) res.push({ ico: 'ri-sticky-note-line', label: n.title || 'Untitled', sub: 'Note', page: 'notes' }); });
     D.habits.forEach(h => { if (h.name.toLowerCase().includes(q)) res.push({ ico: 'ri-seedling-line', label: h.name, sub: 'Habit', page: 'habits' }); });
+    if(D.meals) D.meals.forEach(m => { if (m.name.toLowerCase().includes(q)) res.push({ ico: 'ri-restaurant-line', label: m.name, sub: 'Meal', page: 'diet' }); });
     Object.entries(PAGES).forEach(([k, v]) => { if (v.toLowerCase().includes(q)) res.push({ ico: 'ri-dashboard-line', label: v, sub: 'Page', page: k }); });
+    
     if (!res.length) { drop.innerHTML = '<div class="sr-empty"><i class="ri-search-line"></i> No results</div>'; }
-    else { drop.innerHTML = res.slice(0, 6).map(r => `<div class="sr-item" onclick="goTo('${r.page}');document.getElementById('global-search').value='';closePop('search-drop')"><i class="${r.ico}"></i><div><div>${r.label}</div><div class="muted">${r.sub}</div></div></div>`).join(''); }
+    else { 
+      drop.innerHTML = res.slice(0, 8).map((r, i) => `<div class="sr-item" id="sr-item-${i}" onclick="goTo('${r.page}');document.getElementById('global-search').value='';closePop('search-drop')"><i class="${r.ico}"></i><div><div>${r.label}</div><div class="muted">${r.sub}</div></div></div>`).join(''); 
+    }
   });
-  inp.addEventListener('keydown', e => { if (e.key === 'Escape') { drop.classList.remove('show'); inp.value = ''; } });
+
+  inp.addEventListener('keydown', e => { 
+    const items = drop.querySelectorAll('.sr-item');
+    if (e.key === 'Escape') { drop.classList.remove('show'); inp.value = ''; inp.blur(); } 
+    else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if(items.length > 0) {
+        selectedIndex = (selectedIndex + 1) % items.length;
+        items.forEach(el => el.classList.remove('active'));
+        items[selectedIndex].classList.add('active');
+        items[selectedIndex].scrollIntoView({ block: 'nearest' });
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if(items.length > 0) {
+        selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+        items.forEach(el => el.classList.remove('active'));
+        items[selectedIndex].classList.add('active');
+        items[selectedIndex].scrollIntoView({ block: 'nearest' });
+      }
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if(selectedIndex >= 0 && items[selectedIndex]) {
+        items[selectedIndex].click();
+      } else if(items.length > 0) {
+        items[0].click();
+      }
+    }
+  });
 }
 
 

@@ -245,9 +245,10 @@
         <span class="logo-text">ELEVATE</span>
       </div>
       <div class="tb-bread"><i class="ri-arrow-right-s-line"></i><span id="bc-page">Dashboard</span></div>
-      <div class="tb-search">
+      <div class="tb-search" id="tb-search" onclick="document.getElementById('global-search').focus()">
         <i class="ri-search-line"></i>
         <input type="text" id="global-search" placeholder="Search tasks, notes, habits…" autocomplete="off">
+        <span class="kb-shortcut" style="font-size: 0.7rem; color: var(--ts); border: 1px solid var(--gb); padding: 2px 6px; border-radius: 4px; pointer-events: none; margin-left: 8px;">Ctrl K</span>
       </div>
       <div class="tb-spacer"></div>
       <div class="tb-clock"><i class="ri-time-line"></i><span id="tb-time">00:00:00</span></div>
@@ -335,17 +336,7 @@
             <button class="s-settings-btn" id="btn-logout" style="flex:1;"><i class="ri-logout-box-r-line"></i>
               Logout</button>
           </div>
-          <div class="site-footer" style="margin-top: 1.5rem; padding-top: 1rem;">
-            <span class="copyright">&copy; 2026 Piyush Chauhan. All rights reserved.</span>
-            <div class="social-links" style="font-size: 1.1rem; gap: 10px;">
-              <a href="mailto:piyush.ch407@gmail.com" title="Email"><i class="ri-mail-line"></i></a>
-              <a href="https://github.com/piyushch08" target="_blank" title="GitHub"><i class="ri-github-line"></i></a>
-              <a href="https://www.instagram.com/piyu5h.08?igsh=MXJvcnlnb2hwZHliMQ%3D%3D" target="_blank"
-                title="Instagram"><i class="ri-instagram-line"></i></a>
-              <a href="https://www.linkedin.com/in/piyush-chauhan-353822385" target="_blank" title="LinkedIn"><i
-                  class="ri-linkedin-box-line"></i></a>
-            </div>
-          </div>
+
         </div>
       </nav>
 
@@ -429,6 +420,16 @@
               <div class="pie-legend mt1" id="pie-legend">
                 <!-- populated by js -->
               </div>
+            </div>
+          </div>
+          
+          <div class="dash-footer" style="margin-top: 3rem; text-align: center; border-top: 1px solid var(--gb); padding-top: 1.5rem; padding-bottom: 2rem; color: var(--ts);">
+            <span class="copyright" style="font-size: 0.85rem;">&copy; 2026 Piyush Chauhan. All rights reserved.</span>
+            <div class="social-links" style="font-size: 1.25rem; display: flex; justify-content: center; gap: 15px; margin-top: 10px;">
+              <a href="mailto:piyush.ch407@gmail.com" title="Email" style="color: inherit; transition: color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='inherit'"><i class="ri-mail-line"></i></a>
+              <a href="https://github.com/piyushch08" target="_blank" title="GitHub" style="color: inherit; transition: color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='inherit'"><i class="ri-github-line"></i></a>
+              <a href="https://www.instagram.com/piyu5h.08?igsh=MXJvcnlnb2hwZHliMQ%3D%3D" target="_blank" title="Instagram" style="color: inherit; transition: color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='inherit'"><i class="ri-instagram-line"></i></a>
+              <a href="https://www.linkedin.com/in/piyush-chauhan-353822385" target="_blank" title="LinkedIn" style="color: inherit; transition: color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='inherit'"><i class="ri-linkedin-box-line"></i></a>
             </div>
           </div>
         </section>
