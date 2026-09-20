@@ -80,7 +80,7 @@ window.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', e => {
     if (!e.target.closest('#notif-btn') && !e.target.closest('#notif-panel')) closePop('notif-panel');
     if (!e.target.closest('.tb-search') && !e.target.closest('#search-drop')) closePop('search-drop');
-    if (!e.target.closest('.sidebar') && !e.target.closest('.hamburger') && document.getElementById('sidebar').classList.contains('open')) {
+    if (!e.target.closest('.sidebar') && !e.target.closest('.hamburger') && !e.target.closest('#mobile-menu-btn') && document.getElementById('sidebar').classList.contains('open')) {
       // Allow the overlay click to handle closing, or close it here safely if overlay isn't clicked
       if(!e.target.closest('.sidebar-overlay')) toggleSidebar();
     }
@@ -287,19 +287,52 @@ window.updateProgressChart = function() {
   let labels = [];
   let data1 = [];
   let data2 = [];
+  const now = Date.now();
+  const currWeekStart = getWeekStart(now);
   
   if (period === 'weekly') {
     labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    data1 = [20, 30, 40, 25, 45, 15, 35]; // Mock data - Total Focus
-    data2 = [10, 15, 20, 12, 22, 8, 18];  // Mock data - Tasks Completed
+    const focusWeek = [0,0,0,0,0,0,0];
+    const habitsWeek = [0,0,0,0,0,0,0];
+    
+    D.studyLog.forEach(s => {
+      if(s.id >= currWeekStart) {
+        let d = new Date(s.id).getDay();
+        let day = (d + 6) % 7; // Mon=0
+        focusWeek[day] += s.mins;
+      }
+    });
+    D.habits.forEach(h => {
+      h.days.forEach((d, i) => { if(d) habitsWeek[i]++; });
+    });
+    
+    data1 = focusWeek; // Real focus minutes per day
+    data2 = habitsWeek; // Real habits completed per day
   } else if (period === 'monthly') {
     labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
-    data1 = [120, 150, 140, 180];
-    data2 = [50, 60, 55, 75];
+    data1 = [0,0,0,0];
+    data2 = [0,0,0,0];
+    const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime();
+    D.studyLog.forEach(s => {
+      if(s.id >= monthStart) {
+        let w = Math.floor(new Date(s.id).getDate() / 7);
+        if(w > 3) w = 3;
+        data1[w] += s.mins;
+        data2[w] += 1; // Count of study sessions
+      }
+    });
   } else { // yearly
     labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    data1 = [400, 450, 420, 500, 480, 520, 490, 510, 530, 460, 470, 550];
-    data2 = [150, 180, 160, 200, 190, 210, 200, 220, 230, 190, 180, 240];
+    data1 = Array(12).fill(0);
+    data2 = Array(12).fill(0);
+    const yearStart = new Date(new Date().getFullYear(), 0, 1).getTime();
+    D.studyLog.forEach(s => {
+      if(s.id >= yearStart) {
+        let m = new Date(s.id).getMonth();
+        data1[m] += s.mins;
+        data2[m] += 1;
+      }
+    });
   }
   
   if (progressChartInst) {
@@ -322,7 +355,7 @@ window.updateProgressChart = function() {
             categoryPercentage: 0.8
           },
           {
-            label: 'Tasks Done',
+            label: 'Habits / Sessions',
             data: data2,
             backgroundColor: '#000000',
             borderRadius: 6,
@@ -358,12 +391,16 @@ window.updatePieChart = function() {
   const ctx = document.getElementById('pieChart');
   if(!ctx) return;
   
-  // Real data for today, mock data for weekly
   let data = [];
   if (period === 'today') {
-    data = [D.today.study || 0, D.tasks.filter(t=>t.cat==='Exercise' && t.done).length || 0, D.meals.length || 0];
+    data = [D.today.study || 0, D.tasks.filter(t=>t.cat==='Exercise' && t.done).length || 0, D.meals.filter(m=>m.id >= new Date().setHours(0,0,0,0)).length || 0];
   } else {
-    data = [45, 20, 15]; // Mock weekly
+    // weekly
+    const currWeekStart = getWeekStart(Date.now());
+    const weekStudy = D.studyLog.reduce((s, log) => log.id >= currWeekStart ? s + log.mins : s, 0);
+    const weekMeals = D.meals.filter(m => m.id >= currWeekStart).length;
+    const weekWorkouts = D.streak.filter(Boolean).length;
+    data = [weekStudy, weekWorkouts, weekMeals];
   }
   // Ensure chart renders something if all values are 0
   if(data[0]===0 && data[1]===0 && data[2]===0) data = [1,1,1];
