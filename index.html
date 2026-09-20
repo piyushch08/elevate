@@ -153,7 +153,8 @@
   <!-- Login Modal -->
   <div class="modal-bg" id="m-login" style="z-index:99998; display:flex;">
     <div class="modal" style="text-align:center;">
-      <i class="ri-blaze-line" style="font-size:3rem;background:linear-gradient(135deg,#3B46F2,#7B83FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;"></i>
+      <i class="ri-blaze-line"
+        style="font-size:3rem;background:linear-gradient(135deg,#3B46F2,#7B83FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;"></i>
       <h2 style="margin:1rem 0; font-weight:700; letter-spacing:2px; color:var(--tp);">ELEVATE</h2>
       <p class="muted" style="margin-bottom:1.5rem;">Please sign in to access your personal planner and sync your data
         securely.</p>
@@ -237,8 +238,8 @@
   <div class="app">
     <!-- TOPBAR -->
     <header class="topbar" id="topbar">
-      <button class="tb-btn" id="mobile-menu-btn" onclick="toggleSidebar()" style="display:none; margin-right:10px;"><i
-          class="ri-menu-line"></i></button>
+      <button class="tb-btn" id="mobile-menu-btn" onclick="toggleSidebar()" style="margin-right:10px;"
+        title="Toggle Menu"><i class="ri-menu-line"></i></button>
       <div class="tb-logo">
         <i class="ri-blaze-line"></i>
         <span class="logo-text">ELEVATE</span>
@@ -251,11 +252,14 @@
       <div class="tb-spacer"></div>
       <div class="tb-clock"><i class="ri-time-line"></i><span id="tb-time">00:00:00</span></div>
       <div class="tb-actions">
-        <button class="btn sm prim" onclick="openM('m-task')" title="Add Task"><i class="ri-add-line"></i><span class="hide-mobile"> New</span></button>
+        <button class="btn sm prim" onclick="openM('m-task')" title="Add Task"><i class="ri-add-line"></i><span
+            class="hide-mobile"> New</span></button>
         <button class="tb-btn" id="notif-btn" onclick="toggleNotif()" title="Notifications"><i
             class="ri-notification-3-line"></i>
           <div class="notif-dot" id="notif-dot"></div>
         </button>
+        <button class="tb-btn" onclick="toggleTheme()" title="Toggle Theme"><i class="ri-moon-line"
+            id="theme-icon"></i></button>
         <button class="tb-btn" onclick="openM('m-settings')" title="Settings"><i
             class="ri-settings-4-line"></i></button>
         <div class="tb-avatar" onclick="goTo('personalize')" title="Personalize"><i class="ri-user-smile-line"></i>
@@ -332,12 +336,16 @@
               Logout</button>
           </div>
           <div class="site-footer" style="margin-top: 1.5rem; padding-top: 1rem;">
-            <span class="copyright">&copy; 2026 Piyush Chauhan</span>
+            <span class="copyright">&copy; 2026 Piyush Chauhan. All rights reserved.
+
+            </span>
             <div class="social-links" style="font-size: 1.1rem; gap: 10px;">
               <a href="mailto:piyush.ch407@gmail.com" title="Email"><i class="ri-mail-line"></i></a>
               <a href="https://github.com/piyushch08" target="_blank" title="GitHub"><i class="ri-github-line"></i></a>
-              <a href="https://www.instagram.com/piyu5h.08?igsh=MXJvcnlnb2hwZHliMQ%3D%3D" target="_blank" title="Instagram"><i class="ri-instagram-line"></i></a>
-              <a href="#" target="_blank" title="LinkedIn"><i class="ri-linkedin-box-line"></i></a>
+              <a href="https://www.instagram.com/piyu5h.08?igsh=MXJvcnlnb2hwZHliMQ%3D%3D" target="_blank"
+                title="Instagram"><i class="ri-instagram-line"></i></a>
+              <a href="https://www.linkedin.com/in/piyush-chauhan-353822385" target="_blank" title="LinkedIn"><i
+                  class="ri-linkedin-box-line"></i></a>
             </div>
           </div>
         </div>
@@ -734,9 +742,13 @@
             </div>
             <div class="form-row">
               <label>Description & Steps to Reproduce</label>
-              <textarea id="bug-desc" style="min-height:150px; resize:vertical; padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp); width:100%; box-sizing:border-box;" placeholder="What happened? What were you doing when it happened?"></textarea>
+              <textarea id="bug-desc"
+                style="min-height:150px; resize:vertical; padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp); width:100%; box-sizing:border-box;"
+                placeholder="What happened? What were you doing when it happened?"></textarea>
             </div>
-            <button class="btn prim full" onclick="sendBugReport()" style="margin-top:15px; font-size:1rem; padding: 0.8rem;"><i class="ri-mail-send-line"></i> Send via Email</button>
+            <button class="btn prim full" onclick="sendBugReport()"
+              style="margin-top:15px; font-size:1rem; padding: 0.8rem;"><i class="ri-mail-send-line"></i> Send via
+              Email</button>
           </div>
         </section>
 
@@ -746,8 +758,10 @@
           <div class="social-links">
             <a href="mailto:piyush.ch407@gmail.com" title="Email"><i class="ri-mail-line"></i></a>
             <a href="https://github.com/piyushch08" target="_blank" title="GitHub"><i class="ri-github-line"></i></a>
-            <a href="https://www.instagram.com/piyu5h.08?igsh=MXJvcnlnb2hwZHliMQ%3D%3D" target="_blank" title="Instagram"><i class="ri-instagram-line"></i></a>
-            <a href="#" target="_blank" title="LinkedIn"><i class="ri-linkedin-box-line"></i></a>
+            <a href="https://www.instagram.com/piyu5h.08?igsh=MXJvcnlnb2hwZHliMQ%3D%3D" target="_blank"
+              title="Instagram"><i class="ri-instagram-line"></i></a>
+            <a href="https://www.linkedin.com/in/piyush-chauhan-353822385" target="_blank" title="LinkedIn"><i
+                class="ri-linkedin-box-line"></i></a>
           </div>
         </footer>
 

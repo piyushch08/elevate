@@ -734,10 +734,13 @@ function newQuote() { const q = QUOTES_[Math.floor(Math.random() * QUOTES_.lengt
 
 // ===== SETTINGS =====
 function toggleS(el, key) { el.classList.toggle('on'); D.settings[key] = el.classList.contains('on'); save(); if (key === 'anim') { const bw = document.querySelector('.bg-wrap'); if (bw) bw.style.animation = D.settings.anim ? '' : 'none'; document.querySelectorAll('.blob').forEach(b => b.style.animation = D.settings.anim ? '' : 'none'); } toast(`${key} ${D.settings[key] ? 'enabled' : 'disabled'}`); }
-function toggleTheme(el) {
-  el.classList.toggle('on');
-  const newTheme = el.classList.contains('on') ? 'dark' : 'light';
+function toggleTheme() {
+  const newTheme = D.theme === 'dark' ? 'light' : 'dark';
   applyTheme(newTheme, document.querySelector(`.theme-card[data-t="${newTheme}"]`));
+  const icon = document.getElementById('theme-icon');
+  if (icon) {
+    icon.className = newTheme === 'dark' ? 'ri-sun-line' : 'ri-moon-line';
+  }
 }
 let fontSize = 16;
 function changeFontSize(d) { fontSize = Math.min(22, Math.max(12, fontSize + d)); document.documentElement.style.fontSize = fontSize + 'px'; const l = document.getElementById('fs-label'); if (l) l.textContent = fontSize + 'px'; D.settings.fontSize = fontSize; save(); }
