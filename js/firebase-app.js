@@ -362,18 +362,28 @@ if (btnPhoneSend && auth) {
     const errEl = document.getElementById("login-error");
     if (errEl) { errEl.style.display = "none"; errEl.textContent = ""; }
 
-    const phoneNumber = loginPhoneInp ? loginPhoneInp.value.trim() : "";
+    const countryCodeSelect = document.getElementById("login-country-code");
+    const countryCode = countryCodeSelect ? countryCodeSelect.value : "+1";
+    const phoneInpVal = loginPhoneInp ? loginPhoneInp.value.trim() : "";
     
-    if (!phoneNumber) {
+    if (!phoneInpVal) {
       if (errEl) { errEl.textContent = "Please enter a valid phone number."; errEl.style.display = "block"; }
       return;
     }
+
+    const fullPhoneNumber = countryCode + phoneInpVal;
 
     try {
       btnPhoneSend.disabled = true;
       btnPhoneSend.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Sending...';
 
-      confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
+      if (!recaptchaVerifier) {
+        recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          'size': 'invisible'
+        });
+      }
+
+      confirmationResult = await signInWithPhoneNumber(auth, fullPhoneNumber, recaptchaVerifier);
       
       console.log("SMS sent successfully");
       

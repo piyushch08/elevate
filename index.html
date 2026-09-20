@@ -148,7 +148,18 @@
       
       <!-- Step 1: Phone Number -->
       <div id="phone-step-1" style="display:flex; flex-direction:column; gap:10px;">
-        <input type="tel" id="login-phone" placeholder="+1 234 567 8900" autocomplete="tel" style="padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp);">
+        <div style="display:flex; gap:8px;">
+          <select id="login-country-code" style="padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp); width:35%;">
+            <option value="+1">US (+1)</option>
+            <option value="+44">UK (+44)</option>
+            <option value="+91">IN (+91)</option>
+            <option value="+61">AU (+61)</option>
+            <option value="+81">JP (+81)</option>
+            <option value="+49">DE (+49)</option>
+          </select>
+          <input type="tel" id="login-phone" placeholder="Mobile Number" autocomplete="tel" style="flex:1; padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp);">
+        </div>
+        <div id="recaptcha-container"></div>
         <button class="btn prim full" id="btn-phone-send" style="font-size:1rem;padding:0.8rem; margin-top:5px;">Send SMS Code</button>
       </div>
 
@@ -566,7 +577,7 @@
   </nav>
 </div><!-- end app -->
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script defer src="js/app.js"></script>
 <script type="module" src="js/firebase-app.js"></script>
 
