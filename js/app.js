@@ -15,6 +15,15 @@ const D = window.D = {
   subjects: ['Mathematics', 'Programming', 'Physics', 'Data Science', 'English', 'Other']
 };
 
+// ===== REPORT BUG =====
+window.sendBugReport = function(e) {
+  e.preventDefault();
+  const title = document.getElementById('bug-title').value;
+  const desc = document.getElementById('bug-desc').value;
+  const mailto = `mailto:piyush.ch407@gmail.com?subject=Bug Report: ${encodeURIComponent(title)}&body=${encodeURIComponent(desc)}`;
+  window.location.href = mailto;
+};
+
 function getWeekStart(date) {
   const d = new Date(date);
   const day = d.getDay();
