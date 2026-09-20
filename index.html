@@ -153,8 +153,8 @@
   <!-- Login Modal -->
   <div class="modal-bg" id="m-login" style="z-index:99998; display:flex;">
     <div class="modal" style="text-align:center;">
-      <i class="ri-blaze-line" style="font-size:3rem;color:var(--accent);"></i>
-      <h2 style="margin:1rem 0; font-weight:700; letter-spacing:2px;">ELEVATE</h2>
+      <i class="ri-blaze-line" style="font-size:3rem;background:linear-gradient(135deg,#3B46F2,#7B83FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;"></i>
+      <h2 style="margin:1rem 0; font-weight:700; letter-spacing:2px; color:var(--tp);">ELEVATE</h2>
       <p class="muted" style="margin-bottom:1.5rem;">Please sign in to access your personal planner and sync your data
         securely.</p>
 
@@ -230,16 +230,6 @@
 
       <div id="recaptcha-container" style="margin-top: 10px;"></div>
       <p id="login-error" class="muted" style="color:var(--danger);margin-top:1rem;display:none;"></p>
-      
-      <div style="margin-top: 2rem; text-align: center; font-size: 0.85rem; color: var(--ts);">
-        &copy; 2026 Piyush Chauhan<br>
-        <div style="display: flex; justify-content: center; gap: 12px; margin-top: 8px; font-size: 1.2rem;">
-          <a href="mailto:piyush.ch407@gmail.com" style="color: var(--ts); transition: color 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ts)'" title="Email"><i class="ri-mail-line"></i></a>
-          <a href="https://github.com/piyushch08" target="_blank" style="color: var(--ts); transition: color 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ts)'" title="GitHub"><i class="ri-github-line"></i></a>
-          <a href="https://www.instagram.com/piyu5h.08?igsh=MXJvcnlnb2hwZHliMQ%3D%3D" target="_blank" style="color: var(--ts); transition: color 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ts)'" title="Instagram"><i class="ri-instagram-line"></i></a>
-          <a href="https://www.instagram.com/piyu5h.08?igsh=MXJvcnlnb2hwZHliMQ%3D%3D" target="_blank" style="color: var(--ts); transition: color 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ts)'" title="LinkedIn"><i class="ri-linkedin-box-line"></i></a>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -261,6 +251,7 @@
       <div class="tb-spacer"></div>
       <div class="tb-clock"><i class="ri-time-line"></i><span id="tb-time">00:00:00</span></div>
       <div class="tb-actions">
+        <button class="btn sm prim" onclick="openM('m-task')" title="Add Task"><i class="ri-add-line"></i><span class="hide-mobile"> New</span></button>
         <button class="tb-btn" id="notif-btn" onclick="toggleNotif()" title="Notifications"><i
             class="ri-notification-3-line"></i>
           <div class="notif-dot" id="notif-dot"></div>
@@ -340,21 +331,13 @@
             <button class="s-settings-btn" id="btn-logout" style="flex:1;"><i class="ri-logout-box-r-line"></i>
               Logout</button>
           </div>
-          <div style="margin-top: 1rem; text-align: center; font-size: 0.7rem; color: var(--ts);">
-            &copy; 2026 Piyush Chauhan<br>
-            <div style="display: flex; justify-content: center; gap: 12px; margin-top: 8px; font-size: 1.1rem;">
-              <a href="mailto:piyush.ch407@gmail.com" style="color: var(--ts); transition: color 0.3s;"
-                onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ts)'"
-                title="Email"><i class="ri-mail-line"></i></a>
-              <a href="https://github.com/piyushch08" target="_blank" style="color: var(--ts); transition: color 0.3s;"
-                onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ts)'"
-                title="GitHub"><i class="ri-github-line"></i></a>
-              <a href="https://www.instagram.com/piyu5h.08?igsh=MXJvcnlnb2hwZHliMQ%3D%3D" target="_blank"
-                style="color: var(--ts); transition: color 0.3s;" onmouseover="this.style.color='var(--accent)'"
-                onmouseout="this.style.color='var(--ts)'" title="Instagram"><i class="ri-instagram-line"></i></a>
-              <a href="https://www.instagram.com/piyu5h.08?igsh=MXJvcnlnb2hwZHliMQ%3D%3D" target="_blank"
-                style="color: var(--ts); transition: color 0.3s;" onmouseover="this.style.color='var(--accent)'"
-                onmouseout="this.style.color='var(--ts)'" title="LinkedIn"><i class="ri-linkedin-box-line"></i></a>
+          <div class="site-footer" style="margin-top: 1.5rem; padding-top: 1rem;">
+            <span class="copyright">&copy; 2026 Piyush Chauhan</span>
+            <div class="social-links" style="font-size: 1.1rem; gap: 10px;">
+              <a href="mailto:piyush.ch407@gmail.com" title="Email"><i class="ri-mail-line"></i></a>
+              <a href="https://github.com/piyushch08" target="_blank" title="GitHub"><i class="ri-github-line"></i></a>
+              <a href="https://www.instagram.com/piyu5h.08?igsh=MXJvcnlnb2hwZHliMQ%3D%3D" target="_blank" title="Instagram"><i class="ri-instagram-line"></i></a>
+              <a href="#" target="_blank" title="LinkedIn"><i class="ri-linkedin-box-line"></i></a>
             </div>
           </div>
         </div>
@@ -362,14 +345,6 @@
 
       <!-- MAIN -->
       <main class="main" id="main">
-        <div class="top-nav-bar">
-        <button class="hamburger" onclick="toggleSidebar()" style="color: var(--tp);"><i class="ri-menu-4-line"></i></button>
-        <div class="tb-logo" style="gap:8px;font-size:1.1rem">
-          <i class="ri-blaze-line" style="font-size:1.4rem; color: var(--accent);"></i>
-          <span class="logo-text" style="font-weight:700; letter-spacing:2px; color: var(--tp);">ELEVATE</span>
-        </div>
-          <button class="btn sm prim" onclick="openM('m-task')"><i class="ri-add-line"></i></button>
-        </div>
 
         <!-- DASHBOARD -->
         <section class="page active" id="page-dashboard">
@@ -766,13 +741,13 @@
         </section>
 
         <!-- MAIN APP FOOTER -->
-        <footer style="margin-top: 3rem; padding-bottom: 2rem; text-align: center; font-size: 0.85rem; color: var(--ts);">
-          &copy; 2026 Piyush Chauhan<br>
-          <div style="display: flex; justify-content: center; gap: 15px; margin-top: 10px; font-size: 1.3rem;">
-            <a href="mailto:piyush.ch407@gmail.com" style="color: var(--ts); transition: color 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ts)'" title="Email"><i class="ri-mail-line"></i></a>
-            <a href="https://github.com/piyushch08" target="_blank" style="color: var(--ts); transition: color 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ts)'" title="GitHub"><i class="ri-github-line"></i></a>
-            <a href="https://www.instagram.com/piyu5h.08?igsh=MXJvcnlnb2hwZHliMQ%3D%3D" target="_blank" style="color: var(--ts); transition: color 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ts)'" title="Instagram"><i class="ri-instagram-line"></i></a>
-            <a href="https://www.instagram.com/piyu5h.08?igsh=MXJvcnlnb2hwZHliMQ%3D%3D" target="_blank" style="color: var(--ts); transition: color 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ts)'" title="LinkedIn"><i class="ri-linkedin-box-line"></i></a>
+        <footer class="site-footer">
+          <span class="copyright">&copy; 2026 Piyush Chauhan</span>
+          <div class="social-links">
+            <a href="mailto:piyush.ch407@gmail.com" title="Email"><i class="ri-mail-line"></i></a>
+            <a href="https://github.com/piyushch08" target="_blank" title="GitHub"><i class="ri-github-line"></i></a>
+            <a href="https://www.instagram.com/piyu5h.08?igsh=MXJvcnlnb2hwZHliMQ%3D%3D" target="_blank" title="Instagram"><i class="ri-instagram-line"></i></a>
+            <a href="#" target="_blank" title="LinkedIn"><i class="ri-linkedin-box-line"></i></a>
           </div>
         </footer>
 
