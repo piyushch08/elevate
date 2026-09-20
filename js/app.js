@@ -243,14 +243,14 @@ let pieChartInst = null;
 
 function updateRings() {
   // Update the 4 top cards
-  const focus = D.today.study || 0;
+  const focusHours = Number(((D.today.study || 0) / 60).toFixed(1));
   const tasksDone = D.tasks.filter(t => t.done).length;
-  const meals = D.meals.length;
+  const mealsToday = D.meals.filter(m => m.id >= new Date().setHours(0,0,0,0)).length;
   const activeDays = D.streak.filter(Boolean).length;
   
-  const elFocus = document.getElementById('stat-focus'); if(elFocus) elFocus.textContent = focus;
+  const elFocus = document.getElementById('stat-focus'); if(elFocus) elFocus.textContent = focusHours;
   const elTasks = document.getElementById('stat-tasks'); if(elTasks) elTasks.textContent = tasksDone;
-  const elMeals = document.getElementById('stat-meals'); if(elMeals) elMeals.textContent = meals;
+  const elMeals = document.getElementById('stat-meals'); if(elMeals) elMeals.textContent = mealsToday;
   const elActive = document.getElementById('stat-active'); if(elActive) elActive.textContent = activeDays;
   
   if (typeof Chart !== 'undefined') {
@@ -270,28 +270,28 @@ window.updateProgressChart = function() {
   let labels = [];
   let data1 = [];
   let data2 = [];
+  let xAxisTitle = 'Days of the Week';
   const now = Date.now();
   const currWeekStart = getWeekStart(now);
   
   if (period === 'weekly') {
     labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const focusWeek = [0,0,0,0,0,0,0];
-    const habitsWeek = [0,0,0,0,0,0,0];
+    const sessionsWeek = [0,0,0,0,0,0,0];
     
     D.studyLog.forEach(s => {
       if(s.id >= currWeekStart) {
         let d = new Date(s.id).getDay();
         let day = (d + 6) % 7; // Mon=0
         focusWeek[day] += (s.mins / 60);
+        sessionsWeek[day] += 1;
       }
     });
-    D.habits.forEach(h => {
-      h.days.forEach((d, i) => { if(d) habitsWeek[i]++; });
-    });
     
-    data1 = focusWeek; // Real focus minutes per day
-    data2 = habitsWeek; // Real habits completed per day
+    data1 = focusWeek.map(v => Number(v.toFixed(1))); // Real focus hours per day
+    data2 = sessionsWeek; // Real study sessions per day
   } else if (period === 'monthly') {
+    xAxisTitle = 'Weeks of the Month';
     labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
     data1 = [0,0,0,0];
     data2 = [0,0,0,0];
@@ -304,7 +304,9 @@ window.updateProgressChart = function() {
         data2[w] += 1; // Count of study sessions
       }
     });
+    data1 = data1.map(v => Number(v.toFixed(1)));
   } else { // yearly
+    xAxisTitle = 'Months of the Year';
     labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     data1 = Array(12).fill(0);
     data2 = Array(12).fill(0);
@@ -316,14 +318,25 @@ window.updateProgressChart = function() {
         data2[m] += 1;
       }
     });
+    data1 = data1.map(v => Number(v.toFixed(1)));
   }
   
   if (progressChartInst) {
     progressChartInst.data.labels = labels;
     progressChartInst.data.datasets[0].data = data1;
     progressChartInst.data.datasets[1].data = data2;
+    progressChartInst.options.scales.x.title.text = xAxisTitle;
     progressChartInst.update();
   } else {
+    const canvasCtx = ctx.getContext('2d');
+    const grad1 = canvasCtx.createLinearGradient(0, 0, 0, 250);
+    grad1.addColorStop(0, '#1A73E8'); 
+    grad1.addColorStop(1, 'rgba(26, 115, 232, 0.1)'); 
+    
+    const grad2 = canvasCtx.createLinearGradient(0, 0, 0, 250);
+    grad2.addColorStop(0, 'rgba(52, 168, 83, 0.4)'); 
+    grad2.addColorStop(1, 'rgba(52, 168, 83, 0.0)'); 
+
     progressChartInst = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -332,39 +345,101 @@ window.updateProgressChart = function() {
           {
             label: 'Focus Hours',
             data: data1,
-            backgroundColor: '#0038ff',
+            backgroundColor: grad1,
             borderRadius: 6,
+            borderSkipped: false,
             barPercentage: 0.5,
-            categoryPercentage: 0.8
+            categoryPercentage: 0.7,
+            yAxisID: 'y'
           },
           {
-            label: 'Habits / Sessions',
+            label: 'Study Sessions',
             data: data2,
-            backgroundColor: '#000000',
-            borderRadius: 6,
-            barPercentage: 0.5,
-            categoryPercentage: 0.8
+            type: 'line',
+            backgroundColor: grad2,
+            borderColor: '#34A853',
+            borderWidth: 3,
+            tension: 0.4, // Smooth curve
+            pointBackgroundColor: '#FFFFFF',
+            pointBorderColor: '#34A853',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            fill: true,
+            yAxisID: 'y1'
           }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
         plugins: {
-          legend: { display: false }
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(0,0,0,0.85)',
+            titleFont: { family: "'Outfit', sans-serif", size: 13 },
+            bodyFont: { family: "'Outfit', sans-serif", size: 13 },
+            padding: 12,
+            cornerRadius: 8,
+            boxPadding: 4,
+            usePointStyle: true
+          }
         },
         scales: {
           y: {
+            type: 'linear',
+            display: true,
+            position: 'left',
+            title: {
+              display: true,
+              text: 'Focus Hours',
+              color: 'var(--ts)',
+              font: { size: 12, family: "'Outfit', sans-serif" }
+            },
             beginAtZero: true,
-            grid: { color: 'rgba(0,0,0,0.05)' },
+            grid: { 
+              color: 'rgba(150,150,150,0.1)',
+              borderDash: [5, 5]
+            },
             border: { display: false },
             ticks: {
+              stepSize: 1, // Only show whole numbers (1hr, 2hr)
               callback: function(value) {
-                return value + 'h';
+                return value + 'hr';
+              }
+            }
+          },
+          y1: {
+            type: 'linear',
+            display: true,
+            position: 'right',
+            title: {
+              display: true,
+              text: 'Study Sessions',
+              color: 'var(--ts)',
+              font: { size: 12, family: "'Outfit', sans-serif" }
+            },
+            beginAtZero: true,
+            grid: { drawOnChartArea: false }, // Prevent gridline overlap
+            border: { display: false },
+            ticks: {
+              stepSize: 1, // Whole numbers only
+              callback: function(value) {
+                return value;
               }
             }
           },
           x: {
+            title: {
+              display: true,
+              text: xAxisTitle,
+              color: 'var(--ts)',
+              font: { size: 12, family: "'Outfit', sans-serif" }
+            },
             grid: { display: false },
             border: { display: false }
           }
@@ -381,20 +456,22 @@ window.updatePieChart = function() {
   
   let data = [];
   if (period === 'today') {
-    data = [D.today.study || 0, D.tasks.filter(t=>t.cat==='Exercise' && t.done).length || 0, D.meals.filter(m=>m.id >= new Date().setHours(0,0,0,0)).length || 0];
+    const todayStudyHours = Number(((D.today.study || 0) / 60).toFixed(1));
+    data = [todayStudyHours, D.tasks.filter(t=>t.cat==='Exercise' && t.done).length || 0, D.meals.filter(m=>m.id >= new Date().setHours(0,0,0,0)).length || 0];
   } else {
     // weekly
     const currWeekStart = getWeekStart(Date.now());
-    const weekStudy = D.studyLog.reduce((s, log) => log.id >= currWeekStart ? s + log.mins : s, 0);
+    const weekStudyMins = D.studyLog.reduce((s, log) => log.id >= currWeekStart ? s + log.mins : s, 0);
+    const weekStudyHours = Number((weekStudyMins / 60).toFixed(1));
     const weekMeals = D.meals.filter(m => m.id >= currWeekStart).length;
     const weekWorkouts = D.streak.filter(Boolean).length;
-    data = [weekStudy, weekWorkouts, weekMeals];
+    data = [weekStudyHours, weekWorkouts, weekMeals];
   }
   // Ensure chart renders something if all values are 0
   if(data[0]===0 && data[1]===0 && data[2]===0) data = [1,1,1];
   
   let labels = ['Study', 'Exercise', 'Diet'];
-  let colors = ['#0038ff', '#000000', '#d1d5db'];
+  let colors = ['#1A73E8', '#34A853', '#FBBC04'];
   
   if (pieChartInst) {
     pieChartInst.data.labels = labels;
@@ -410,14 +487,24 @@ window.updatePieChart = function() {
           data: data,
           backgroundColor: colors,
           borderWidth: 2,
-          borderColor: 'rgba(255,255,255,0.2)'
+          borderColor: 'transparent',
+          hoverOffset: 6
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { display: false }
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(0,0,0,0.85)',
+            titleFont: { family: "'Outfit', sans-serif", size: 14 },
+            bodyFont: { family: "'Outfit', sans-serif", size: 13 },
+            padding: 12,
+            cornerRadius: 8,
+            boxPadding: 4,
+            usePointStyle: true
+          }
         }
       }
     });
@@ -798,7 +885,14 @@ function setupSearch() {
 
   inp.addEventListener('input', () => {
     selectedIndex = -1;
-    const q = inp.value.trim().toLowerCase(); if (!q) { drop.classList.remove('show'); return; } drop.classList.add('show');
+    const q = inp.value.trim().toLowerCase(); 
+    
+    // Toggle clear button
+    const clearBtn = document.getElementById('search-clear');
+    if (clearBtn) clearBtn.style.display = q ? 'block' : 'none';
+    
+    if (!q) { drop.classList.remove('show'); return; } 
+    drop.classList.add('show');
     const res = [];
     D.tasks.forEach(t => { if (t.name.toLowerCase().includes(q)) res.push({ ico: 'ri-list-check', label: t.name, sub: 'Task · ' + t.cat, page: 'todo' }); });
     D.notes.forEach(n => { if ((n.title || '').toLowerCase().includes(q) || (n.body || '').toLowerCase().includes(q)) res.push({ ico: 'ri-sticky-note-line', label: n.title || 'Untitled', sub: 'Note', page: 'notes' }); });

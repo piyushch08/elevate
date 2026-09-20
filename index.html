@@ -152,7 +152,10 @@
 
   <!-- Login Modal -->
   <div class="modal-bg" id="m-login" style="z-index:99998; display:flex;">
-    <div class="modal" style="text-align:center;">
+    <div class="modal" style="text-align:center; position:relative;">
+      <button class="x-btn"
+        onclick="document.getElementById('m-login').style.display='none'; document.getElementById('app-body').style.display='flex';"
+        style="position:absolute; top:15px; right:15px;"><i class="ri-close-line"></i></button>
       <i class="ri-blaze-line"
         style="font-size:3rem;background:linear-gradient(135deg,#3B46F2,#7B83FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;"></i>
       <h2 style="margin:1rem 0; font-weight:700; letter-spacing:2px; color:var(--tp);">ELEVATE</h2>
@@ -248,7 +251,14 @@
       <div class="tb-search" id="tb-search" onclick="document.getElementById('global-search').focus()">
         <i class="ri-search-line"></i>
         <input type="text" id="global-search" placeholder="Search tasks, notes, habits…" autocomplete="off">
-        <span class="kb-shortcut" style="font-size: 0.7rem; color: var(--ts); border: 1px solid var(--gb); padding: 2px 6px; border-radius: 4px; pointer-events: none; margin-left: 8px;">Ctrl K</span>
+        <i class="ri-close-circle-fill" id="search-clear"
+          style="display:none; cursor:pointer; color:var(--ts); font-size:1.1rem; margin-left:5px;"
+          onclick="document.getElementById('global-search').value=''; document.getElementById('search-drop').classList.remove('show'); this.style.display='none';"></i>
+        <span class="kb-shortcut"
+          style="font-size: 0.7rem; color: var(--ts); background: rgba(150,150,150,0.1); border: 1px solid var(--gb); border-bottom-width: 2px; padding: 3px 7px; border-radius: 6px; pointer-events: none; margin-left: 8px; font-family: monospace; font-weight: 600; letter-spacing: 0.5px;">Ctrl
+          K</span>
+        <!-- Search dropdown -->
+        <div class="search-drop" id="search-drop"></div>
       </div>
       <div class="tb-spacer"></div>
       <div class="tb-clock"><i class="ri-time-line"></i><span id="tb-time">00:00:00</span></div>
@@ -266,8 +276,6 @@
         <div class="tb-avatar" onclick="goTo('personalize')" title="Personalize"><i class="ri-user-smile-line"></i>
         </div>
       </div>
-      <!-- Search dropdown -->
-      <div class="search-drop" id="search-drop"></div>
       <!-- Notif panel -->
       <div class="notif-panel" id="notif-panel">
         <div class="np-head"><span>🔔 Notifications</span><button class="x-btn" onclick="toggleNotif()"><i
@@ -355,31 +363,31 @@
           <div class="grid g4 stat-cards-row">
             <div class="widget stat-card dark-green-card">
               <div class="sc-head">
-                <div class="sc-ico"><i class="ri-timer-line"></i></div><span class="sc-badge">+15.2%</span>
+                <div class="sc-ico"><i class="ri-timer-line"></i></div>
               </div>
-              <div class="sc-label">Total Focus Time</div>
+              <div class="sc-label">Focus Hours Today</div>
               <div class="sc-val"><span id="stat-focus">0</span> <small
-                  style="font-size:0.5em;font-weight:400">mins</small></div>
+                  style="font-size:0.5em;font-weight:400">h</small></div>
             </div>
             <div class="widget stat-card">
               <div class="sc-head">
-                <div class="sc-ico"><i class="ri-list-check"></i></div><span class="sc-badge pos">+10.9%</span>
+                <div class="sc-ico"><i class="ri-list-check"></i></div>
               </div>
               <div class="sc-label">Tasks Completed</div>
               <div class="sc-val" id="stat-tasks">0</div>
             </div>
             <div class="widget stat-card">
               <div class="sc-head">
-                <div class="sc-ico"><i class="ri-restaurant-line"></i></div><span class="sc-badge neg">-10.2%</span>
+                <div class="sc-ico"><i class="ri-restaurant-line"></i></div>
               </div>
-              <div class="sc-label">Meals Logged</div>
+              <div class="sc-label">Meals Today</div>
               <div class="sc-val" id="stat-meals">0</div>
             </div>
             <div class="widget stat-card">
               <div class="sc-head">
-                <div class="sc-ico"><i class="ri-calendar-check-line"></i></div><span class="sc-badge pos">+20.9%</span>
+                <div class="sc-ico"><i class="ri-fire-line"></i></div>
               </div>
-              <div class="sc-label">Active Days</div>
+              <div class="sc-label">Weekly Workouts</div>
               <div class="sc-val" id="stat-active">0</div>
             </div>
           </div>
@@ -406,7 +414,7 @@
               <div class="flex-b w-title" style="margin-bottom: 1.5rem;">
                 <div style="margin:0; text-transform:none; letter-spacing:0;">
                   <h3 class="dash-title" style="font-size:1.25rem;margin-bottom:4px">Progress Breakdown</h3>
-                  <span class="muted" style="font-weight:400;color:rgba(27,36,82,0.7) !important">Today's
+                  <span class="muted" style="font-weight:400;color:var(--ts) !important">Today's
                     breakdown</span>
                 </div>
                 <select id="breakdown-period" class="sm-select dark-select" onchange="updatePieChart()">
@@ -422,14 +430,19 @@
               </div>
             </div>
           </div>
-          
-          <div class="dash-footer" style="margin-top: 3rem; text-align: center; border-top: 1px solid var(--gb); padding-top: 1.5rem; padding-bottom: 2rem; color: var(--ts);">
+
+          <div class="dash-footer"
+            style="margin-top: 3rem; text-align: center; border-top: 1px solid var(--gb); padding-top: 1.5rem; padding-bottom: 2rem; color: var(--ts);">
             <span class="copyright" style="font-size: 0.85rem;">&copy; 2026 Piyush Chauhan. All rights reserved.</span>
-            <div class="social-links" style="font-size: 1.25rem; display: flex; justify-content: center; gap: 15px; margin-top: 10px;">
-              <a href="mailto:piyush.ch407@gmail.com" title="Email" style="color: inherit; transition: color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='inherit'"><i class="ri-mail-line"></i></a>
-              <a href="https://github.com/piyushch08" target="_blank" title="GitHub" style="color: inherit; transition: color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='inherit'"><i class="ri-github-line"></i></a>
-              <a href="https://www.instagram.com/piyu5h.08?igsh=MXJvcnlnb2hwZHliMQ%3D%3D" target="_blank" title="Instagram" style="color: inherit; transition: color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='inherit'"><i class="ri-instagram-line"></i></a>
-              <a href="https://www.linkedin.com/in/piyush-chauhan-353822385" target="_blank" title="LinkedIn" style="color: inherit; transition: color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='inherit'"><i class="ri-linkedin-box-line"></i></a>
+            <div class="social-links"
+              style="font-size: 1.25rem; display: flex; justify-content: center; gap: 15px; margin-top: 10px;">
+              <a href="mailto:piyush.ch407@gmail.com" title="Email" class="social-link"><i class="ri-mail-line"></i></a>
+              <a href="https://github.com/piyushch08" target="_blank" title="GitHub" class="social-link"><i
+                  class="ri-github-line"></i></a>
+              <a href="https://www.instagram.com/piyu5h.08?igsh=MXJvcnlnb2hwZHliMQ%3D%3D" target="_blank"
+                title="Instagram" class="social-link"><i class="ri-instagram-line"></i></a>
+              <a href="https://www.linkedin.com/in/piyush-chauhan-353822385" target="_blank" title="LinkedIn"
+                class="social-link"><i class="ri-linkedin-box-line"></i></a>
             </div>
           </div>
         </section>
@@ -751,18 +764,6 @@
           </div>
         </section>
 
-        <!-- MAIN APP FOOTER -->
-        <footer class="site-footer">
-          <span class="copyright">&copy; 2026 Piyush Chauhan</span>
-          <div class="social-links">
-            <a href="mailto:piyush.ch407@gmail.com" title="Email"><i class="ri-mail-line"></i></a>
-            <a href="https://github.com/piyushch08" target="_blank" title="GitHub"><i class="ri-github-line"></i></a>
-            <a href="https://www.instagram.com/piyu5h.08?igsh=MXJvcnlnb2hwZHliMQ%3D%3D" target="_blank"
-              title="Instagram"><i class="ri-instagram-line"></i></a>
-            <a href="https://www.linkedin.com/in/piyush-chauhan-353822385" target="_blank" title="LinkedIn"><i
-                class="ri-linkedin-box-line"></i></a>
-          </div>
-        </footer>
 
       </main>
     </div><!-- end app-body -->
