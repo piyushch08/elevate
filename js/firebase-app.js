@@ -585,7 +585,7 @@ if (auth) {
                   tasks: [], events: [], deadlines: [], studyLog: [], meals: [],
                   exercises: [{ name: 'Bench Press', sets: '4×8', done: false }, { name: 'Overhead Press', sets: '3×10', done: false }, { name: 'Tricep Pushdown', sets: '3×12', done: false }],
                   streak: [0, 0, 0, 0, 0, 0, 0], habits: [], notes: [],
-                  filter: 'all', theme: 'space',
+                  filter: 'all', theme: 'dark',
                   calY: new Date().getFullYear(), calM: new Date().getMonth(), calEvents: {},
                   timerSec: 25 * 60, timerBase: 25 * 60, timerOn: false, workoutOn: false,
                   editNoteId: null, noteColor: '#00f2fe',

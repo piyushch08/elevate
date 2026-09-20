@@ -7,7 +7,7 @@ const D = window.D = {
   tasks: [], events: [], deadlines: [], studyLog: [], meals: [],
   exercises: [{ name: 'Bench Press', sets: '4×8', done: false }, { name: 'Overhead Press', sets: '3×10', done: false }, { name: 'Tricep Pushdown', sets: '3×12', done: false }],
   streak: [0, 0, 0, 0, 0, 0, 0], habits: [], notes: [],
-  filter: 'all', theme: 'space',
+  filter: 'all', theme: 'dark',
   calY: new Date().getFullYear(), calM: new Date().getMonth(), calEvents: {},
   timerSec: 25 * 60, timerBase: 25 * 60, timerOn: false, workoutOn: false,
   editNoteId: null, noteColor: '#00f2fe',
@@ -481,6 +481,28 @@ function saveEvent() {
   D.events.push({ id: Date.now(), date, name }); D.events.sort((a, b) => a.date.localeCompare(b.date));
   document.getElementById('ev-name').value = ''; closeM('m-event'); renderEvents(); renderCalendar(); save(); toast('Event saved!', 'success');
 }
+
+// ===== BUG REPORT =====
+window.sendBugReport = function() {
+  const title = document.getElementById('bug-title').value.trim();
+  const desc = document.getElementById('bug-desc').value.trim();
+  if (!title || !desc) {
+    if (typeof toast === 'function') toast('Please fill in both title and description', 'error');
+    return;
+  }
+  
+  const subject = encodeURIComponent("Bug Report: " + title);
+  const body = encodeURIComponent("Description & Steps to Reproduce:\n" + desc + "\n\n---\nReported via ELEVATE Planner App");
+  
+  // Clear the fields
+  document.getElementById('bug-title').value = '';
+  document.getElementById('bug-desc').value = '';
+  
+  if (typeof toast === 'function') toast('Opening email client...', 'success');
+  
+  // Trigger mailto link
+  window.location.href = `mailto:piyush.ch407@gmail.com?subject=${subject}&body=${body}`;
+};
 function renderEvents() {
   const list = document.getElementById('event-list'); const empty = document.getElementById('event-empty'); if (!list) return;
   list.innerHTML = ''; empty.style.display = D.events.length ? 'none' : 'block';
@@ -712,6 +734,11 @@ function newQuote() { const q = QUOTES_[Math.floor(Math.random() * QUOTES_.lengt
 
 // ===== SETTINGS =====
 function toggleS(el, key) { el.classList.toggle('on'); D.settings[key] = el.classList.contains('on'); save(); if (key === 'anim') { const bw = document.querySelector('.bg-wrap'); if (bw) bw.style.animation = D.settings.anim ? '' : 'none'; document.querySelectorAll('.blob').forEach(b => b.style.animation = D.settings.anim ? '' : 'none'); } toast(`${key} ${D.settings[key] ? 'enabled' : 'disabled'}`); }
+function toggleTheme(el) {
+  el.classList.toggle('on');
+  const newTheme = el.classList.contains('on') ? 'dark' : 'light';
+  applyTheme(newTheme, document.querySelector(`.theme-card[data-t="${newTheme}"]`));
+}
 let fontSize = 16;
 function changeFontSize(d) { fontSize = Math.min(22, Math.max(12, fontSize + d)); document.documentElement.style.fontSize = fontSize + 'px'; const l = document.getElementById('fs-label'); if (l) l.textContent = fontSize + 'px'; D.settings.fontSize = fontSize; save(); }
 function applyFontSize() { fontSize = D.settings.fontSize || 16; document.documentElement.style.fontSize = fontSize + 'px'; const l = document.getElementById('fs-label'); if (l) l.textContent = fontSize + 'px'; }

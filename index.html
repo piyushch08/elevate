@@ -1,564 +1,798 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ELEVATE - Track your progress</title>
-<meta name="description" content="A personal productivity planner to monitor daily routines and track progress.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='%2300f2fe' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M19 9C19.6667 10.0606 20 11.3939 20 13C20 16 16.5 17 15 22C14.3333 21.4254 14 20.5921 14 19.5C14 16.0181 19 14.2101 19 9ZM14.5 5C15.1667 6.23841 15.5 7.57175 15.5 9C15.5 14 9.5 15 11.5 22C9.83333 20.8392 9 19.1726 9 17C9 13.675 14.5 11 14.5 5ZM10 1C10.6667 2.33333 11 3.83333 11 5.5C11 11.5 2 13 8 22C5.5 21.5 3.5 19 3.5 16C3.5 9.5 10 8.5 10 1Z'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ELEVATE - Track your progress</title>
+  <meta name="description" content="A personal productivity planner to monitor daily routines and track progress.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&family=Orbitron:wght@700;900&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='%2300f2fe' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M19 9C19.6667 10.0606 20 11.3939 20 13C20 16 16.5 17 15 22C14.3333 21.4254 14 20.5921 14 19.5C14 16.0181 19 14.2101 19 9ZM14.5 5C15.1667 6.23841 15.5 7.57175 15.5 9C15.5 14 9.5 15 11.5 22C9.83333 20.8392 9 19.1726 9 17C9 13.675 14.5 11 14.5 5ZM10 1C10.6667 2.33333 11 3.83333 11 5.5C11 11.5 2 13 8 22C5.5 21.5 3.5 19 3.5 16C3.5 9.5 10 8.5 10 1Z'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
 
 
-<!-- TOAST -->
-<div class="toast-wrap" id="toast-wrap"></div>
+  <!-- TOAST -->
+  <div class="toast-wrap" id="toast-wrap"></div>
 
-<!-- MODALS -->
-<!-- Settings -->
-<div class="modal-bg hide" id="m-settings">
-  <div class="modal">
-    <div class="m-head"><h2><i class="ri-settings-4-line accent"></i> Settings</h2><button class="x-btn" onclick="closeM('m-settings')"><i class="ri-close-line"></i></button></div>
-    <div class="toggle-row"><span>Background Animation</span><div class="tgl on" id="t-anim" onclick="toggleS(this,'anim')"><div class="tgl-k"></div></div></div>
-    <div class="toggle-row"><span>Widget Tilt Effect</span><div class="tgl on" id="t-tilt" onclick="toggleS(this,'tilt')"><div class="tgl-k"></div></div></div>
-    <div class="toggle-row"><span>Button Ripple</span><div class="tgl on" id="t-ripple" onclick="toggleS(this,'ripple')"><div class="tgl-k"></div></div></div>
-    <hr class="divider">
-    <label>Font Size</label>
-    <div class="fs-row"><button class="btn sm" onclick="changeFontSize(-1)">A−</button><span id="fs-label" style="flex:1;text-align:center">16px</span><button class="btn sm" onclick="changeFontSize(1)">A+</button></div>
-  </div>
-</div>
-<!-- Add Task -->
-<div class="modal-bg hide" id="m-task">
-  <div class="modal">
-    <div class="m-head"><h2><i class="ri-add-circle-line accent"></i> New Task</h2><button class="x-btn" onclick="closeM('m-task')"><i class="ri-close-line"></i></button></div>
-    <div class="form-row"><label>Task Name</label><input type="text" id="t-name-inp" placeholder="What needs to be done?"></div>
-    <div class="form-row"><label>Category</label><select id="t-cat"><option>General</option><option>Study</option><option>Diet</option><option>Exercise</option><option>Habits</option></select></div>
-    <div class="form-row"><label>Priority</label><select id="t-pri"><option value="normal">Normal</option><option value="urgent">Urgent</option></select></div>
-    <div class="form-row"><label>Focus Minutes (optional)</label><input type="number" id="t-timer" placeholder="e.g. 25" min="1"></div>
-    <button class="btn prim full" onclick="saveTask()"><i class="ri-check-line"></i> Add Task</button>
-  </div>
-</div>
-<!-- Edit Note -->
-<div class="modal-bg hide" id="m-note">
-  <div class="modal">
-    <div class="m-head"><h2><i class="ri-sticky-note-line accent"></i> <span id="m-note-title">New Note</span></h2><button class="x-btn" onclick="closeM('m-note')"><i class="ri-close-line"></i></button></div>
-    <div class="form-row"><label>Title</label><input type="text" id="n-title" placeholder="Give it a title…"></div>
-    <div class="form-row"><label>Content</label><textarea id="n-body" style="min-height:130px;resize:vertical" placeholder="Write anything…"></textarea></div>
-    <label>Color Label</label>
-    <div class="cp-row" id="cp-row">
-      <div class="cp-dot sel" data-c="#00f2fe" style="background:#00f2fe"></div>
-      <div class="cp-dot" data-c="#28ffb5" style="background:#28ffb5"></div>
-      <div class="cp-dot" data-c="#ff477e" style="background:#ff477e"></div>
-      <div class="cp-dot" data-c="#ffd166" style="background:#ffd166"></div>
-      <div class="cp-dot" data-c="#b721ff" style="background:#b721ff"></div>
-    </div>
-    <button class="btn prim full" onclick="saveNote()"><i class="ri-save-line"></i> Save Note</button>
-  </div>
-</div>
-<!-- Deadline form -->
-<div class="modal-bg hide" id="m-deadline">
-  <div class="modal">
-    <div class="m-head"><h2><i class="ri-alarm-warning-line accent"></i> Add Deadline</h2><button class="x-btn" onclick="closeM('m-deadline')"><i class="ri-close-line"></i></button></div>
-    <div class="form-row"><label>Name</label><input type="text" id="dl-name" placeholder="e.g. Math assignment"></div>
-    <div class="form-row"><label>Due Date</label><input type="date" id="dl-date"></div>
-    <div class="form-row"><label>Priority</label><select id="dl-pri"><option value="normal">Normal</option><option value="urgent">Urgent</option></select></div>
-    <button class="btn prim full" onclick="saveDeadline()"><i class="ri-save-line"></i> Save Deadline</button>
-  </div>
-</div>
-<!-- Add Event modal -->
-<div class="modal-bg hide" id="m-event">
-  <div class="modal">
-    <div class="m-head"><h2><i class="ri-calendar-event-line accent"></i> Add Event</h2><button class="x-btn" onclick="closeM('m-event')"><i class="ri-close-line"></i></button></div>
-    <div class="form-row"><label>Date</label><input type="date" id="ev-date"></div>
-    <div class="form-row"><label>Event Name</label><input type="text" id="ev-name" placeholder="e.g. Doctor appointment"></div>
-    <button class="btn prim full" onclick="saveEvent()"><i class="ri-save-line"></i> Save Event</button>
-  </div>
-</div>
-
-<!-- Manage Subjects modal -->
-<div class="modal-bg hide" id="m-subjects">
-  <div class="modal">
-    <div class="m-head"><h2><i class="ri-book-open-line accent"></i> Manage Subjects</h2><button class="x-btn" onclick="closeM('m-subjects')"><i class="ri-close-line"></i></button></div>
-    <div style="display:flex;gap:6px;margin-bottom:1rem">
-      <input type="text" id="new-subj-name" placeholder="New subject name" style="flex:1">
-      <button class="btn prim" onclick="addSubject()"><i class="ri-add-line"></i></button>
-    </div>
-    <ul class="task-list" id="subject-list" style="max-height:200px;overflow-y:auto;"></ul>
-  </div>
-</div>
-
-<!-- Login Modal -->
-<div class="modal-bg" id="m-login" style="z-index:99998; display:flex;">
-  <div class="modal" style="text-align:center;">
-    <i class="ri-blaze-line" style="font-size:3rem;color:var(--accent);"></i>
-    <h2 style="margin:1rem 0;">Welcome to ELEVATE</h2>
-    <p class="muted" style="margin-bottom:1.5rem;">Please sign in to access your personal planner and sync your data securely.</p>
-    
-    <div id="auth-email-google-view">
-      <div style="display:flex; gap:10px; margin-bottom: 1rem;">
-        <button class="btn prim" id="tab-login" style="flex:1; font-size:1rem; padding:0.6rem;">Sign In</button>
-        <button class="btn" id="tab-signup" style="flex:1; font-size:1rem; padding:0.6rem; background:var(--glass); border:1px solid var(--gb); color:var(--tp);">Sign Up</button>
+  <!-- MODALS -->
+  <!-- Settings -->
+  <div class="modal-bg hide" id="m-settings">
+    <div class="modal">
+      <div class="m-head">
+        <h2><i class="ri-settings-4-line accent"></i> Settings</h2><button class="x-btn"
+          onclick="closeM('m-settings')"><i class="ri-close-line"></i></button>
       </div>
-      
-      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 1.5rem;">
-        <input type="email" id="login-email" placeholder="Email Address" autocomplete="email" style="padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp);">
-        <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" style="padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp);">
-        <input type="password" id="login-password-confirm" placeholder="Confirm Password" autocomplete="new-password" style="display:none; padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp);">
-        
-        <button class="btn prim full" id="btn-auth-action" style="font-size:1rem;padding:0.8rem; margin-top:5px;">Sign In</button>
-      </div>
-      
-      <div class="muted" style="margin-bottom:1.5rem;">— OR —</div>
-
-      <div style="display:flex; flex-direction:column; gap:10px;">
-        <button class="btn full" id="btn-login" style="font-size:1rem;padding:0.8rem;background:var(--glass);border:1px solid var(--gb);color:var(--tp);"><i class="ri-google-fill" style="color:#DB4437;"></i> Sign in with Google</button>
-        <button class="btn full" id="btn-phone-start" style="font-size:1rem;padding:0.8rem;background:var(--glass);border:1px solid var(--gb);color:var(--tp);"><i class="ri-phone-fill" style="color:var(--accent);"></i> Sign in with Phone</button>
-      </div>
-    </div>
-
-    <!-- Phone Auth View (Hidden by default) -->
-    <div id="auth-phone-view" style="display:none; flex-direction:column; gap:10px; margin-bottom: 1.5rem;">
-      <h3 style="margin: 0 0 1rem 0;">Phone Authentication</h3>
-      
-      <!-- Step 1: Phone Number -->
-      <div id="phone-step-1" style="display:flex; flex-direction:column; gap:10px;">
-        <div style="display:flex; gap:8px;">
-          <select id="login-country-code" style="padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp); width:35%;">
-            <option value="+1">US (+1)</option>
-            <option value="+44">UK (+44)</option>
-            <option value="+91">IN (+91)</option>
-            <option value="+61">AU (+61)</option>
-            <option value="+81">JP (+81)</option>
-            <option value="+49">DE (+49)</option>
-          </select>
-          <input type="tel" id="login-phone" placeholder="Mobile Number" autocomplete="tel" style="flex:1; padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp);">
+      <div class="toggle-row"><span>Background Animation</span>
+        <div class="tgl on" id="t-anim" onclick="toggleS(this,'anim')">
+          <div class="tgl-k"></div>
         </div>
-        <div id="recaptcha-container"></div>
-        <button class="btn prim full" id="btn-phone-send" style="font-size:1rem;padding:0.8rem; margin-top:5px;">Send SMS Code</button>
       </div>
-
-      <!-- Step 2: Verification Code -->
-      <div id="phone-step-2" style="display:none; flex-direction:column; gap:10px;">
-        <p class="muted" style="margin:0 0 10px 0;">Enter the 6-digit code sent to your phone.</p>
-        <input type="text" id="login-phone-code" placeholder="123456" style="padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp); letter-spacing: 5px; text-align:center; font-size:1.2rem;">
-        <button class="btn prim full" id="btn-phone-verify" style="font-size:1rem;padding:0.8rem; margin-top:5px;">Verify & Login</button>
+      <div class="toggle-row"><span>Widget Tilt Effect</span>
+        <div class="tgl on" id="t-tilt" onclick="toggleS(this,'tilt')">
+          <div class="tgl-k"></div>
+        </div>
       </div>
-
-      <button class="btn full" id="btn-phone-back" style="font-size:1rem;padding:0.8rem;background:transparent;border:none;color:var(--ts); margin-top:10px;"><i class="ri-arrow-left-line"></i> Back</button>
+      <div class="toggle-row"><span>Dark Mode</span>
+        <div class="tgl" id="t-dark" onclick="toggleTheme(this)">
+          <div class="tgl-k"></div>
+        </div>
+      </div>
+      <div class="toggle-row"><span>Button Ripple</span>
+        <div class="tgl on" id="t-ripple" onclick="toggleS(this,'ripple')">
+          <div class="tgl-k"></div>
+        </div>
+      </div>
+      <hr class="divider">
+      <label>Font Size</label>
+      <div class="fs-row"><button class="btn sm" onclick="changeFontSize(-1)">A−</button><span id="fs-label"
+          style="flex:1;text-align:center">16px</span><button class="btn sm" onclick="changeFontSize(1)">A+</button>
+      </div>
     </div>
-
-    <div id="recaptcha-container" style="margin-top: 10px;"></div>
-    <p id="login-error" class="muted" style="color:var(--danger);margin-top:1rem;display:none;"></p>
   </div>
-</div>
+  <!-- Add Task -->
+  <div class="modal-bg hide" id="m-task">
+    <div class="modal">
+      <div class="m-head">
+        <h2><i class="ri-add-circle-line accent"></i> New Task</h2><button class="x-btn" onclick="closeM('m-task')"><i
+            class="ri-close-line"></i></button>
+      </div>
+      <div class="form-row"><label>Task Name</label><input type="text" id="t-name-inp"
+          placeholder="What needs to be done?"></div>
+      <div class="form-row"><label>Category</label><select id="t-cat">
+          <option>General</option>
+          <option>Study</option>
+          <option>Diet</option>
+          <option>Exercise</option>
+          <option>Habits</option>
+        </select></div>
+      <div class="form-row"><label>Priority</label><select id="t-pri">
+          <option value="normal">Normal</option>
+          <option value="urgent">Urgent</option>
+        </select></div>
+      <div class="form-row"><label>Focus Minutes (optional)</label><input type="number" id="t-timer"
+          placeholder="e.g. 25" min="1"></div>
+      <button class="btn prim full" onclick="saveTask()"><i class="ri-check-line"></i> Add Task</button>
+    </div>
+  </div>
+  <!-- Edit Note -->
+  <div class="modal-bg hide" id="m-note">
+    <div class="modal">
+      <div class="m-head">
+        <h2><i class="ri-sticky-note-line accent"></i> <span id="m-note-title">New Note</span></h2><button class="x-btn"
+          onclick="closeM('m-note')"><i class="ri-close-line"></i></button>
+      </div>
+      <div class="form-row"><label>Title</label><input type="text" id="n-title" placeholder="Give it a title…"></div>
+      <div class="form-row"><label>Content</label><textarea id="n-body" style="min-height:130px;resize:vertical"
+          placeholder="Write anything…"></textarea></div>
+      <label>Color Label</label>
+      <div class="cp-row" id="cp-row">
+        <div class="cp-dot sel" data-c="#00f2fe" style="background:#00f2fe"></div>
+        <div class="cp-dot" data-c="#28ffb5" style="background:#28ffb5"></div>
+        <div class="cp-dot" data-c="#ff477e" style="background:#ff477e"></div>
+        <div class="cp-dot" data-c="#ffd166" style="background:#ffd166"></div>
+        <div class="cp-dot" data-c="#b721ff" style="background:#b721ff"></div>
+      </div>
+      <button class="btn prim full" onclick="saveNote()"><i class="ri-save-line"></i> Save Note</button>
+    </div>
+  </div>
+  <!-- Deadline form -->
+  <div class="modal-bg hide" id="m-deadline">
+    <div class="modal">
+      <div class="m-head">
+        <h2><i class="ri-alarm-warning-line accent"></i> Add Deadline</h2><button class="x-btn"
+          onclick="closeM('m-deadline')"><i class="ri-close-line"></i></button>
+      </div>
+      <div class="form-row"><label>Name</label><input type="text" id="dl-name" placeholder="e.g. Math assignment"></div>
+      <div class="form-row"><label>Due Date</label><input type="date" id="dl-date"></div>
+      <div class="form-row"><label>Priority</label><select id="dl-pri">
+          <option value="normal">Normal</option>
+          <option value="urgent">Urgent</option>
+        </select></div>
+      <button class="btn prim full" onclick="saveDeadline()"><i class="ri-save-line"></i> Save Deadline</button>
+    </div>
+  </div>
+  <!-- Add Event modal -->
+  <div class="modal-bg hide" id="m-event">
+    <div class="modal">
+      <div class="m-head">
+        <h2><i class="ri-calendar-event-line accent"></i> Add Event</h2><button class="x-btn"
+          onclick="closeM('m-event')"><i class="ri-close-line"></i></button>
+      </div>
+      <div class="form-row"><label>Date</label><input type="date" id="ev-date"></div>
+      <div class="form-row"><label>Event Name</label><input type="text" id="ev-name"
+          placeholder="e.g. Doctor appointment"></div>
+      <button class="btn prim full" onclick="saveEvent()"><i class="ri-save-line"></i> Save Event</button>
+    </div>
+  </div>
 
-<!-- APP -->
-<div class="app">
-  <!-- TOPBAR -->
-  <header class="topbar" id="topbar">
-    <button class="tb-btn" id="mobile-menu-btn" onclick="toggleSidebar()" style="display:none; margin-right:10px;"><i class="ri-menu-line"></i></button>
-    <div class="tb-logo">
-      <i class="ri-blaze-line"></i>
-      <span class="logo-text">ELEVATE</span>
+  <!-- Manage Subjects modal -->
+  <div class="modal-bg hide" id="m-subjects">
+    <div class="modal">
+      <div class="m-head">
+        <h2><i class="ri-book-open-line accent"></i> Manage Subjects</h2><button class="x-btn"
+          onclick="closeM('m-subjects')"><i class="ri-close-line"></i></button>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:1rem">
+        <input type="text" id="new-subj-name" placeholder="New subject name" style="flex:1">
+        <button class="btn prim" onclick="addSubject()"><i class="ri-add-line"></i></button>
+      </div>
+      <ul class="task-list" id="subject-list" style="max-height:200px;overflow-y:auto;"></ul>
     </div>
-    <div class="tb-bread"><i class="ri-arrow-right-s-line"></i><span id="bc-page">Dashboard</span></div>
-    <div class="tb-search">
-      <i class="ri-search-line"></i>
-      <input type="text" id="global-search" placeholder="Search tasks, notes, habits…" autocomplete="off">
-    </div>
-    <div class="tb-spacer"></div>
-    <div class="tb-clock"><i class="ri-time-line"></i><span id="tb-time">00:00:00</span></div>
-    <div class="tb-actions">
-      <button class="tb-btn" id="notif-btn" onclick="toggleNotif()" title="Notifications"><i class="ri-notification-3-line"></i><div class="notif-dot" id="notif-dot"></div></button>
-      <button class="tb-btn" onclick="openM('m-settings')" title="Settings"><i class="ri-settings-4-line"></i></button>
-      <div class="tb-avatar" onclick="goTo('personalize')" title="Personalize"><i class="ri-user-smile-line"></i></div>
-    </div>
-    <!-- Search dropdown -->
-    <div class="search-drop" id="search-drop"></div>
-    <!-- Notif panel -->
-    <div class="notif-panel" id="notif-panel">
-      <div class="np-head"><span>🔔 Notifications</span><button class="x-btn" onclick="toggleNotif()"><i class="ri-close-line"></i></button></div>
-      <div class="np-list">
-        <div class="np-item"><div class="np-ico blue"><i class="ri-timer-line"></i></div><div class="np-body"><p>Focus timer ready. Time to study! 🎯</p><small>Just now</small></div></div>
-        <div class="np-item"><div class="np-ico green"><i class="ri-checkbox-circle-line"></i></div><div class="np-body"><p>Great job! You completed tasks yesterday.</p><small>Yesterday</small></div></div>
-        <div class="np-item"><div class="np-ico red"><i class="ri-alarm-warning-line"></i></div><div class="np-body"><p>Don't forget to log your meals today!</p><small>Today</small></div></div>
+  </div>
+
+  <!-- Login Modal -->
+  <div class="modal-bg" id="m-login" style="z-index:99998; display:flex;">
+    <div class="modal" style="text-align:center;">
+      <i class="ri-blaze-line" style="font-size:3rem;color:var(--accent);"></i>
+      <h2 style="margin:1rem 0; font-weight:700; letter-spacing:2px;">ELEVATE</h2>
+      <p class="muted" style="margin-bottom:1.5rem;">Please sign in to access your personal planner and sync your data
+        securely.</p>
+
+      <div id="auth-email-google-view">
+        <div style="display:flex; gap:10px; margin-bottom: 1rem;">
+          <button class="btn prim" id="tab-login" style="flex:1; font-size:1rem; padding:0.6rem;">Sign In</button>
+          <button class="btn" id="tab-signup"
+            style="flex:1; font-size:1rem; padding:0.6rem; background:var(--glass); border:1px solid var(--gb); color:var(--tp);">Sign
+            Up</button>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 1.5rem;">
+          <input type="email" id="login-email" placeholder="Email Address" autocomplete="email"
+            style="padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp);">
+          <input type="password" id="login-password" placeholder="Password" autocomplete="current-password"
+            style="padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp);">
+          <input type="password" id="login-password-confirm" placeholder="Confirm Password" autocomplete="new-password"
+            style="display:none; padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp);">
+
+          <button class="btn prim full" id="btn-auth-action" style="font-size:1rem;padding:0.8rem; margin-top:5px;">Sign
+            In</button>
+        </div>
+
+        <div class="muted" style="margin-bottom:1.5rem;">— OR —</div>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <button class="btn full" id="btn-login"
+            style="font-size:1rem;padding:0.8rem;background:var(--glass);border:1px solid var(--gb);color:var(--tp);"><i
+              class="ri-google-fill" style="color:#DB4437;"></i> Sign in with Google</button>
+          <button class="btn full" id="btn-phone-start"
+            style="font-size:1rem;padding:0.8rem;background:var(--glass);border:1px solid var(--gb);color:var(--tp);"><i
+              class="ri-phone-fill" style="color:var(--accent);"></i> Sign in with Phone</button>
+        </div>
+      </div>
+
+      <!-- Phone Auth View (Hidden by default) -->
+      <div id="auth-phone-view" style="display:none; flex-direction:column; gap:10px; margin-bottom: 1.5rem;">
+        <h3 style="margin: 0 0 1rem 0;">Phone Authentication</h3>
+
+        <!-- Step 1: Phone Number -->
+        <div id="phone-step-1" style="display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; gap:8px;">
+            <select id="login-country-code"
+              style="padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp); width:35%;">
+              <option value="+1">US (+1)</option>
+              <option value="+44">UK (+44)</option>
+              <option value="+91">IN (+91)</option>
+              <option value="+61">AU (+61)</option>
+              <option value="+81">JP (+81)</option>
+              <option value="+49">DE (+49)</option>
+            </select>
+            <input type="tel" id="login-phone" placeholder="Mobile Number" autocomplete="tel"
+              style="flex:1; padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp);">
+          </div>
+          <div id="recaptcha-container"></div>
+          <button class="btn prim full" id="btn-phone-send" style="font-size:1rem;padding:0.8rem; margin-top:5px;">Send
+            SMS Code</button>
+        </div>
+
+        <!-- Step 2: Verification Code -->
+        <div id="phone-step-2" style="display:none; flex-direction:column; gap:10px;">
+          <p class="muted" style="margin:0 0 10px 0;">Enter the 6-digit code sent to your phone.</p>
+          <input type="text" id="login-phone-code" placeholder="123456"
+            style="padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp); letter-spacing: 5px; text-align:center; font-size:1.2rem;">
+          <button class="btn prim full" id="btn-phone-verify"
+            style="font-size:1rem;padding:0.8rem; margin-top:5px;">Verify & Login</button>
+        </div>
+
+        <button class="btn full" id="btn-phone-back"
+          style="font-size:1rem;padding:0.8rem;background:transparent;border:none;color:var(--ts); margin-top:10px;"><i
+            class="ri-arrow-left-line"></i> Back</button>
+      </div>
+
+      <div id="recaptcha-container" style="margin-top: 10px;"></div>
+      <p id="login-error" class="muted" style="color:var(--danger);margin-top:1rem;display:none;"></p>
+      
+      <div style="margin-top: 2rem; text-align: center; font-size: 0.85rem; color: var(--ts);">
+        &copy; 2026 Piyush Chauhan<br>
+        <div style="display: flex; justify-content: center; gap: 12px; margin-top: 8px; font-size: 1.2rem;">
+          <a href="mailto:piyush.ch407@gmail.com" style="color: var(--ts); transition: color 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ts)'" title="Email"><i class="ri-mail-line"></i></a>
+          <a href="https://github.com/piyushch08" target="_blank" style="color: var(--ts); transition: color 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ts)'" title="GitHub"><i class="ri-github-line"></i></a>
+          <a href="https://www.instagram.com/piyu5h.08?igsh=MXJvcnlnb2hwZHliMQ%3D%3D" target="_blank" style="color: var(--ts); transition: color 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ts)'" title="Instagram"><i class="ri-instagram-line"></i></a>
+          <a href="https://www.instagram.com/piyu5h.08?igsh=MXJvcnlnb2hwZHliMQ%3D%3D" target="_blank" style="color: var(--ts); transition: color 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ts)'" title="LinkedIn"><i class="ri-linkedin-box-line"></i></a>
+        </div>
       </div>
     </div>
-  </header>
+  </div>
 
-  <!-- MAIN APP -->
-  <div class="app-body" id="app-body" style="display:none;">
-    
-    <!-- SIDEBAR OVERLAY -->
-    <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
-
-    <!-- SIDEBAR -->
-    <nav class="sidebar" id="sidebar">
-      <div class="s-logo">
+  <!-- APP -->
+  <div class="app">
+    <!-- TOPBAR -->
+    <header class="topbar" id="topbar">
+      <button class="tb-btn" id="mobile-menu-btn" onclick="toggleSidebar()" style="display:none; margin-right:10px;"><i
+          class="ri-menu-line"></i></button>
+      <div class="tb-logo">
         <i class="ri-blaze-line"></i>
-        <span class="s-logo-text">ELEVATE</span>
+        <span class="logo-text">ELEVATE</span>
       </div>
-      <ul class="nav-list">
-        <div class="s-section">Main</div>
-        <li class="nav-item active" data-page="dashboard"><i class="ri-dashboard-line"></i> Dashboard</li>
-        <li class="nav-item" data-page="todo"><i class="ri-list-check"></i> To-Do List</li>
-        <li class="nav-item" data-page="calendar"><i class="ri-calendar-line"></i> Calendar</li>
-        <div class="s-section">Health & Growth</div>
-        <li class="nav-item" data-page="study"><i class="ri-book-open-line"></i> Study</li>
-        <li class="nav-item" data-page="diet"><i class="ri-restaurant-line"></i> Diet</li>
-        <li class="nav-item" data-page="exercise"><i class="ri-run-line"></i> Exercise</li>
-        <li class="nav-item" data-page="habits"><i class="ri-seedling-line"></i> Habits</li>
-        <div class="s-section">Personal</div>
-        <li class="nav-item" data-page="notes"><i class="ri-sticky-note-line"></i> Notes</li>
-        <li class="nav-item" data-page="personalize"><i class="ri-palette-line"></i> Personalize</li>
-        <li class="nav-item" data-page="report-bug"><i class="ri-bug-line"></i> Report Bug</li>
-      </ul>
-      <div class="s-footer">
-        <div class="user-card">
-          <div class="s-avatar"><i class="ri-user-smile-line"></i></div>
-          <div style="overflow:hidden">
-            <span class="u-name" id="u-name" contenteditable="true" spellcheck="false">Explorer</span>
-            <span class="u-status" id="u-status" contenteditable="true" spellcheck="false">On a roll today 🔥</span>
+      <div class="tb-bread"><i class="ri-arrow-right-s-line"></i><span id="bc-page">Dashboard</span></div>
+      <div class="tb-search">
+        <i class="ri-search-line"></i>
+        <input type="text" id="global-search" placeholder="Search tasks, notes, habits…" autocomplete="off">
+      </div>
+      <div class="tb-spacer"></div>
+      <div class="tb-clock"><i class="ri-time-line"></i><span id="tb-time">00:00:00</span></div>
+      <div class="tb-actions">
+        <button class="tb-btn" id="notif-btn" onclick="toggleNotif()" title="Notifications"><i
+            class="ri-notification-3-line"></i>
+          <div class="notif-dot" id="notif-dot"></div>
+        </button>
+        <button class="tb-btn" onclick="openM('m-settings')" title="Settings"><i
+            class="ri-settings-4-line"></i></button>
+        <div class="tb-avatar" onclick="goTo('personalize')" title="Personalize"><i class="ri-user-smile-line"></i>
+        </div>
+      </div>
+      <!-- Search dropdown -->
+      <div class="search-drop" id="search-drop"></div>
+      <!-- Notif panel -->
+      <div class="notif-panel" id="notif-panel">
+        <div class="np-head"><span>🔔 Notifications</span><button class="x-btn" onclick="toggleNotif()"><i
+              class="ri-close-line"></i></button></div>
+        <div class="np-list">
+          <div class="np-item">
+            <div class="np-ico blue"><i class="ri-timer-line"></i></div>
+            <div class="np-body">
+              <p>Focus timer ready. Time to study! 🎯</p><small>Just now</small>
+            </div>
+          </div>
+          <div class="np-item">
+            <div class="np-ico green"><i class="ri-checkbox-circle-line"></i></div>
+            <div class="np-body">
+              <p>Great job! You completed tasks yesterday.</p><small>Yesterday</small>
+            </div>
+          </div>
+          <div class="np-item">
+            <div class="np-ico red"><i class="ri-alarm-warning-line"></i></div>
+            <div class="np-body">
+              <p>Don't forget to log your meals today!</p><small>Today</small>
+            </div>
           </div>
         </div>
-        <div style="display:flex;gap:5px;width:100%;">
-          <button class="s-settings-btn" onclick="openM('m-settings')" style="flex:1;"><i class="ri-settings-4-line"></i> Settings</button>
-          <button class="s-settings-btn" id="btn-logout" style="flex:1;"><i class="ri-logout-box-r-line"></i> Logout</button>
+      </div>
+    </header>
+
+    <!-- MAIN APP -->
+    <div class="app-body" id="app-body" style="display:none;">
+
+      <!-- SIDEBAR OVERLAY -->
+      <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+      <!-- SIDEBAR -->
+      <nav class="sidebar" id="sidebar">
+        <div class="s-logo">
+          <i class="ri-blaze-line"></i>
+          <span class="s-logo-text">ELEVATE</span>
         </div>
-        <div style="margin-top: 1rem; text-align: center; font-size: 0.7rem; color: var(--ts);">
+        <ul class="nav-list">
+          <div class="s-section">Main</div>
+          <li class="nav-item active" data-page="dashboard"><i class="ri-dashboard-line"></i> Dashboard</li>
+          <li class="nav-item" data-page="todo"><i class="ri-list-check"></i> To-Do List</li>
+          <li class="nav-item" data-page="calendar"><i class="ri-calendar-line"></i> Calendar</li>
+          <div class="s-section">Health & Growth</div>
+          <li class="nav-item" data-page="study"><i class="ri-book-open-line"></i> Study</li>
+          <li class="nav-item" data-page="diet"><i class="ri-restaurant-line"></i> Diet</li>
+          <li class="nav-item" data-page="exercise"><i class="ri-run-line"></i> Exercise</li>
+          <li class="nav-item" data-page="habits"><i class="ri-seedling-line"></i> Habits</li>
+          <div class="s-section">Personal</div>
+          <li class="nav-item" data-page="notes"><i class="ri-sticky-note-line"></i> Notes</li>
+          <li class="nav-item" data-page="personalize"><i class="ri-palette-line"></i> Personalize</li>
+          <li class="nav-item" data-page="report-bug"><i class="ri-bug-line"></i> Report Bug</li>
+        </ul>
+        <div class="s-footer">
+          <div class="user-card">
+            <div class="s-avatar"><i class="ri-user-smile-line"></i></div>
+            <div style="overflow:hidden">
+              <span class="u-name" id="u-name" contenteditable="true" spellcheck="false">Explorer</span>
+              <span class="u-status" id="u-status" contenteditable="true" spellcheck="false">On a roll today 🔥</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:5px;width:100%;">
+            <button class="s-settings-btn" onclick="openM('m-settings')" style="flex:1;"><i
+                class="ri-settings-4-line"></i> Settings</button>
+            <button class="s-settings-btn" id="btn-logout" style="flex:1;"><i class="ri-logout-box-r-line"></i>
+              Logout</button>
+          </div>
+          <div style="margin-top: 1rem; text-align: center; font-size: 0.7rem; color: var(--ts);">
+            &copy; 2026 Piyush Chauhan<br>
+            <div style="display: flex; justify-content: center; gap: 12px; margin-top: 8px; font-size: 1.1rem;">
+              <a href="mailto:piyush.ch407@gmail.com" style="color: var(--ts); transition: color 0.3s;"
+                onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ts)'"
+                title="Email"><i class="ri-mail-line"></i></a>
+              <a href="https://github.com/piyushch08" target="_blank" style="color: var(--ts); transition: color 0.3s;"
+                onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ts)'"
+                title="GitHub"><i class="ri-github-line"></i></a>
+              <a href="https://www.instagram.com/piyu5h.08?igsh=MXJvcnlnb2hwZHliMQ%3D%3D" target="_blank"
+                style="color: var(--ts); transition: color 0.3s;" onmouseover="this.style.color='var(--accent)'"
+                onmouseout="this.style.color='var(--ts)'" title="Instagram"><i class="ri-instagram-line"></i></a>
+              <a href="https://www.instagram.com/piyu5h.08?igsh=MXJvcnlnb2hwZHliMQ%3D%3D" target="_blank"
+                style="color: var(--ts); transition: color 0.3s;" onmouseover="this.style.color='var(--accent)'"
+                onmouseout="this.style.color='var(--ts)'" title="LinkedIn"><i class="ri-linkedin-box-line"></i></a>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <!-- MAIN -->
+      <main class="main" id="main">
+        <div class="top-nav-bar">
+        <button class="hamburger" onclick="toggleSidebar()" style="color: var(--tp);"><i class="ri-menu-4-line"></i></button>
+        <div class="tb-logo" style="gap:8px;font-size:1.1rem">
+          <i class="ri-blaze-line" style="font-size:1.4rem; color: var(--accent);"></i>
+          <span class="logo-text" style="font-weight:700; letter-spacing:2px; color: var(--tp);">ELEVATE</span>
+        </div>
+          <button class="btn sm prim" onclick="openM('m-task')"><i class="ri-add-line"></i></button>
+        </div>
+
+        <!-- DASHBOARD -->
+        <section class="page active" id="page-dashboard">
+          <div class="dash-header flex-b" style="margin-bottom:1.5rem">
+            <div>
+              <h1 class="page-title">User Progress Report</h1>
+              <p class="page-sub" id="today-date">Loading…</p>
+            </div>
+          </div>
+
+          <div class="grid g4 stat-cards-row">
+            <div class="widget stat-card dark-green-card">
+              <div class="sc-head">
+                <div class="sc-ico"><i class="ri-timer-line"></i></div><span class="sc-badge">+15.2%</span>
+              </div>
+              <div class="sc-label">Total Focus Time</div>
+              <div class="sc-val"><span id="stat-focus">0</span> <small
+                  style="font-size:0.5em;font-weight:400">mins</small></div>
+            </div>
+            <div class="widget stat-card">
+              <div class="sc-head">
+                <div class="sc-ico"><i class="ri-list-check"></i></div><span class="sc-badge pos">+10.9%</span>
+              </div>
+              <div class="sc-label">Tasks Completed</div>
+              <div class="sc-val" id="stat-tasks">0</div>
+            </div>
+            <div class="widget stat-card">
+              <div class="sc-head">
+                <div class="sc-ico"><i class="ri-restaurant-line"></i></div><span class="sc-badge neg">-10.2%</span>
+              </div>
+              <div class="sc-label">Meals Logged</div>
+              <div class="sc-val" id="stat-meals">0</div>
+            </div>
+            <div class="widget stat-card">
+              <div class="sc-head">
+                <div class="sc-ico"><i class="ri-calendar-check-line"></i></div><span class="sc-badge pos">+20.9%</span>
+              </div>
+              <div class="sc-label">Active Days</div>
+              <div class="sc-val" id="stat-active">0</div>
+            </div>
+          </div>
+
+          <div class="grid g2-7-3 mt2" style="grid-template-columns: 2.2fr 1fr; align-items: stretch;">
+            <div class="widget chart-widget">
+              <div class="flex-b w-title" style="margin-bottom: 1.5rem;">
+                <div style="margin:0; text-transform:none; letter-spacing:0;">
+                  <h3 style="font-size:1.25rem;color:var(--tp);margin-bottom:4px">User Progress</h3>
+                  <span class="muted" style="font-weight:400">Track your progress</span>
+                </div>
+                <select id="progress-period" class="sm-select" onchange="updateProgressChart()">
+                  <option value="weekly">This week</option>
+                  <option value="monthly">This month</option>
+                  <option value="yearly">This year</option>
+                </select>
+              </div>
+              <div style="position: relative; height: 300px; width: 100%;">
+                <canvas id="progressChart"></canvas>
+              </div>
+            </div>
+
+            <div class="widget chart-widget green-gradient">
+              <div class="flex-b w-title" style="margin-bottom: 1.5rem;">
+                <div style="margin:0; text-transform:none; letter-spacing:0;">
+                  <h3 style="font-size:1.25rem;color:var(--tp);margin-bottom:4px">Progress Breakdown</h3>
+                  <span class="muted" style="font-weight:400;color:rgba(255,255,255,0.7) !important">Today's
+                    breakdown</span>
+                </div>
+                <select id="breakdown-period" class="sm-select dark-select" onchange="updatePieChart()">
+                  <option value="today">Today</option>
+                  <option value="weekly">This week</option>
+                </select>
+              </div>
+              <div style="position: relative; height: 220px; width: 100%; display:flex; justify-content:center;">
+                <canvas id="pieChart"></canvas>
+              </div>
+              <div class="pie-legend mt1" id="pie-legend">
+                <!-- populated by js -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TO-DO -->
+        <section class="page" id="page-todo">
+          <div class="flex-b">
+            <div>
+              <h1 class="page-title">My Tasks</h1>
+              <p class="page-sub" id="todo-count">0 tasks</p>
+            </div><button class="btn prim" onclick="openM('m-task')"><i class="ri-add-line"></i> New Task</button>
+          </div>
+          <div class="grid g1 mt2">
+            <div class="widget">
+              <div class="flex-b" style="margin-bottom:1rem">
+                <div class="w-title" style="margin:0"><i class="ri-filter-line"></i> Filter</div>
+                <div style="display:flex;gap:6px">
+                  <button class="btn sm" id="f-all" onclick="setFilter('all')">All</button>
+                  <button class="btn sm" id="f-active" onclick="setFilter('active')">Active</button>
+                  <button class="btn sm" id="f-done" onclick="setFilter('done')">Done</button>
+                </div>
+              </div>
+              <ul class="task-list" id="todo-list"></ul>
+              <div id="todo-empty" class="center muted"><i class="ri-checkbox-circle-line"
+                  style="font-size:2rem;display:block;color:var(--accent)"></i>No tasks yet! Hit New Task.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CALENDAR -->
+        <section class="page" id="page-calendar">
+          <h1 class="page-title">Calendar</h1>
+          <p class="page-sub">Click any day to mark it. Add named events below.</p>
+          <div class="grid g2">
+            <div class="widget">
+              <div class="cal-nav">
+                <button class="btn ico" onclick="calNav(-1)"><i class="ri-arrow-left-s-line"></i></button>
+                <h3 id="cal-label">Month Year</h3>
+                <button class="btn ico" onclick="calNav(1)"><i class="ri-arrow-right-s-line"></i></button>
+              </div>
+              <div class="cal-grid" id="cal-grid"></div>
+            </div>
+            <div class="widget">
+              <div class="w-title"><i class="ri-calendar-event-line"></i> Events</div>
+              <button class="btn prim full" onclick="openM('m-event')" style="margin-top:0"><i class="ri-add-line"></i>
+                Add Event</button>
+              <ul class="task-list" id="event-list" style="margin-top:1rem"></ul>
+              <div id="event-empty" class="center muted">No events yet.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- STUDY -->
+        <section class="page" id="page-study">
+          <h1 class="page-title">Study Hub</h1>
+          <p class="page-sub">Track focus sessions, subjects, and deadlines.</p>
+          <div class="grid g2">
+            <div class="widget">
+              <div class="w-title"><i class="ri-timer-line"></i> Focus Timer</div>
+              <div class="mode-row">
+                <button class="mode-btn on" onclick="setMode('focus',this)">Focus 25m</button>
+                <button class="mode-btn" onclick="setMode('short',this)">Break 5m</button>
+                <button class="mode-btn" onclick="setMode('long',this)">Long 15m</button>
+              </div>
+              <div class="f-inline" style="margin-bottom:.6rem"><input type="number" id="custom-min"
+                  placeholder="Custom min" min="1"><button class="btn sm" onclick="applyCustomTimer()">Set</button>
+              </div>
+              <div class="timer-disp" id="timer-disp">25:00</div>
+              <div class="timer-btns">
+                <button class="btn prim" id="timer-btn" onclick="toggleTimer()"><i class="ri-play-fill"></i>
+                  Start</button>
+                <button class="btn" onclick="resetTimer()"><i class="ri-refresh-line"></i> Reset</button>
+              </div>
+            </div>
+            <div class="widget">
+              <div class="w-title"><i class="ri-edit-line"></i> Log Session</div>
+              <div class="form-row">
+                <div class="flex-b" style="margin-bottom:.35rem">
+                  <label style="margin:0">Subject</label>
+                  <button class="btn sm" onclick="openM('m-subjects')" style="padding:2px 6px;font-size:.7rem"><i
+                      class="ri-settings-3-line"></i> Add/Remove</button>
+                </div>
+                <select id="subj"></select>
+              </div>
+              <div class="form-row"><label>Duration (minutes)</label><input type="number" id="study-mins"
+                  placeholder="e.g. 45" min="1"></div>
+              <div class="form-row"><label>Notes (optional)</label><input type="text" id="study-notes"
+                  placeholder="Topics covered…"></div>
+              <button class="btn prim full" onclick="logStudy()"><i class="ri-save-line"></i> Log Session</button>
+            </div>
+            <div class="widget" style="grid-column:1/-1">
+              <div class="flex-b" style="margin-bottom:1rem">
+                <div class="w-title" style="margin:0"><i class="ri-alarm-warning-line"></i> Deadlines</div><button
+                  class="btn sm" onclick="openM('m-deadline')"><i class="ri-add-line"></i> Add</button>
+              </div>
+              <ul class="task-list" id="deadline-list"></ul>
+              <div id="deadline-empty" class="center muted">No deadlines. Stay ahead! 🚀</div>
+            </div>
+            <div class="widget" style="grid-column:1/-1">
+              <div class="w-title"><i class="ri-history-line"></i> Study Log</div>
+              <ul class="task-list" id="study-log"></ul>
+              <div id="study-log-empty" class="center muted">No sessions logged yet.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- DIET -->
+        <section class="page" id="page-diet">
+          <h1 class="page-title">Diet & Nutrition</h1>
+          <p class="page-sub">Track meals, macros, and hydration.</p>
+          <div class="grid g2">
+            <div class="widget">
+              <div class="w-title"><i class="ri-pie-chart-line"></i> Today's Macros</div>
+              <div class="prog-wrap">
+                <div class="prog-label"><span>Calories</span><span id="cal-lbl">0 / 2200 kcal</span></div>
+                <div class="prog-track">
+                  <div class="prog-fill" id="cal-bar" style="width:0%"></div>
+                </div>
+              </div>
+              <div class="prog-wrap">
+                <div class="prog-label"><span>Protein</span><span id="prot-lbl">0 / 150g</span></div>
+                <div class="prog-track">
+                  <div class="prog-fill p" id="prot-bar" style="width:0%"></div>
+                </div>
+              </div>
+              <div class="prog-wrap">
+                <div class="prog-label"><span>Carbs</span><span id="carb-lbl">0 / 250g</span></div>
+                <div class="prog-track">
+                  <div class="prog-fill c" id="carb-bar" style="width:0%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="widget" style="text-align:center">
+              <div class="w-title" style="justify-content:center"><i class="ri-drop-line"></i> Water Intake</div>
+              <div class="water-cup">
+                <div class="water-fill" id="water-fill" style="height:0%"></div>
+              </div>
+              <p id="water-lbl" class="muted" style="margin-bottom:.6rem">0 / 2000 ml</p>
+              <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
+                <button class="btn sm" onclick="addWater(150)">+150ml</button>
+                <button class="btn sm" onclick="addWater(250)">+250ml</button>
+                <button class="btn sm" onclick="addWater(500)">+500ml</button>
+                <button class="btn sm dng" onclick="resetWater()"><i class="ri-refresh-line"></i></button>
+              </div>
+            </div>
+            <div class="widget">
+              <div class="w-title"><i class="ri-add-circle-line"></i> Log Meal</div>
+              <div class="form-row"><label>Meal Name</label><input type="text" id="meal-name"
+                  placeholder="e.g. Oatmeal with berries"></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+                <div><label>Calories</label><input type="number" id="meal-cal" placeholder="kcal" min="0"></div>
+                <div><label>Protein (g)</label><input type="number" id="meal-prot" placeholder="g" min="0"></div>
+                <div><label>Carbs (g)</label><input type="number" id="meal-carb" placeholder="g" min="0"></div>
+              </div>
+              <button class="btn prim full" onclick="logMeal()"><i class="ri-restaurant-line"></i> Log Meal</button>
+            </div>
+            <div class="widget">
+              <div class="w-title"><i class="ri-list-check"></i> Today's Meals</div>
+              <ul class="task-list" id="meal-list"></ul>
+              <div id="meal-empty" class="center muted">No meals logged. Eat well! 🥗</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- EXERCISE -->
+        <section class="page" id="page-exercise">
+          <h1 class="page-title">Exercise Hub</h1>
+          <p class="page-sub">Plan workouts and track your streaks.</p>
+          <div class="grid g2">
+            <div class="widget">
+              <div class="flex-b" style="margin-bottom:.75rem">
+                <div class="w-title" style="margin:0"><i class="ri-fire-fill"></i> Today's Routine</div>
+                <input type="text" id="routine-name" value="Push Day"
+                  style="width:130px;padding:.35rem .7rem;font-size:.78rem">
+              </div>
+              <div id="ex-list"></div>
+              <div style="display:flex;gap:6px;margin-top:.75rem;flex-wrap:wrap">
+                <input type="text" id="new-ex" placeholder="Exercise" style="flex:2;min-width:100px;padding:.45rem">
+                <input type="text" id="new-sets" placeholder="Sets×Reps" style="flex:1;min-width:80px;padding:.45rem">
+                <button class="btn prim sm" onclick="addExercise()"><i class="ri-add-line"></i></button>
+              </div>
+              <button class="btn prim full" id="workout-btn" onclick="toggleWorkout()"><i class="ri-play-fill"></i>
+                Start Workout</button>
+            </div>
+            <div class="widget">
+              <div class="w-title"><i class="ri-calendar-check-fill"></i> Weekly Streak</div>
+              <div class="streak-row" id="streak-row"></div>
+              <button class="btn full mt2" onclick="logToday()"><i class="ri-check-double-line"></i> Log Today as
+                Active</button>
+              <hr class="divider">
+              <div class="w-title"><i class="ri-target-line"></i> Weekly Goal</div>
+              <div class="f-inline mt1"><input type="number" id="goal-wk" placeholder="Target workouts/week"><button
+                  class="btn sm" onclick="saveGoal()">Save</button></div>
+              <p class="muted mt1" id="goal-disp">Set your weekly target above.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- HABITS -->
+        <section class="page" id="page-habits">
+          <div class="flex-b">
+            <div>
+              <h1 class="page-title">Habit Tracker</h1>
+              <p class="page-sub">Build powerful habits one day at a time.</p>
+            </div><button class="btn prim" onclick="showHabitForm()"><i class="ri-add-line"></i> New Habit</button>
+          </div>
+          <div class="grid g1 mt2">
+            <div class="widget" id="habit-form" style="display:none">
+              <div class="w-title"><i class="ri-add-circle-line"></i> New Habit</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <input type="text" id="h-name" placeholder="Habit name (e.g. Morning Run)"
+                  style="flex:2;min-width:150px">
+                <select id="h-icon" style="flex:1;min-width:120px">
+                  <option value="🏃">🏃 Exercise</option>
+                  <option value="📚">📚 Study</option>
+                  <option value="💧">💧 Hydrate</option>
+                  <option value="🧘">🧘 Meditate</option>
+                  <option value="🥗">🥗 Eat Healthy</option>
+                  <option value="😴">😴 Sleep Early</option>
+                  <option value="✍️">✍️ Journal</option>
+                  <option value="🎯">🎯 Custom</option>
+                </select>
+                <button class="btn prim sm" onclick="saveHabit()">Add</button>
+                <button class="btn sm" onclick="hideHabitForm()">Cancel</button>
+              </div>
+            </div>
+            <div class="widget">
+              <div class="w-title"><i class="ri-seedling-line"></i> This Week</div>
+              <div id="habit-list"></div>
+              <div id="habit-empty" class="center muted"><i class="ri-seedling-line"
+                  style="font-size:2rem;display:block;color:var(--accent)"></i>No habits yet. Start building!</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- NOTES -->
+        <section class="page" id="page-notes">
+          <div class="flex-b">
+            <div>
+              <h1 class="page-title">Notes & Journal</h1>
+              <p class="page-sub">Capture thoughts, ideas, and reflections.</p>
+            </div><button class="btn prim" onclick="openNoteForm()"><i class="ri-add-line"></i> New Note</button>
+          </div>
+          <div class="notes-grid" id="notes-grid"></div>
+          <div id="notes-empty" class="center muted" style="padding:3rem 0"><i class="ri-sticky-note-line"
+              style="font-size:2.5rem;display:block;color:var(--accent)"></i>No notes yet. Capture your first thought!
+          </div>
+        </section>
+
+        <!-- PERSONALIZE -->
+        <section class="page" id="page-personalize">
+          <h1 class="page-title">Personalization</h1>
+          <p class="page-sub">Make ELEVATE truly yours — themes, profile, goals.</p>
+          <div class="grid g2">
+            <div class="widget">
+              <div class="w-title"><i class="ri-palette-fill"></i> Theme</div>
+              <div class="theme-grid">
+                <div class="theme-card on" data-t="dark" onclick="applyTheme('dark',this)">
+                  <div class="th-dot" style="background:#1e293b;border:1px solid #334155;"></div>Minimal Dark
+                </div>
+                <div class="theme-card" data-t="light" onclick="applyTheme('light',this)">
+                  <div class="th-dot" style="background:#f1f5f9;border:1px solid #e2e8f0;"></div>Minimal Light
+                </div>
+              </div>
+            </div>
+            <div class="widget">
+              <div class="w-title"><i class="ri-user-settings-line"></i> Your Profile</div>
+              <div class="form-row"><label>Display Name</label><input type="text" id="p-name" placeholder="Your name">
+              </div>
+              <div class="form-row"><label>Status Message</label><input type="text" id="p-status"
+                  placeholder="On a roll today 🔥"></div>
+              <button class="btn prim full" onclick="saveProfile()"><i class="ri-save-line"></i> Save Profile</button>
+            </div>
+            <div class="widget">
+              <div class="w-title"><i class="ri-target-line"></i> Daily Goals</div>
+              <div class="form-row"><label>Study Goal (min/day)</label><input type="number" id="g-study"
+                  placeholder="e.g. 120"></div>
+              <div class="form-row"><label>Calorie Goal (kcal)</label><input type="number" id="g-cal"
+                  placeholder="e.g. 2200"></div>
+              <div class="form-row"><label>Protein Goal (g)</label><input type="number" id="g-prot"
+                  placeholder="e.g. 150"></div>
+              <div class="form-row"><label>Carbs Goal (g)</label><input type="number" id="g-carb"
+                  placeholder="e.g. 250"></div>
+              <div class="form-row"><label>Water Goal (ml)</label><input type="number" id="g-water"
+                  placeholder="e.g. 2000"></div>
+              <button class="btn prim full" onclick="saveGoals()"><i class="ri-save-line"></i> Save Goals</button>
+            </div>
+            <div class="widget"
+              style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+              <i class="ri-double-quotes-l" style="font-size:2rem;color:var(--accent);margin-bottom:10px"></i>
+              <p id="quote-text" style="font-size:1rem;font-weight:300;line-height:1.6"></p>
+              <p id="quote-auth" class="muted" style="margin-top:6px"></p>
+              <button class="btn sm mt2" onclick="newQuote()"><i class="ri-refresh-line"></i> New Quote</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- REPORT BUG -->
+        <section class="page" id="page-report-bug">
+          <div class="dash-header" style="margin-bottom:1.5rem">
+            <h1 class="page-title">Report a Bug</h1>
+            <p class="page-sub">Found an issue? Let us know directly so we can fix it.</p>
+          </div>
+          <div class="card" style="max-width:500px; margin: 0 auto; text-align: left;">
+            <h2 style="margin-bottom:1rem; font-size:1.2rem;"><i class="ri-bug-line accent"></i> Bug Details</h2>
+            <div class="form-row">
+              <label>Bug Title</label>
+              <input type="text" id="bug-title" placeholder="Brief summary of the issue">
+            </div>
+            <div class="form-row">
+              <label>Description & Steps to Reproduce</label>
+              <textarea id="bug-desc" style="min-height:150px; resize:vertical; padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp); width:100%; box-sizing:border-box;" placeholder="What happened? What were you doing when it happened?"></textarea>
+            </div>
+            <button class="btn prim full" onclick="sendBugReport()" style="margin-top:15px; font-size:1rem; padding: 0.8rem;"><i class="ri-mail-send-line"></i> Send via Email</button>
+          </div>
+        </section>
+
+        <!-- MAIN APP FOOTER -->
+        <footer style="margin-top: 3rem; padding-bottom: 2rem; text-align: center; font-size: 0.85rem; color: var(--ts);">
           &copy; 2026 Piyush Chauhan<br>
-          <div style="display: flex; justify-content: center; gap: 12px; margin-top: 8px; font-size: 1.1rem;">
+          <div style="display: flex; justify-content: center; gap: 15px; margin-top: 10px; font-size: 1.3rem;">
             <a href="mailto:piyush.ch407@gmail.com" style="color: var(--ts); transition: color 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ts)'" title="Email"><i class="ri-mail-line"></i></a>
             <a href="https://github.com/piyushch08" target="_blank" style="color: var(--ts); transition: color 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ts)'" title="GitHub"><i class="ri-github-line"></i></a>
             <a href="https://www.instagram.com/piyu5h.08?igsh=MXJvcnlnb2hwZHliMQ%3D%3D" target="_blank" style="color: var(--ts); transition: color 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ts)'" title="Instagram"><i class="ri-instagram-line"></i></a>
             <a href="https://www.instagram.com/piyu5h.08?igsh=MXJvcnlnb2hwZHliMQ%3D%3D" target="_blank" style="color: var(--ts); transition: color 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ts)'" title="LinkedIn"><i class="ri-linkedin-box-line"></i></a>
           </div>
-        </div>
-      </div>
+        </footer>
+
+      </main>
+    </div><!-- end app-body -->
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav" id="bottom-nav">
+      <div class="bn-item active" data-page="dashboard"><i class="ri-dashboard-line"></i>Home</div>
+      <div class="bn-item" data-page="todo"><i class="ri-list-check"></i>Tasks</div>
+      <div class="bn-item" data-page="study"><i class="ri-book-open-line"></i>Study</div>
+      <div class="bn-item" data-page="habits"><i class="ri-seedling-line"></i>Habits</div>
+      <div class="bn-item" data-page="notes"><i class="ri-sticky-note-line"></i>Notes</div>
     </nav>
+  </div><!-- end app -->
 
-    <!-- MAIN -->
-    <main class="main" id="main">
-      <div class="top-nav-bar">
-        <button class="hamburger" onclick="toggleSidebar()"><i class="ri-menu-4-line"></i></button>
-        <div class="tb-logo" style="gap:5px;font-size:.9rem">
-          <i class="ri-blaze-line" style="font-size:1.2rem; color: var(--accent);"></i>
-          <span class="logo-text">ELEVATE</span>
-        </div>
-        <button class="btn sm prim" onclick="openM('m-task')"><i class="ri-add-line"></i></button>
-      </div>
-
-      <!-- DASHBOARD -->
-      <section class="page active" id="page-dashboard">
-        <div class="dash-header flex-b" style="margin-bottom:1.5rem">
-          <div>
-            <h1 class="page-title">User Progress Report</h1>
-            <p class="page-sub" id="today-date">Loading…</p>
-          </div>
-        </div>
-        
-        <div class="grid g4 stat-cards-row">
-          <div class="widget stat-card dark-green-card">
-            <div class="sc-head"><div class="sc-ico"><i class="ri-timer-line"></i></div><span class="sc-badge">+15.2%</span></div>
-            <div class="sc-label">Total Focus Time</div>
-            <div class="sc-val"><span id="stat-focus">0</span> <small style="font-size:0.5em;font-weight:400">mins</small></div>
-          </div>
-          <div class="widget stat-card">
-            <div class="sc-head"><div class="sc-ico"><i class="ri-list-check"></i></div><span class="sc-badge pos">+10.9%</span></div>
-            <div class="sc-label">Tasks Completed</div>
-            <div class="sc-val" id="stat-tasks">0</div>
-          </div>
-          <div class="widget stat-card">
-            <div class="sc-head"><div class="sc-ico"><i class="ri-restaurant-line"></i></div><span class="sc-badge neg">-10.2%</span></div>
-            <div class="sc-label">Meals Logged</div>
-            <div class="sc-val" id="stat-meals">0</div>
-          </div>
-          <div class="widget stat-card">
-            <div class="sc-head"><div class="sc-ico"><i class="ri-calendar-check-line"></i></div><span class="sc-badge pos">+20.9%</span></div>
-            <div class="sc-label">Active Days</div>
-            <div class="sc-val" id="stat-active">0</div>
-          </div>
-        </div>
-
-        <div class="grid g2-7-3 mt2" style="grid-template-columns: 2.2fr 1fr; align-items: stretch;">
-          <div class="widget chart-widget">
-            <div class="flex-b w-title" style="margin-bottom: 1.5rem;">
-              <div style="margin:0; text-transform:none; letter-spacing:0;">
-                <h3 style="font-size:1.25rem;color:var(--tp);margin-bottom:4px">User Progress</h3>
-                <span class="muted" style="font-weight:400">Track your progress</span>
-              </div>
-              <select id="progress-period" class="sm-select" onchange="updateProgressChart()">
-                <option value="weekly">This week</option>
-                <option value="monthly">This month</option>
-                <option value="yearly">This year</option>
-              </select>
-            </div>
-            <div style="position: relative; height: 300px; width: 100%;">
-              <canvas id="progressChart"></canvas>
-            </div>
-          </div>
-          
-          <div class="widget chart-widget green-gradient">
-            <div class="flex-b w-title" style="margin-bottom: 1.5rem;">
-              <div style="margin:0; text-transform:none; letter-spacing:0;">
-                <h3 style="font-size:1.25rem;color:var(--tp);margin-bottom:4px">Progress Breakdown</h3>
-                <span class="muted" style="font-weight:400;color:rgba(255,255,255,0.7) !important">Today's breakdown</span>
-              </div>
-              <select id="breakdown-period" class="sm-select dark-select" onchange="updatePieChart()">
-                <option value="today">Today</option>
-                <option value="weekly">This week</option>
-              </select>
-            </div>
-            <div style="position: relative; height: 220px; width: 100%; display:flex; justify-content:center;">
-              <canvas id="pieChart"></canvas>
-            </div>
-            <div class="pie-legend mt1" id="pie-legend">
-              <!-- populated by js -->
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- TO-DO -->
-      <section class="page" id="page-todo">
-        <div class="flex-b"><div><h1 class="page-title">My Tasks</h1><p class="page-sub" id="todo-count">0 tasks</p></div><button class="btn prim" onclick="openM('m-task')"><i class="ri-add-line"></i> New Task</button></div>
-        <div class="grid g1 mt2">
-          <div class="widget">
-            <div class="flex-b" style="margin-bottom:1rem">
-              <div class="w-title" style="margin:0"><i class="ri-filter-line"></i> Filter</div>
-              <div style="display:flex;gap:6px">
-                <button class="btn sm" id="f-all" onclick="setFilter('all')">All</button>
-                <button class="btn sm" id="f-active" onclick="setFilter('active')">Active</button>
-                <button class="btn sm" id="f-done" onclick="setFilter('done')">Done</button>
-              </div>
-            </div>
-            <ul class="task-list" id="todo-list"></ul>
-            <div id="todo-empty" class="center muted"><i class="ri-checkbox-circle-line" style="font-size:2rem;display:block;color:var(--accent)"></i>No tasks yet! Hit New Task.</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- CALENDAR -->
-      <section class="page" id="page-calendar">
-        <h1 class="page-title">Calendar</h1><p class="page-sub">Click any day to mark it. Add named events below.</p>
-        <div class="grid g2">
-          <div class="widget">
-            <div class="cal-nav">
-              <button class="btn ico" onclick="calNav(-1)"><i class="ri-arrow-left-s-line"></i></button>
-              <h3 id="cal-label">Month Year</h3>
-              <button class="btn ico" onclick="calNav(1)"><i class="ri-arrow-right-s-line"></i></button>
-            </div>
-            <div class="cal-grid" id="cal-grid"></div>
-          </div>
-          <div class="widget">
-            <div class="w-title"><i class="ri-calendar-event-line"></i> Events</div>
-            <button class="btn prim full" onclick="openM('m-event')" style="margin-top:0"><i class="ri-add-line"></i> Add Event</button>
-            <ul class="task-list" id="event-list" style="margin-top:1rem"></ul>
-            <div id="event-empty" class="center muted">No events yet.</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- STUDY -->
-      <section class="page" id="page-study">
-        <h1 class="page-title">Study Hub</h1><p class="page-sub">Track focus sessions, subjects, and deadlines.</p>
-        <div class="grid g2">
-          <div class="widget">
-            <div class="w-title"><i class="ri-timer-line"></i> Focus Timer</div>
-            <div class="mode-row">
-              <button class="mode-btn on" onclick="setMode('focus',this)">Focus 25m</button>
-              <button class="mode-btn" onclick="setMode('short',this)">Break 5m</button>
-              <button class="mode-btn" onclick="setMode('long',this)">Long 15m</button>
-            </div>
-            <div class="f-inline" style="margin-bottom:.6rem"><input type="number" id="custom-min" placeholder="Custom min" min="1"><button class="btn sm" onclick="applyCustomTimer()">Set</button></div>
-            <div class="timer-disp" id="timer-disp">25:00</div>
-            <div class="timer-btns">
-              <button class="btn prim" id="timer-btn" onclick="toggleTimer()"><i class="ri-play-fill"></i> Start</button>
-              <button class="btn" onclick="resetTimer()"><i class="ri-refresh-line"></i> Reset</button>
-            </div>
-          </div>
-          <div class="widget">
-            <div class="w-title"><i class="ri-edit-line"></i> Log Session</div>
-            <div class="form-row">
-              <div class="flex-b" style="margin-bottom:.35rem">
-                <label style="margin:0">Subject</label>
-                <button class="btn sm" onclick="openM('m-subjects')" style="padding:2px 6px;font-size:.7rem"><i class="ri-settings-3-line"></i> Add/Remove</button>
-              </div>
-              <select id="subj"></select>
-            </div>
-            <div class="form-row"><label>Duration (minutes)</label><input type="number" id="study-mins" placeholder="e.g. 45" min="1"></div>
-            <div class="form-row"><label>Notes (optional)</label><input type="text" id="study-notes" placeholder="Topics covered…"></div>
-            <button class="btn prim full" onclick="logStudy()"><i class="ri-save-line"></i> Log Session</button>
-          </div>
-          <div class="widget" style="grid-column:1/-1">
-            <div class="flex-b" style="margin-bottom:1rem"><div class="w-title" style="margin:0"><i class="ri-alarm-warning-line"></i> Deadlines</div><button class="btn sm" onclick="openM('m-deadline')"><i class="ri-add-line"></i> Add</button></div>
-            <ul class="task-list" id="deadline-list"></ul>
-            <div id="deadline-empty" class="center muted">No deadlines. Stay ahead! 🚀</div>
-          </div>
-          <div class="widget" style="grid-column:1/-1">
-            <div class="w-title"><i class="ri-history-line"></i> Study Log</div>
-            <ul class="task-list" id="study-log"></ul>
-            <div id="study-log-empty" class="center muted">No sessions logged yet.</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- DIET -->
-      <section class="page" id="page-diet">
-        <h1 class="page-title">Diet & Nutrition</h1><p class="page-sub">Track meals, macros, and hydration.</p>
-        <div class="grid g2">
-          <div class="widget">
-            <div class="w-title"><i class="ri-pie-chart-line"></i> Today's Macros</div>
-            <div class="prog-wrap"><div class="prog-label"><span>Calories</span><span id="cal-lbl">0 / 2200 kcal</span></div><div class="prog-track"><div class="prog-fill" id="cal-bar" style="width:0%"></div></div></div>
-            <div class="prog-wrap"><div class="prog-label"><span>Protein</span><span id="prot-lbl">0 / 150g</span></div><div class="prog-track"><div class="prog-fill p" id="prot-bar" style="width:0%"></div></div></div>
-            <div class="prog-wrap"><div class="prog-label"><span>Carbs</span><span id="carb-lbl">0 / 250g</span></div><div class="prog-track"><div class="prog-fill c" id="carb-bar" style="width:0%"></div></div></div>
-          </div>
-          <div class="widget" style="text-align:center">
-            <div class="w-title" style="justify-content:center"><i class="ri-drop-line"></i> Water Intake</div>
-            <div class="water-cup"><div class="water-fill" id="water-fill" style="height:0%"></div></div>
-            <p id="water-lbl" class="muted" style="margin-bottom:.6rem">0 / 2000 ml</p>
-            <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
-              <button class="btn sm" onclick="addWater(150)">+150ml</button>
-              <button class="btn sm" onclick="addWater(250)">+250ml</button>
-              <button class="btn sm" onclick="addWater(500)">+500ml</button>
-              <button class="btn sm dng" onclick="resetWater()"><i class="ri-refresh-line"></i></button>
-            </div>
-          </div>
-          <div class="widget">
-            <div class="w-title"><i class="ri-add-circle-line"></i> Log Meal</div>
-            <div class="form-row"><label>Meal Name</label><input type="text" id="meal-name" placeholder="e.g. Oatmeal with berries"></div>
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-              <div><label>Calories</label><input type="number" id="meal-cal" placeholder="kcal" min="0"></div>
-              <div><label>Protein (g)</label><input type="number" id="meal-prot" placeholder="g" min="0"></div>
-              <div><label>Carbs (g)</label><input type="number" id="meal-carb" placeholder="g" min="0"></div>
-            </div>
-            <button class="btn prim full" onclick="logMeal()"><i class="ri-restaurant-line"></i> Log Meal</button>
-          </div>
-          <div class="widget">
-            <div class="w-title"><i class="ri-list-check"></i> Today's Meals</div>
-            <ul class="task-list" id="meal-list"></ul>
-            <div id="meal-empty" class="center muted">No meals logged. Eat well! 🥗</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- EXERCISE -->
-      <section class="page" id="page-exercise">
-        <h1 class="page-title">Exercise Hub</h1><p class="page-sub">Plan workouts and track your streaks.</p>
-        <div class="grid g2">
-          <div class="widget">
-            <div class="flex-b" style="margin-bottom:.75rem">
-              <div class="w-title" style="margin:0"><i class="ri-fire-fill"></i> Today's Routine</div>
-              <input type="text" id="routine-name" value="Push Day" style="width:130px;padding:.35rem .7rem;font-size:.78rem">
-            </div>
-            <div id="ex-list"></div>
-            <div style="display:flex;gap:6px;margin-top:.75rem;flex-wrap:wrap">
-              <input type="text" id="new-ex" placeholder="Exercise" style="flex:2;min-width:100px;padding:.45rem">
-              <input type="text" id="new-sets" placeholder="Sets×Reps" style="flex:1;min-width:80px;padding:.45rem">
-              <button class="btn prim sm" onclick="addExercise()"><i class="ri-add-line"></i></button>
-            </div>
-            <button class="btn prim full" id="workout-btn" onclick="toggleWorkout()"><i class="ri-play-fill"></i> Start Workout</button>
-          </div>
-          <div class="widget">
-            <div class="w-title"><i class="ri-calendar-check-fill"></i> Weekly Streak</div>
-            <div class="streak-row" id="streak-row"></div>
-            <button class="btn full mt2" onclick="logToday()"><i class="ri-check-double-line"></i> Log Today as Active</button>
-            <hr class="divider">
-            <div class="w-title"><i class="ri-target-line"></i> Weekly Goal</div>
-            <div class="f-inline mt1"><input type="number" id="goal-wk" placeholder="Target workouts/week"><button class="btn sm" onclick="saveGoal()">Save</button></div>
-            <p class="muted mt1" id="goal-disp">Set your weekly target above.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- HABITS -->
-      <section class="page" id="page-habits">
-        <div class="flex-b"><div><h1 class="page-title">Habit Tracker</h1><p class="page-sub">Build powerful habits one day at a time.</p></div><button class="btn prim" onclick="showHabitForm()"><i class="ri-add-line"></i> New Habit</button></div>
-        <div class="grid g1 mt2">
-          <div class="widget" id="habit-form" style="display:none">
-            <div class="w-title"><i class="ri-add-circle-line"></i> New Habit</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <input type="text" id="h-name" placeholder="Habit name (e.g. Morning Run)" style="flex:2;min-width:150px">
-              <select id="h-icon" style="flex:1;min-width:120px">
-                <option value="🏃">🏃 Exercise</option><option value="📚">📚 Study</option>
-                <option value="💧">💧 Hydrate</option><option value="🧘">🧘 Meditate</option>
-                <option value="🥗">🥗 Eat Healthy</option><option value="😴">😴 Sleep Early</option>
-                <option value="✍️">✍️ Journal</option><option value="🎯">🎯 Custom</option>
-              </select>
-              <button class="btn prim sm" onclick="saveHabit()">Add</button>
-              <button class="btn sm" onclick="hideHabitForm()">Cancel</button>
-            </div>
-          </div>
-          <div class="widget">
-            <div class="w-title"><i class="ri-seedling-line"></i> This Week</div>
-            <div id="habit-list"></div>
-            <div id="habit-empty" class="center muted"><i class="ri-seedling-line" style="font-size:2rem;display:block;color:var(--accent)"></i>No habits yet. Start building!</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- NOTES -->
-      <section class="page" id="page-notes">
-        <div class="flex-b"><div><h1 class="page-title">Notes & Journal</h1><p class="page-sub">Capture thoughts, ideas, and reflections.</p></div><button class="btn prim" onclick="openNoteForm()"><i class="ri-add-line"></i> New Note</button></div>
-        <div class="notes-grid" id="notes-grid"></div>
-        <div id="notes-empty" class="center muted" style="padding:3rem 0"><i class="ri-sticky-note-line" style="font-size:2.5rem;display:block;color:var(--accent)"></i>No notes yet. Capture your first thought!</div>
-      </section>
-
-      <!-- PERSONALIZE -->
-      <section class="page" id="page-personalize">
-        <h1 class="page-title">Personalization</h1><p class="page-sub">Make ELEVATE truly yours — themes, profile, goals.</p>
-        <div class="grid g2">
-          <div class="widget">
-            <div class="w-title"><i class="ri-palette-fill"></i> Theme</div>
-            <div class="theme-grid">
-              <div class="theme-card on" data-t="space" onclick="applyTheme('space',this)"><div class="th-dot" style="background:#1e293b;border:1px solid #334155;"></div>Minimal Dark</div>
-              <div class="theme-card" data-t="light" onclick="applyTheme('light',this)"><div class="th-dot" style="background:#f1f5f9;border:1px solid #e2e8f0;"></div>Minimal Light</div>
-            </div>
-          </div>
-          <div class="widget">
-            <div class="w-title"><i class="ri-user-settings-line"></i> Your Profile</div>
-            <div class="form-row"><label>Display Name</label><input type="text" id="p-name" placeholder="Your name"></div>
-            <div class="form-row"><label>Status Message</label><input type="text" id="p-status" placeholder="On a roll today 🔥"></div>
-            <button class="btn prim full" onclick="saveProfile()"><i class="ri-save-line"></i> Save Profile</button>
-          </div>
-          <div class="widget">
-            <div class="w-title"><i class="ri-target-line"></i> Daily Goals</div>
-            <div class="form-row"><label>Study Goal (min/day)</label><input type="number" id="g-study" placeholder="e.g. 120"></div>
-            <div class="form-row"><label>Calorie Goal (kcal)</label><input type="number" id="g-cal" placeholder="e.g. 2200"></div>
-            <div class="form-row"><label>Protein Goal (g)</label><input type="number" id="g-prot" placeholder="e.g. 150"></div>
-            <div class="form-row"><label>Carbs Goal (g)</label><input type="number" id="g-carb" placeholder="e.g. 250"></div>
-            <div class="form-row"><label>Water Goal (ml)</label><input type="number" id="g-water" placeholder="e.g. 2000"></div>
-            <button class="btn prim full" onclick="saveGoals()"><i class="ri-save-line"></i> Save Goals</button>
-          </div>
-          <div class="widget" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
-            <i class="ri-double-quotes-l" style="font-size:2rem;color:var(--accent);margin-bottom:10px"></i>
-            <p id="quote-text" style="font-size:1rem;font-weight:300;line-height:1.6"></p>
-            <p id="quote-auth" class="muted" style="margin-top:6px"></p>
-            <button class="btn sm mt2" onclick="newQuote()"><i class="ri-refresh-line"></i> New Quote</button>
-          </div>
-        </div>
-      </section>
-    </main>
-  </div><!-- end app-body -->
-
-  <!-- BOTTOM NAV -->
-  <nav class="bottom-nav" id="bottom-nav">
-    <div class="bn-item active" data-page="dashboard"><i class="ri-dashboard-line"></i>Home</div>
-    <div class="bn-item" data-page="todo"><i class="ri-list-check"></i>Tasks</div>
-    <div class="bn-item" data-page="study"><i class="ri-book-open-line"></i>Study</div>
-    <div class="bn-item" data-page="habits"><i class="ri-seedling-line"></i>Habits</div>
-    <div class="bn-item" data-page="notes"><i class="ri-sticky-note-line"></i>Notes</div>
-  </nav>
-</div><!-- end app -->
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script defer src="js/app.js"></script>
-<script type="module" src="js/firebase-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script defer src="js/app.js"></script>
+  <script type="module" src="js/firebase-app.js"></script>
 
 </body>
+
 </html>
