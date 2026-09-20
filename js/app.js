@@ -315,7 +315,7 @@ window.updateProgressChart = function() {
           {
             label: 'Focus Mins',
             data: data1,
-            backgroundColor: '#0f4a27',
+            backgroundColor: '#0038ff',
             borderRadius: 6,
             barPercentage: 0.5,
             categoryPercentage: 0.8
@@ -323,7 +323,7 @@ window.updateProgressChart = function() {
           {
             label: 'Tasks Done',
             data: data2,
-            backgroundColor: '#28c76f',
+            backgroundColor: '#000000',
             borderRadius: 6,
             barPercentage: 0.5,
             categoryPercentage: 0.8
@@ -368,7 +368,7 @@ window.updatePieChart = function() {
   if(data[0]===0 && data[1]===0 && data[2]===0) data = [1,1,1];
   
   let labels = ['Study', 'Exercise', 'Diet'];
-  let colors = ['#0f4a27', '#28c76f', '#ea5455'];
+  let colors = ['#0038ff', '#000000', '#d1d5db'];
   
   if (pieChartInst) {
     pieChartInst.data.labels = labels;
@@ -739,147 +739,9 @@ function setupSearch() {
 }
 
 
-// ===== INTRO SPLASH =====
-(() => {
-  const splash = document.getElementById('intro-splash');
-  if (!splash) return;
-
-  /* ---- Web Audio Engine ---- */
-  let actx = null;
-  function getACtx() {
-    if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { } }
-    return actx;
-  }
-  function playTone(freq, type, startT, dur, vol, ramp) {
-    const a = getACtx(); if (!a) return;
-    const o = a.createOscillator(), g = a.createGain();
-    o.type = type || 'sine'; o.frequency.setValueAtTime(freq, a.currentTime + startT);
-    if (ramp) o.frequency.linearRampToValueAtTime(ramp, a.currentTime + startT + dur);
-    g.gain.setValueAtTime(0, a.currentTime + startT);
-    g.gain.linearRampToValueAtTime(vol || .18, a.currentTime + startT + .01);
-    g.gain.exponentialRampToValueAtTime(.0001, a.currentTime + startT + dur);
-    o.connect(g); g.connect(a.destination);
-    o.start(a.currentTime + startT); o.stop(a.currentTime + startT + dur + .05);
-  }
-  function playNoise(startT, dur, vol) {
-    const a = getACtx(); if (!a) return;
-    const buf = a.createBuffer(1, a.sampleRate * dur, a.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < data.length; i++)data[i] = (Math.random() * 2 - 1);
-    const src = a.createBufferSource();
-    src.buffer = buf;
-    const flt = a.createBiquadFilter(); flt.type = 'bandpass'; flt.frequency.value = 800; flt.Q.value = .5;
-    const g = a.createGain();
-    g.gain.setValueAtTime(vol || .08, a.currentTime + startT);
-    g.gain.exponentialRampToValueAtTime(.0001, a.currentTime + startT + dur);
-    src.connect(flt); flt.connect(g); g.connect(a.destination);
-    src.start(a.currentTime + startT); src.stop(a.currentTime + startT + dur + .05);
-  }
-  function playSoundtrack() {
-    // Cinematic deep sweep
-    playTone(40, 'sine', 0, 2.5, 0.4, 20);
-    playNoise(0, 1.5, 0.05);
-    // Ethereal chime
-    playTone(523.25, 'sine', 0.5, 2.0, 0.1);
-    playTone(659.25, 'sine', 0.6, 2.0, 0.1);
-    playTone(783.99, 'sine', 0.7, 2.0, 0.1);
-    playTone(1046.50, 'sine', 0.9, 2.5, 0.15);
-    // Gentle ticks for text
-    const delays = [.4, .5, .6, .7, .8, .9, 1.0];
-    delays.forEach(d => playTone(2000, 'square', d, 0.02, 0.02, 1000));
-  }
-  function playClick() {
-    if (!D.settings.anim) return;
-    playTone(800, 'sine', 0, 0.05, 0.04, 1200);
-  }
-  function playSuccess() {
-    if (!D.settings.anim) return;
-    playTone(523.25, 'sine', 0, 0.1, 0.06);
-    playTone(659.25, 'sine', 0.1, 0.1, 0.06);
-    playTone(1046.50, 'sine', 0.2, 0.3, 0.06);
-  }
-
-  /* ---- Particles ---- */
-  const pc = document.getElementById('splash-particles');
-  const cols = ['#00f2fe', '#ff477e', '#28ffb5', '#ffd166', '#b721ff'];
-  for (let i = 0; i < 40; i++) {
-    const d = document.createElement('div');
-    d.className = 'splash-particle';
-    const sz = Math.random() * 5 + 1.5;
-    const tx = (Math.random() - 0.5) * 80, ty = -(Math.random() * 60 + 20);
-    Object.assign(d.style, {
-      width: sz + 'px', height: sz + 'px',
-      left: Math.random() * 100 + '%', top: Math.random() * 100 + '%',
-      background: cols[Math.floor(Math.random() * cols.length)],
-      '--opa': Math.random() * .4 + .1,
-      '--dur': (Math.random() * 4 + 2.5) + 's',
-      '--delay': (Math.random() * 2) + 's',
-      '--tx': tx + 'px', '--ty': ty + 'px',
-      boxShadow: `0 0 ${sz * 2}px ${cols[Math.floor(Math.random() * cols.length)]}`
-    });
-    pc.appendChild(d);
-  }
-
-  /* ---- Shooting stars ---- */
-  for (let i = 0; i < 8; i++) {
-    const s = document.createElement('div');
-    s.className = 'splash-star';
-    const w = Math.random() * 120 + 80;
-    Object.assign(s.style, {
-      width: w + 'px',
-      left: Math.random() * 80 + '%', top: Math.random() * 100 + '%',
-      '--sl': (w + 100) + 'px',
-      '--sd': (Math.random() * 1 + .8) + 's',
-      '--ss': (Math.random() * .8 + .1) + 's',
-      transform: `rotate(${(Math.random() - 0.5) * 30}deg)`
-    });
-    splash.appendChild(s);
-  }
-
-  /* ---- Shockwave rings ---- */
-  [0, .15, .35, .6, 1.1].forEach((delay, i) => {
-    const w = document.createElement('div');
-    w.className = 'splash-wave';
-    Object.assign(w.style, {
-      '--wd': (1.6 + i * .1) + 's',
-      '--wdl': delay + 's',
-      borderColor: i % 2 === 0 ? 'rgba(0,242,254,.5)' : 'rgba(255,71,126,.3)'
-    });
-    splash.appendChild(w);
-  });
-
-  /* ---- Percentage counter ---- */
-  const pctEl = document.getElementById('splash-pct');
-  let pctVal = 0;
-  const pctTimer = setInterval(() => {
-    pctVal = Math.min(100, pctVal + Math.ceil(Math.random() * 4 + 1));
-    if (pctEl) pctEl.textContent = pctVal + '%';
-    if (pctVal >= 100) clearInterval(pctTimer);
-  }, 19);
-
-  /* ---- Trigger sound on first interaction or after short delay ---- */
-  let soundPlayed = false;
-  function trySound() {
-    if (soundPlayed) return; soundPlayed = true;
-    playSoundtrack();
-    document.removeEventListener('click', trySound);
-    document.removeEventListener('touchstart', trySound);
-    document.removeEventListener('keydown', trySound);
-  }
-  // Auto-play after tiny delay (works in most browsers)
-  setTimeout(trySound, 80);
-  document.addEventListener('click', trySound, { once: true });
-  document.addEventListener('touchstart', trySound, { once: true });
-  document.addEventListener('keydown', trySound, { once: true });
-
-  /* ---- Dismiss ---- */
-  setTimeout(() => {
-    clearInterval(pctTimer);
-    if (pctEl) pctEl.textContent = '100%';
-    splash.classList.add('go');
-    splash.addEventListener('animationend', () => splash.remove(), { once: true });
-  }, 3200);
-})();
+// ===== LIGHTWEIGHT AUDIO STUBS =====
+window.playClick = function() {};
+window.playSuccess = function() {};
 
 // ===== THEME ON LOAD =====
 (() => { try { const s = localStorage.getItem('elevate2'); if (s) { const d = JSON.parse(s); if (d.theme) { document.documentElement.setAttribute('data-theme', d.theme); } } } catch (e) { } })();
