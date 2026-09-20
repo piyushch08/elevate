@@ -392,7 +392,7 @@
             </div>
           </div>
 
-          <div class="grid g2-7-3 mt2" style="grid-template-columns: 2.2fr 1fr; align-items: stretch;">
+          <div class="grid g2-7-3 mt2" style="align-items: stretch;">
             <div class="widget chart-widget">
               <div class="flex-b w-title" style="margin-bottom: 1.5rem;">
                 <div style="margin:0; text-transform:none; letter-spacing:0;">
@@ -592,7 +592,7 @@
               <div class="w-title"><i class="ri-add-circle-line"></i> Log Meal</div>
               <div class="form-row"><label>Meal Name</label><input type="text" id="meal-name"
                   placeholder="e.g. Oatmeal with berries"></div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(80px, 1fr));gap:8px">
                 <div><label>Calories</label><input type="number" id="meal-cal" placeholder="kcal" min="0"></div>
                 <div><label>Protein (g)</label><input type="number" id="meal-prot" placeholder="g" min="0"></div>
                 <div><label>Carbs (g)</label><input type="number" id="meal-carb" placeholder="g" min="0"></div>

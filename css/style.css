@@ -984,7 +984,7 @@ body {
 
 /* ===== NEW DASHBOARD WIDGETS ===== */
 .g4 {
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
 }
 
 .g2-7-3 {
@@ -2296,6 +2296,24 @@ label {
 
   .main {
     padding: 1.25rem .9rem 5.5rem
+  }
+
+  .widget {
+    padding: 1.1rem;
+  }
+
+  .page-title {
+    font-size: 1.8rem;
+  }
+
+  .tb-actions {
+    gap: 4px;
+  }
+
+  .tb-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 1rem;
   }
 
   .bottom-nav {
