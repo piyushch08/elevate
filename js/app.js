@@ -230,19 +230,155 @@ function setupEditable() {
   if (qi) qi.addEventListener('keydown', e => { if (e.key === 'Enter' && qi.value.trim()) { D.tasks.push({ id: Date.now(), name: qi.value.trim(), done: false, cat: 'General', pri: 'normal', mins: 0 }); qi.value = ''; renderTasks(); updateRings(); save(); toast('Task added!', 'success'); } });
 }
 
-// ===== RINGS =====
-function setRing(id, pct) {
-  const r = document.getElementById('ring-' + id); const t = document.getElementById('ring-' + id + '-t');
-  if (r) r.setAttribute('stroke-dasharray', `${pct},100`); if (t) t.textContent = pct + '%';
-}
+// ===== DASHBOARD STATS & CHARTS =====
+let progressChartInst = null;
+let pieChartInst = null;
+
 function updateRings() {
-  const done = D.tasks.filter(t => t.done).length, total = D.tasks.length;
-  setRing('todo', total > 0 ? Math.round(done / total * 100) : 0);
-  setRing('study', Math.min(100, Math.round(D.today.study / D.goals.study * 100)));
-  setRing('diet', Math.min(100, Math.round(D.today.cal / D.goals.cal * 100)));
-  const ex = D.exercises.length || 1, exd = D.exercises.filter(e => e.done).length;
-  setRing('ex', Math.round(exd / ex * 100));
+  // Update the 4 top cards
+  const focus = D.today.study || 0;
+  const tasksDone = D.tasks.filter(t => t.done).length;
+  const meals = D.meals.length;
+  const activeDays = D.streak.filter(Boolean).length;
+  
+  const elFocus = document.getElementById('stat-focus'); if(elFocus) elFocus.textContent = focus;
+  const elTasks = document.getElementById('stat-tasks'); if(elTasks) elTasks.textContent = tasksDone;
+  const elMeals = document.getElementById('stat-meals'); if(elMeals) elMeals.textContent = meals;
+  const elActive = document.getElementById('stat-active'); if(elActive) elActive.textContent = activeDays;
+  
+  if (typeof Chart !== 'undefined') {
+    updateProgressChart();
+    updatePieChart();
+  } else {
+    // If Chart.js isn't loaded yet, try again in 200ms
+    setTimeout(updateRings, 200);
+  }
 }
+
+window.updateProgressChart = function() {
+  const period = document.getElementById('progress-period')?.value || 'weekly';
+  const ctx = document.getElementById('progressChart');
+  if(!ctx) return;
+  
+  let labels = [];
+  let data1 = [];
+  let data2 = [];
+  
+  if (period === 'weekly') {
+    labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    data1 = [20, 30, 40, 25, 45, 15, 35]; // Mock data - Total Focus
+    data2 = [10, 15, 20, 12, 22, 8, 18];  // Mock data - Tasks Completed
+  } else if (period === 'monthly') {
+    labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+    data1 = [120, 150, 140, 180];
+    data2 = [50, 60, 55, 75];
+  } else { // yearly
+    labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    data1 = [400, 450, 420, 500, 480, 520, 490, 510, 530, 460, 470, 550];
+    data2 = [150, 180, 160, 200, 190, 210, 200, 220, 230, 190, 180, 240];
+  }
+  
+  if (progressChartInst) {
+    progressChartInst.destroy();
+  }
+  
+  progressChartInst = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Focus Mins',
+          data: data1,
+          backgroundColor: '#0f4a27',
+          borderRadius: 6,
+          barPercentage: 0.5,
+          categoryPercentage: 0.8
+        },
+        {
+          label: 'Tasks Done',
+          data: data2,
+          backgroundColor: '#28c76f',
+          borderRadius: 6,
+          barPercentage: 0.5,
+          categoryPercentage: 0.8
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(0,0,0,0.05)' },
+          border: { display: false }
+        },
+        x: {
+          grid: { display: false },
+          border: { display: false }
+        }
+      }
+    }
+  });
+};
+
+window.updatePieChart = function() {
+  const period = document.getElementById('breakdown-period')?.value || 'today';
+  const ctx = document.getElementById('pieChart');
+  if(!ctx) return;
+  
+  // Real data for today, mock data for weekly
+  let data = [];
+  if (period === 'today') {
+    data = [D.today.study || 0, D.tasks.filter(t=>t.cat==='Exercise' && t.done).length || 0, D.meals.length || 0];
+  } else {
+    data = [45, 20, 15]; // Mock weekly
+  }
+  // Ensure chart renders something if all values are 0
+  if(data[0]===0 && data[1]===0 && data[2]===0) data = [1,1,1];
+  
+  let labels = ['Study', 'Exercise', 'Diet'];
+  let colors = ['#0f4a27', '#28c76f', '#ea5455'];
+  
+  if (pieChartInst) pieChartInst.destroy();
+  
+  pieChartInst = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: data,
+        backgroundColor: colors,
+        borderWidth: 2,
+        borderColor: 'rgba(255,255,255,0.2)'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  });
+  
+  // Update custom legend
+  const leg = document.getElementById('pie-legend');
+  if (leg) {
+    const total = data.reduce((a,b)=>a+b, 0);
+    leg.innerHTML = data.map((d, i) => {
+      const pct = Math.round((d/total)*100) || 0;
+      return `<div class="pie-legend-item">
+                <div class="pie-legend-label"><div class="pie-legend-dot" style="background:${colors[i]}"></div>${labels[i]}</div>
+                <div class="pie-legend-val">${d} <span class="pie-badge ${pct > 30 ? 'up' : ''}">${pct}%</span></div>
+              </div>`;
+    }).join('');
+  }
+};
 
 // ===== TASKS =====
 function saveTask() {

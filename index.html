@@ -251,39 +251,71 @@
 
       <!-- DASHBOARD -->
       <section class="page active" id="page-dashboard">
-        <h1 class="page-title" id="greeting">Good Morning ☀️</h1>
-        <p class="page-sub" id="today-date">Loading…</p>
-        <div class="grid g2">
-          <div class="widget">
-            <div class="w-title"><i class="ri-donut-chart-fill"></i> Daily Progress</div>
-            <div class="rings-row">
-              <div class="ring-item r-study"><svg class="circ" viewBox="0 0 36 36"><path class="c-bg" d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831a15.9155 15.9155 0 0 1 0-31.831"/><path class="c-fill" id="ring-study" stroke-dasharray="0,100" d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831a15.9155 15.9155 0 0 1 0-31.831"/><text x="18" y="20.5" class="c-txt" id="ring-study-t">0%</text></svg><span>Study</span></div>
-              <div class="ring-item r-diet"><svg class="circ" viewBox="0 0 36 36"><path class="c-bg" d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831a15.9155 15.9155 0 0 1 0-31.831"/><path class="c-fill" id="ring-diet" stroke-dasharray="0,100" d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831a15.9155 15.9155 0 0 1 0-31.831"/><text x="18" y="20.5" class="c-txt" id="ring-diet-t">0%</text></svg><span>Diet</span></div>
-              <div class="ring-item r-ex"><svg class="circ" viewBox="0 0 36 36"><path class="c-bg" d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831a15.9155 15.9155 0 0 1 0-31.831"/><path class="c-fill" id="ring-ex" stroke-dasharray="0,100" d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831a15.9155 15.9155 0 0 1 0-31.831"/><text x="18" y="20.5" class="c-txt" id="ring-ex-t">0%</text></svg><span>Exercise</span></div>
-              <div class="ring-item r-todo"><svg class="circ" viewBox="0 0 36 36"><path class="c-bg" d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831a15.9155 15.9155 0 0 1 0-31.831"/><path class="c-fill" id="ring-todo" stroke-dasharray="0,100" d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831a15.9155 15.9155 0 0 1 0-31.831"/><text x="18" y="20.5" class="c-txt" id="ring-todo-t">0%</text></svg><span>Tasks</span></div>
+        <div class="dash-header flex-b" style="margin-bottom:1.5rem">
+          <div>
+            <h1 class="page-title">User Progress Report</h1>
+            <p class="page-sub" id="today-date">Loading…</p>
+          </div>
+        </div>
+        
+        <div class="grid g4 stat-cards-row">
+          <div class="widget stat-card dark-green-card">
+            <div class="sc-head"><div class="sc-ico"><i class="ri-timer-line"></i></div><span class="sc-badge">+15.2%</span></div>
+            <div class="sc-label">Total Focus Time</div>
+            <div class="sc-val"><span id="stat-focus">0</span> <small style="font-size:0.5em;font-weight:400">mins</small></div>
+          </div>
+          <div class="widget stat-card">
+            <div class="sc-head"><div class="sc-ico"><i class="ri-list-check"></i></div><span class="sc-badge pos">+10.9%</span></div>
+            <div class="sc-label">Tasks Completed</div>
+            <div class="sc-val" id="stat-tasks">0</div>
+          </div>
+          <div class="widget stat-card">
+            <div class="sc-head"><div class="sc-ico"><i class="ri-restaurant-line"></i></div><span class="sc-badge neg">-10.2%</span></div>
+            <div class="sc-label">Meals Logged</div>
+            <div class="sc-val" id="stat-meals">0</div>
+          </div>
+          <div class="widget stat-card">
+            <div class="sc-head"><div class="sc-ico"><i class="ri-calendar-check-line"></i></div><span class="sc-badge pos">+20.9%</span></div>
+            <div class="sc-label">Active Days</div>
+            <div class="sc-val" id="stat-active">0</div>
+          </div>
+        </div>
+
+        <div class="grid g2-7-3 mt2" style="grid-template-columns: 2.2fr 1fr; align-items: stretch;">
+          <div class="widget chart-widget">
+            <div class="flex-b w-title" style="margin-bottom: 1.5rem;">
+              <div style="margin:0; text-transform:none; letter-spacing:0;">
+                <h3 style="font-size:1.25rem;color:var(--tp);margin-bottom:4px">User Progress</h3>
+                <span class="muted" style="font-weight:400">Track your progress</span>
+              </div>
+              <select id="progress-period" class="sm-select" onchange="updateProgressChart()">
+                <option value="weekly">This week</option>
+                <option value="monthly">This month</option>
+                <option value="yearly">This year</option>
+              </select>
+            </div>
+            <div style="position: relative; height: 300px; width: 100%;">
+              <canvas id="progressChart"></canvas>
             </div>
           </div>
-          <div class="widget">
-            <div class="w-title"><i class="ri-bar-chart-fill"></i> Weekly Consistency</div>
-            <div class="chart-bars">
-              <div class="bar-w"><div class="bar" style="height:55%"></div><div class="bar-l">M</div></div>
-              <div class="bar-w"><div class="bar" style="height:80%"></div><div class="bar-l">T</div></div>
-              <div class="bar-w"><div class="bar" style="height:45%"></div><div class="bar-l">W</div></div>
-              <div class="bar-w"><div class="bar" style="height:90%"></div><div class="bar-l">T</div></div>
-              <div class="bar-w"><div class="bar" style="height:70%"></div><div class="bar-l">F</div></div>
-              <div class="bar-w"><div class="bar" style="height:35%"></div><div class="bar-l">S</div></div>
-              <div class="bar-w"><div class="bar" id="today-bar" style="height:10%"></div><div class="bar-l">S</div></div>
+          
+          <div class="widget chart-widget green-gradient">
+            <div class="flex-b w-title" style="margin-bottom: 1.5rem;">
+              <div style="margin:0; text-transform:none; letter-spacing:0;">
+                <h3 style="font-size:1.25rem;color:var(--tp);margin-bottom:4px">Progress Breakdown</h3>
+                <span class="muted" style="font-weight:400;color:rgba(255,255,255,0.7) !important">Today's breakdown</span>
+              </div>
+              <select id="breakdown-period" class="sm-select dark-select" onchange="updatePieChart()">
+                <option value="today">Today</option>
+                <option value="weekly">This week</option>
+              </select>
             </div>
-          </div>
-          <div class="widget">
-            <div class="w-title"><i class="ri-flashlight-line"></i> Quick Add Task</div>
-            <input type="text" id="quick-input" placeholder="Type a task and press Enter…">
-            <div class="muted mt1">Or use the full form for priority & timer.</div>
-            <button class="btn prim full" onclick="openM('m-task')"><i class="ri-add-line"></i> Full Task Form</button>
-          </div>
-          <div class="widget">
-            <div class="w-title"><i class="ri-sun-line"></i> Today's Tasks</div>
-            <div id="dash-tasks"><div class="muted">No tasks yet — add some!</div></div>
+            <div style="position: relative; height: 220px; width: 100%; display:flex; justify-content:center;">
+              <canvas id="pieChart"></canvas>
+            </div>
+            <div class="pie-legend mt1" id="pie-legend">
+              <!-- populated by js -->
+            </div>
           </div>
         </div>
       </section>
@@ -520,6 +552,7 @@
   </nav>
 </div><!-- end app -->
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script defer src="js/app.js"></script>
 <script type="module" src="js/firebase-app.js"></script>
 
