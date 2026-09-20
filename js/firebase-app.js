@@ -502,6 +502,8 @@ if (auth) {
         if (loginModal) {
           loginModal.style.display = "none";
         }
+        const appBody = document.getElementById('app-body');
+        if (appBody) appBody.style.display = 'flex';
 
 
         // Update username
@@ -650,6 +652,8 @@ if (auth) {
         if (loginModal) {
           loginModal.style.display = "flex";
         }
+        const appBody = document.getElementById('app-body');
+        if (appBody) appBody.style.display = 'none';
         
         if (authEmailGoogleView) authEmailGoogleView.style.display = 'block';
         if (authPhoneView) authPhoneView.style.display = 'none';

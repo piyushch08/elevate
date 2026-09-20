@@ -64,6 +64,7 @@ const WDAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 // ===== INIT =====
 window.addEventListener('DOMContentLoaded', () => {
   load();
+  goTo('dashboard');
   setupNav();
   setupRipple();
   setupTilt();
