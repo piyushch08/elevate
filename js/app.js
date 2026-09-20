@@ -302,51 +302,54 @@ window.updateProgressChart = function() {
   }
   
   if (progressChartInst) {
-    progressChartInst.destroy();
-  }
-  
-  progressChartInst = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          label: 'Focus Mins',
-          data: data1,
-          backgroundColor: '#0f4a27',
-          borderRadius: 6,
-          barPercentage: 0.5,
-          categoryPercentage: 0.8
-        },
-        {
-          label: 'Tasks Done',
-          data: data2,
-          backgroundColor: '#28c76f',
-          borderRadius: 6,
-          barPercentage: 0.5,
-          categoryPercentage: 0.8
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false }
+    progressChartInst.data.labels = labels;
+    progressChartInst.data.datasets[0].data = data1;
+    progressChartInst.data.datasets[1].data = data2;
+    progressChartInst.update();
+  } else {
+    progressChartInst = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Focus Mins',
+            data: data1,
+            backgroundColor: '#0f4a27',
+            borderRadius: 6,
+            barPercentage: 0.5,
+            categoryPercentage: 0.8
+          },
+          {
+            label: 'Tasks Done',
+            data: data2,
+            backgroundColor: '#28c76f',
+            borderRadius: 6,
+            barPercentage: 0.5,
+            categoryPercentage: 0.8
+          }
+        ]
       },
-      scales: {
-        y: {
-          beginAtZero: true,
-          grid: { color: 'rgba(0,0,0,0.05)' },
-          border: { display: false }
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
         },
-        x: {
-          grid: { display: false },
-          border: { display: false }
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(0,0,0,0.05)' },
+            border: { display: false }
+          },
+          x: {
+            grid: { display: false },
+            border: { display: false }
+          }
         }
       }
-    }
-  });
+    });
+  }
 };
 
 window.updatePieChart = function() {
@@ -367,27 +370,32 @@ window.updatePieChart = function() {
   let labels = ['Study', 'Exercise', 'Diet'];
   let colors = ['#0f4a27', '#28c76f', '#ea5455'];
   
-  if (pieChartInst) pieChartInst.destroy();
-  
-  pieChartInst = new Chart(ctx, {
-    type: 'pie',
-    data: {
-      labels: labels,
-      datasets: [{
-        data: data,
-        backgroundColor: colors,
-        borderWidth: 2,
-        borderColor: 'rgba(255,255,255,0.2)'
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false }
+  if (pieChartInst) {
+    pieChartInst.data.labels = labels;
+    pieChartInst.data.datasets[0].data = data;
+    pieChartInst.data.datasets[0].backgroundColor = colors;
+    pieChartInst.update();
+  } else {
+    pieChartInst = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: data,
+          backgroundColor: colors,
+          borderWidth: 2,
+          borderColor: 'rgba(255,255,255,0.2)'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        }
       }
-    }
-  });
+    });
+  }
   
   // Update custom legend
   const leg = document.getElementById('pie-legend');
