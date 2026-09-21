@@ -193,7 +193,20 @@ function updateGreeting() {
   const g = h < 12 ? 'Good Morning ☀️' : h < 17 ? 'Good Afternoon 🌤️' : 'Good Evening 🌙';
   const name = document.getElementById('u-name')?.textContent || 'Explorer';
   const el = document.getElementById('greeting'); if (el) el.textContent = `${g}, ${name}!`;
-  const de = document.getElementById('today-date'); if (de) de.textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const hr = new Date().getHours();
+  let dashG = 'Good evening';
+  if (hr < 12) dashG = 'Good morning';
+  else if (hr < 18) dashG = 'Good afternoon';
+  
+  const dashName = document.getElementById('u-name')?.textContent || 'Explorer';
+  const gt = document.getElementById('greeting-title');
+  if (gt) gt.innerHTML = `${dashG}, ${dashName}! 👋`;
+  
+  const gs = document.getElementById('greeting-sub');
+  if (gs) {
+    const opts = { weekday: 'long', month: 'long', day: 'numeric' };
+    gs.innerHTML = `Here is your <span style="color:var(--accent);font-weight:600;">Progress Report</span> for ${new Date().toLocaleDateString('en-US', opts)}`;
+  }
 }
 
 // ===== MODALS =====
@@ -626,6 +639,35 @@ function renderEvents() {
     li.innerHTML = `<div class="h-ico" style="background:rgba(0,242,254,.15);color:var(--accent);width:32px;height:32px;border-radius:8px;font-size:1.1rem;display:flex;align-items:center;justify-content:center;"><i class="ri-calendar-event-fill"></i></div><div style="flex:1;"><span class="t-name" style="display:block;font-weight:600;">${ev.name}</span><span class="muted"><i class="ri-time-line"></i> ${formattedDate}</span></div><button class="btn ico dng" onclick="delEvent(${ev.id})"><i class="ri-delete-bin-line"></i></button>`;
     list.appendChild(li);
   });
+
+  const dashEvents = document.getElementById('dash-events');
+  if (dashEvents) {
+    // Sort events by date and get upcoming ones
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const upcoming = [...D.events]
+      .filter(e => new Date(e.date + 'T00:00:00') >= today)
+      .sort((a,b) => new Date(a.date) - new Date(b.date))
+      .slice(0, 2);
+
+    if (!upcoming.length) {
+      dashEvents.innerHTML = '<div class="muted" style="padding:1rem 0; text-align:center;">No upcoming events!</div>';
+    } else {
+      dashEvents.innerHTML = upcoming.map(ev => {
+        const dateObj = new Date(ev.date + 'T00:00:00');
+        const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return `<div class="event-card" style="margin-bottom:8px; background:var(--sidebar-glass); padding:10px; border-radius:8px; display:flex; align-items:center; gap:12px;">
+          <div class="h-ico" style="background:rgba(0,242,254,.15); color:var(--accent); width:32px; height:32px; border-radius:8px; font-size:1.1rem; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <i class="ri-calendar-event-fill"></i>
+          </div>
+          <div style="flex:1; overflow:hidden;">
+            <div style="font-weight:600; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${ev.name}</div>
+            <div class="muted" style="font-size:0.85rem;"><i class="ri-time-line"></i> ${formattedDate}</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }
 }
 function delEvent(id) { D.events = D.events.filter(e => e.id !== id); renderEvents(); save(); toast('Event removed.', 'info'); }
 
@@ -818,6 +860,23 @@ function renderNotes() {
     card.appendChild(del);
     card.onclick = () => editNote(n.id); grid.appendChild(card);
   });
+
+  const dashNotes = document.getElementById('dash-notes');
+  if (dashNotes) {
+    if (!D.notes.length) {
+      dashNotes.innerHTML = '<div class="muted" style="padding:1rem 0; text-align:center;">No notes yet — jot something down!</div>';
+    } else {
+      dashNotes.innerHTML = [...D.notes].reverse().slice(0, 2).map(n => {
+        return `<div class="note-card" style="margin-bottom:8px; background:var(--sidebar-glass); padding:10px; border-radius:8px; cursor:pointer;" onclick="goTo('notes'); setTimeout(() => editNote(${n.id}), 100);">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+            <div style="width:10px; height:10px; border-radius:50%; background:${n.color}; flex-shrink:0;"></div>
+            <div style="font-weight:600; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${n.title || 'Untitled'}</div>
+          </div>
+          <div class="muted" style="font-size:0.85rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${n.body || '<em>No content</em>'}</div>
+        </div>`;
+      }).join('');
+    }
+  }
 }
 function editNote(id) {
   const n = D.notes.find(x => x.id === id); if (!n) return;

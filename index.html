@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ELEVATE - Track your progress</title>
   <meta name="description" content="A personal productivity planner to monitor daily routines and track progress.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -355,8 +355,8 @@
         <section class="page active" id="page-dashboard">
           <div class="dash-header flex-b" style="margin-bottom:1.5rem">
             <div>
-              <h1 class="page-title">User Progress Report</h1>
-              <p class="page-sub" id="today-date">Loading…</p>
+              <h1 class="page-title" id="greeting-title">Welcome back! 👋</h1>
+              <p class="page-sub" id="greeting-sub">Loading…</p>
             </div>
           </div>
 
@@ -432,7 +432,7 @@
           </div>
 
           <!-- NEW RELEVANT INFO ROW -->
-          <div class="grid g4 mt2" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+          <div class="grid g4 mt2" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); align-items: stretch;">
             <div class="widget">
               <div class="flex-b w-title" style="margin-bottom: 1rem;">
                 <div style="margin:0;"><h3 class="dash-title"><i class="ri-list-check"></i> Recent Tasks</h3></div>
@@ -449,6 +449,26 @@
                 <button class="btn sm" onclick="goTo('habits')">View All</button>
               </div>
               <div id="dash-habits">
+                <!-- Populated by app.js -->
+              </div>
+            </div>
+
+            <div class="widget">
+              <div class="flex-b w-title" style="margin-bottom: 1rem;">
+                <div style="margin:0;"><h3 class="dash-title"><i class="ri-sticky-note-line"></i> Recent Notes</h3></div>
+                <button class="btn sm" onclick="goTo('notes')">View All</button>
+              </div>
+              <div id="dash-notes">
+                <!-- Populated by app.js -->
+              </div>
+            </div>
+
+            <div class="widget">
+              <div class="flex-b w-title" style="margin-bottom: 1rem;">
+                <div style="margin:0;"><h3 class="dash-title"><i class="ri-calendar-event-line"></i> Upcoming Events</h3></div>
+                <button class="btn sm" onclick="goTo('calendar')">View All</button>
+              </div>
+              <div id="dash-events">
                 <!-- Populated by app.js -->
               </div>
             </div>
