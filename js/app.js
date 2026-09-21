@@ -765,6 +765,21 @@ function renderHabits() {
     const hc = document.getElementById('hc-' + hi);
     WDAYS.forEach((day, di) => { const box = document.createElement('div'); box.className = 'h-chk' + (h.days[di] ? ' on' : ''); box.textContent = day; box.onclick = () => { h.days[di] = h.days[di] ? 0 : 1; renderHabits(); save(); }; hc.appendChild(box); });
   });
+
+  const dashHabits = document.getElementById('dash-habits');
+  if (dashHabits) {
+    if (!D.habits.length) {
+      dashHabits.innerHTML = '<div class="muted" style="padding:1rem 0; text-align:center;">No habits tracked yet — create one!</div>';
+    } else {
+      dashHabits.innerHTML = D.habits.slice(0, 3).map(h => {
+        const streak = calcStreak(h.days);
+        return `<div class="habit-info" style="margin-bottom:8px; background:var(--sidebar-glass); padding:8px 12px; border-radius:8px; display:flex; align-items:center; gap:12px;">
+          <div class="h-ico" style="background:rgba(0,242,254,.1); font-size:1.2rem; min-width:36px; height:36px;">${h.icon}</div>
+          <div><div class="h-name" style="font-size:0.95rem;">${h.name}</div><div class="h-streak" style="font-size:0.8rem;">🔥 ${streak} day streak</div></div>
+        </div>`;
+      }).join('');
+    }
+  }
 }
 function calcStreak(days) { const td = (new Date().getDay() + 6) % 7; let s = 0; for (let i = td; i >= 0; i--) { if (days[i]) s++; else break; } return s; }
 function delHabit(id) { D.habits = D.habits.filter(h => h.id !== id); renderHabits(); save(); toast('Habit removed.', 'info'); }
