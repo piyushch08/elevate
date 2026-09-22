@@ -1005,25 +1005,25 @@ body {
 }
 
 .dark-green-card {
-  background: linear-gradient(135deg, var(--accent), var(--accent2)) !important;
-  color: white !important;
-  border: none;
-  box-shadow: 0 10px 25px var(--glow) !important;
+  background: var(--glass) !important;
+  color: var(--tp) !important;
+  border: 1px solid var(--accent);
+  box-shadow: none !important;
 }
 
 .dark-green-card .sc-label,
 .dark-green-card .sc-val {
-  color: white !important;
+  color: var(--tp) !important;
 }
 
 .dark-green-card .sc-ico {
-  background: rgba(255, 255, 255, 0.2) !important;
-  color: white !important;
+  background: rgba(26, 115, 232, 0.1) !important;
+  color: var(--accent) !important;
 }
 
 .dark-green-card .sc-badge {
-  background: rgba(255, 255, 255, 0.25) !important;
-  color: white !important;
+  background: rgba(26, 115, 232, 0.1) !important;
+  color: var(--accent) !important;
 }
 
 .sc-head {
@@ -1085,21 +1085,8 @@ body {
 }
 
 .green-gradient {
-  background: linear-gradient(135deg, #e8ecff 0%, #d4d9fc 100%);
-  border: none;
-}
-
-.green-gradient .w-title h3 {
-  color: #1B2452;
-}
-
-[data-theme=dark] .green-gradient {
-  background: var(--glass) !important;
-  border: 1px solid var(--gb) !important;
-}
-
-[data-theme=dark] .green-gradient .w-title h3 {
-  color: var(--tp) !important;
+  background: var(--glass);
+  border: 1px solid var(--gb);
 }
 
 .sm-select {
@@ -2292,6 +2279,20 @@ label {
 
   .hide-mobile {
     display: none !important
+  }
+
+  .topbar {
+    padding: 0 0.8rem;
+    gap: 0.5rem;
+  }
+
+  .tb-logo .logo-text {
+    display: none;
+  }
+
+  .tb-actions > button[title="Toggle Theme"],
+  .tb-actions > button[title="Settings"] {
+    display: none;
   }
 
   .main {
