@@ -58,11 +58,24 @@
 *::after {
   box-sizing: border-box;
   margin: 0;
-  padding: 0
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html {
-  scroll-behavior: smooth
+  scroll-behavior: smooth;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior: none;
+}
+
+a, button, input, select, textarea, .nav-item, .cal-cell, .cp-dot, .s-dot, .theme-card, .note-card, .task-item, .habit-row, .h-chk, .chk, .tb-btn, .s-settings-btn {
+  touch-action: manipulation;
+}
+
+button, .tb-btn, .nav-item, .sidebar, .topbar, .bottom-nav, .cal-cell, .cp-dot, .s-dot, .theme-card {
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 ::-webkit-scrollbar {
@@ -85,6 +98,7 @@ body {
   min-height: 100vh;
   overflow: hidden;
   transition: color 0.3s, background 0.3s;
+  overscroll-behavior: none;
 }
 
 /* ===== BACKGROUND ===== */
@@ -555,7 +569,8 @@ body {
   padding: 1.5rem 1rem;
   z-index: 50;
   transition: transform .35s ease, background .4s, border-color .4s;
-  overflow-y: auto
+  overflow-y: auto;
+  will-change: transform;
 }
 
 .sidebar.open {
@@ -2455,4 +2470,24 @@ label {
 .stat-card {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+}
+
+/* ===== TOUCH FEEDBACK (ACTIVE STATES) ===== */
+.btn:active,
+.tb-btn:active,
+.nav-item:active,
+.cal-cell:not(.cal-empty):active,
+.cp-dot:active,
+.s-dot:active,
+.theme-card:active,
+.note-card:active,
+.task-item:active,
+.habit-row:active,
+.h-chk:active,
+.chk:active,
+.s-settings-btn:active,
+.mode-btn:active {
+  transform: scale(0.96) !important;
+  opacity: 0.8;
+  transition: transform 0.05s, opacity 0.05s !important;
 }
