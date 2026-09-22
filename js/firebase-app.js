@@ -396,6 +396,10 @@ if (btnPhoneSend && auth) {
         errEl.textContent = "Failed to send SMS: " + error.message;
         errEl.style.display = "block";
       }
+      if (recaptchaVerifier) {
+        try { recaptchaVerifier.clear(); } catch(e) {}
+        recaptchaVerifier = null;
+      }
     } finally {
       btnPhoneSend.disabled = false;
       btnPhoneSend.innerHTML = 'Send SMS Code';
@@ -422,6 +426,8 @@ if (btnPhoneVerify && auth) {
       await confirmationResult.confirm(code);
       console.log("Phone sign-in successful");
       
+      btnPhoneVerify.disabled = false;
+      btnPhoneVerify.innerHTML = 'Verify & Login';
     } catch (error) {
       console.error("Phone verification failed:", error);
       if (errEl) {
@@ -680,6 +686,12 @@ if (auth) {
 
         if (loginEmailInp) loginEmailInp.value = '';
         if (loginPasswordInp) loginPasswordInp.value = '';
+        if (loginPhoneInp) loginPhoneInp.value = '';
+        if (loginPhoneCodeInp) loginPhoneCodeInp.value = '';
+        if (btnPhoneVerify) {
+          btnPhoneVerify.disabled = false;
+          btnPhoneVerify.innerHTML = 'Verify & Login';
+        }
 
         if (btnLogout) btnLogout.disabled = false;
 

@@ -562,8 +562,8 @@ function renderTasks() {
   const rec = D.tasks.slice(-4).reverse();
   dash.innerHTML = rec.length ? rec.map(t => `<div class="task-item${t.done ? ' done' : ''}"><div class="chk${t.done ? ' on' : ''}" onclick="toggleTask(${t.id})"></div><span class="t-name">${t.name}</span></div>`).join('') : '<div class="muted">No tasks yet — add some!</div>';
 }
-function toggleTask(id) { const t = D.tasks.find(t => t.id === id); if (t) { t.done = !t.done; try { if (t.done) playSuccess(); else playClick(); } catch (e) { } renderTasks(); updateRings(); save(); } }
-function delTask(id) { D.tasks = D.tasks.filter(t => t.id !== id); renderTasks(); updateRings(); save(); toast('Task removed.', 'info'); }
+function toggleTask(id) { const t = D.tasks.find(t => String(t.id) === String(id)); if (t) { t.done = !t.done; try { if (t.done) playSuccess(); else playClick(); } catch (e) { } renderTasks(); updateRings(); save(); } }
+function delTask(id) { D.tasks = D.tasks.filter(t => String(t.id) !== String(id)); renderTasks(); updateRings(); save(); toast('Task removed.', 'info'); }
 function setFilter(f) {
   D.filter = f;
   ['all', 'active', 'done'].forEach(x => { const el = document.getElementById('f-' + x); if (el) el.classList.toggle('prim', x === f); });
