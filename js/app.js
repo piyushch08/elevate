@@ -902,11 +902,38 @@ function applyTheme(t, card, silent=false) {
   save(); 
   if(!silent) toast(`Theme: ${t}`, 'success');
 }
+window.selectedAvatar = null;
+window.selectAvatar = function(src, el) {
+  window.selectedAvatar = src;
+  document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+  document.getElementById('custom-avatar-name').textContent = '';
+};
+window.handleAvatarUpload = function(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    window.selectedAvatar = e.target.result;
+    document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
+    document.getElementById('custom-avatar-name').textContent = file.name;
+  };
+  reader.readAsDataURL(file);
+};
+window.updateAvatarUI = function(src) {
+  const uAvatar = document.getElementById('u-avatar');
+  const tbAvatar = document.getElementById('tb-avatar-btn');
+  if (src) {
+    if (uAvatar) uAvatar.innerHTML = `<img src="${src}" alt="Profile">`;
+    if (tbAvatar) tbAvatar.innerHTML = `<img src="${src}" alt="Profile">`;
+  }
+};
 function saveProfile() {
   const name = document.getElementById('p-name').value.trim(); const status = document.getElementById('p-status').value.trim();
   D.profile = D.profile || {};
   if (name) { document.getElementById('u-name').textContent = name; D.profile.name = name; }
   if (status) { document.getElementById('u-status').textContent = status; D.profile.status = status; }
+  if (window.selectedAvatar) { D.profile.avatar = window.selectedAvatar; window.updateAvatarUI(window.selectedAvatar); }
   updateGreeting(); save(); toast('Profile saved!', 'success');
 }
 function saveGoals() {

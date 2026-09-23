@@ -277,7 +277,7 @@
             id="theme-icon"></i></button>
         <button class="tb-btn" onclick="openM('m-settings')" title="Settings"><i
             class="ri-settings-4-line"></i></button>
-        <div class="tb-avatar" onclick="goTo('personalize')" title="Personalize"><i class="ri-user-smile-line"></i>
+        <div class="tb-avatar" id="tb-avatar-btn" onclick="goTo('personalize')" title="Personalize"><i class="ri-user-smile-line"></i>
         </div>
       </div>
       <!-- Notif panel -->
@@ -336,7 +336,7 @@
         </ul>
         <div class="s-footer">
           <div class="user-card">
-            <div class="s-avatar"><i class="ri-user-smile-line"></i></div>
+            <div class="s-avatar" id="u-avatar"><i class="ri-user-smile-line"></i></div>
             <div style="overflow:hidden">
               <span class="u-name" id="u-name" contenteditable="true" spellcheck="false">Explorer</span>
               <span class="u-status" id="u-status" contenteditable="true" spellcheck="false">On a roll today 🔥</span>
@@ -757,6 +757,41 @@
             </div>
             <div class="widget">
               <div class="w-title"><i class="ri-user-settings-line"></i> Your Profile</div>
+              
+              <div class="form-row">
+                <label>Profile Avatar</label>
+                <div class="avatar-grid" id="avatar-grid">
+                  <!-- Modern / Aesthetic -->
+                  <img src="https://api.dicebear.com/7.x/micah/svg?seed=Alex&backgroundColor=f8f9fa" class="avatar-option" onclick="selectAvatar(this.src, this)" title="Micah 1">
+                  <img src="https://api.dicebear.com/7.x/micah/svg?seed=Taylor&backgroundColor=f8f9fa" class="avatar-option" onclick="selectAvatar(this.src, this)" title="Micah 2">
+                  
+                  <!-- Soft / Pastel -->
+                  <img src="https://api.dicebear.com/7.x/lorelei/svg?seed=Eden&backgroundColor=fef6ff" class="avatar-option" onclick="selectAvatar(this.src, this)" title="Lorelei">
+                  
+                  <!-- Minimalist Line Art -->
+                  <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Casey&backgroundColor=ffffff" class="avatar-option" onclick="selectAvatar(this.src, this)" title="Notionist">
+                  
+                  <!-- Detailed / Classic -->
+                  <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Leo&backgroundColor=f0f4ff" class="avatar-option" onclick="selectAvatar(this.src, this)" title="Avataaar">
+                  
+                  <!-- Cute / Adventurer Neutral -->
+                  <img src="https://api.dicebear.com/7.x/adventurer-neutral/svg?seed=Sam&backgroundColor=fff0f5" class="avatar-option" onclick="selectAvatar(this.src, this)" title="Adventurer">
+                  
+                  <!-- Fun / Robot -->
+                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Spark&backgroundColor=e6f7ff" class="avatar-option" onclick="selectAvatar(this.src, this)" title="Bot">
+                  
+                  <!-- Abstract / Creative -->
+                  <img src="https://api.dicebear.com/7.x/rings/svg?seed=Aura" class="avatar-option" onclick="selectAvatar(this.src, this)" title="Abstract Rings">
+                  <img src="https://api.dicebear.com/7.x/shapes/svg?seed=Vibe" class="avatar-option" onclick="selectAvatar(this.src, this)" title="Geometric Shapes">
+                  <img src="https://api.dicebear.com/7.x/thumbs/svg?seed=Joy&backgroundColor=fffbea" class="avatar-option" onclick="selectAvatar(this.src, this)" title="Thumbs">
+                </div>
+                <div style="margin-top: 10px; display: flex; align-items: center; gap: 10px;">
+                  <button class="btn sm" onclick="document.getElementById('p-avatar-upload').click()"><i class="ri-upload-2-line"></i> Upload Custom</button>
+                  <input type="file" id="p-avatar-upload" accept="image/*" style="display:none;" onchange="handleAvatarUpload(event)">
+                  <span id="custom-avatar-name" class="muted" style="font-size: 0.8rem;"></span>
+                </div>
+              </div>
+
               <div class="form-row"><label>Display Name</label><input type="text" id="p-name" placeholder="Your name">
               </div>
               <div class="form-row"><label>Status Message</label><input type="text" id="p-status"

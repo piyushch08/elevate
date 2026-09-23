@@ -574,6 +574,17 @@ if (auth) {
               // Update local copy
               try { localStorage.setItem("elevate2", JSON.stringify(window.D)); } catch (e) { }
 
+              // Sync persistent profile data to UI
+              if (window.D.profile) {
+                if (window.D.profile.name) {
+                  const nameEl = document.getElementById("u-name");
+                  if (nameEl) nameEl.textContent = window.D.profile.name;
+                }
+                if (window.D.profile.avatar && typeof window.updateAvatarUI === 'function') {
+                  window.updateAvatarUI(window.D.profile.avatar);
+                }
+              }
+
               // Refresh UI
               if (typeof window.renderAll === "function") window.renderAll();
               if (typeof window.updateGreeting === "function") window.updateGreeting();

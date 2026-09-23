@@ -326,7 +326,8 @@ body {
   color: #fff;
   cursor: pointer;
   border: 2px solid var(--glow);
-  transition: box-shadow .25s
+  transition: box-shadow .25s;
+  overflow: hidden;
 }
 
 .tb-avatar:hover {
@@ -693,7 +694,40 @@ body {
   justify-content: center;
   font-size: 1rem;
   flex-shrink: 0;
-  color: #ffffff
+  color: #ffffff;
+  overflow: hidden;
+}
+
+.s-avatar img, .tb-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-grid {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.avatar-option {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+  background: var(--surface);
+}
+
+.avatar-option:hover {
+  transform: scale(1.1);
+}
+
+.avatar-option.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 10px var(--accent-tp);
 }
 
 .u-name {
