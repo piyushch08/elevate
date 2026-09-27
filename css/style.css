@@ -2525,3 +2525,14 @@ label {
   opacity: 0.8;
   transition: transform 0.05s, opacity 0.05s !important;
 }
+
+/* --- Performance & Smoothness Optimizations --- */
+.modal, .sidebar, .btn, .theme-card, .avatar-option, .task-card, .board-column, .w-body, .view {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+img {
+  image-rendering: -webkit-optimize-contrast;
+}
