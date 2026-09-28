@@ -254,6 +254,7 @@ function setupEditable() {
 let progressChartInst = null;
 let pieChartInst = null;
 
+let chartUpdateTimeout = null;
 function updateRings() {
   // Update the 4 top cards
   const focusHours = Number(((D.today.study || 0) / 60).toFixed(1));
@@ -267,11 +268,15 @@ function updateRings() {
   const elActive = document.getElementById('stat-active'); if(elActive) elActive.textContent = activeDays;
   
   if (typeof Chart !== 'undefined') {
-    updateProgressChart();
-    updatePieChart();
+    clearTimeout(chartUpdateTimeout);
+    chartUpdateTimeout = setTimeout(() => {
+      if (typeof updateProgressChart === 'function') updateProgressChart();
+      if (typeof updatePieChart === 'function') updatePieChart();
+    }, 150);
   } else {
     // If Chart.js isn't loaded yet, try again in 200ms
-    setTimeout(updateRings, 200);
+    clearTimeout(chartUpdateTimeout);
+    chartUpdateTimeout = setTimeout(updateRings, 200);
   }
 }
 
@@ -386,6 +391,10 @@ window.updateProgressChart = function() {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        animation: {
+          duration: 400,
+          easing: 'easeOutQuart'
+        },
         interaction: {
           mode: 'index',
           intersect: false,
@@ -507,6 +516,10 @@ window.updatePieChart = function() {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        animation: {
+          duration: 400,
+          easing: 'easeOutQuart'
+        },
         plugins: {
           legend: { display: false },
           tooltip: {
