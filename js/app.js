@@ -104,9 +104,13 @@ function save() {
   // Debounce localStorage writes (300ms) to prevent micro-stutters
   clearTimeout(localSaveTimeout);
   localSaveTimeout = setTimeout(() => {
-    try {
-      localStorage.setItem('elevate2', JSON.stringify(D));
-    } catch (e) { console.error('Error saving state:', e); }
+    const performSave = () => {
+      try {
+        localStorage.setItem('elevate2', JSON.stringify(D));
+      } catch (e) { console.error('Error saving state:', e); }
+    };
+    if (window.requestIdleCallback) requestIdleCallback(performSave);
+    else performSave();
   }, 300);
 
   // Sync to Firebase if the user is logged in (debounced to 1000ms)

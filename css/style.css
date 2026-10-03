@@ -824,11 +824,14 @@ body {
 /* ===== PAGES ===== */
 .page {
   display: none;
-  animation: pgIn .3s ease
+  animation: pgIn .3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
 }
 
 .page.active {
-  display: block
+  display: block;
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 1000px;
 }
 
 @keyframes pgIn {
@@ -1930,7 +1933,9 @@ label {
   padding: .7rem 0;
   border-bottom: 1px solid var(--gb);
   transition: opacity .25s;
-  color: var(--tp)
+  color: var(--tp);
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 60px;
 }
 
 .ex-row:last-child {
@@ -2078,7 +2083,9 @@ label {
   transition: all .25s;
   position: relative;
   overflow: hidden;
-  color: var(--tp)
+  color: var(--tp);
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 150px;
 }
 
 .note-card:hover {
