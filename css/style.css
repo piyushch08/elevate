@@ -69,11 +69,36 @@ html {
   overscroll-behavior: none;
 }
 
-a, button, input, select, textarea, .nav-item, .cal-cell, .cp-dot, .s-dot, .theme-card, .note-card, .task-item, .habit-row, .h-chk, .chk, .tb-btn, .s-settings-btn {
+a,
+button,
+input,
+select,
+textarea,
+.nav-item,
+.cal-cell,
+.cp-dot,
+.s-dot,
+.theme-card,
+.note-card,
+.task-item,
+.habit-row,
+.h-chk,
+.chk,
+.tb-btn,
+.s-settings-btn {
   touch-action: manipulation;
 }
 
-button, .tb-btn, .nav-item, .sidebar, .topbar, .bottom-nav, .cal-cell, .cp-dot, .s-dot, .theme-card {
+button,
+.tb-btn,
+.nav-item,
+.sidebar,
+.topbar,
+.bottom-nav,
+.cal-cell,
+.cp-dot,
+.s-dot,
+.theme-card {
   user-select: none;
   -webkit-user-select: none;
 }
@@ -698,7 +723,8 @@ body {
   overflow: hidden;
 }
 
-.s-avatar img, .tb-avatar img {
+.s-avatar img,
+.tb-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -2356,8 +2382,8 @@ label {
     display: none;
   }
 
-  .tb-actions > button[title="Toggle Theme"],
-  .tb-actions > button[title="Settings"] {
+  .tb-actions>button[title="Toggle Theme"],
+  .tb-actions>button[title="Settings"] {
     display: none;
   }
 
@@ -2544,7 +2570,15 @@ label {
 }
 
 /* --- Performance & Smoothness Optimizations --- */
-.modal, .sidebar, .btn, .theme-card, .avatar-option, .task-card, .board-column, .w-body, .view {
+.modal,
+.sidebar,
+.btn,
+.theme-card,
+.avatar-option,
+.task-card,
+.board-column,
+.w-body,
+.view {
   will-change: transform, opacity;
   backface-visibility: hidden;
   transform: translateZ(0);
