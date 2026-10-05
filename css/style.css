@@ -1871,18 +1871,24 @@ label {
   font-size: .9rem;
   font-weight: 500;
   cursor: pointer;
-  /* Optimized transition: targeting specific properties prevents layout thrashing */
-  transition: transform .35s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color .2s, box-shadow .2s;
+  /* Include border-color in the transition for smooth outline changes */
+  transition: transform .35s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color .2s, border-color .2s, box-shadow .2s;
   position: relative;
   background-color: transparent;
   color: var(--tp);
+  border: 1px solid transparent;
   z-index: 0;
+}
+
+.cal-cell:not(.cal-empty) {
+  border-color: var(--sidebar-border);
 }
 
 .cal-cell:not(.cal-empty):hover {
   background-color: var(--sidebar-hover);
   transform: scale(1.15) translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  border-color: var(--accent);
   z-index: 10;
 }
 
@@ -1890,11 +1896,13 @@ label {
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   color: #fff;
   font-weight: 700;
+  border-color: transparent;
   box-shadow: 0 4px 12px var(--glow);
 }
 
 .cal-cell.cal-today:hover {
   transform: scale(1.25) translateY(-4px);
+  border-color: transparent;
   box-shadow: 0 10px 25px var(--glow);
 }
 
