@@ -1923,6 +1923,11 @@ label {
   background: #fff;
 }
 
+.cal-sunday {
+  color: var(--danger) !important;
+  font-weight: 600;
+}
+
 .cal-cell.is-holiday {
   color: var(--danger);
 }

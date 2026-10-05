@@ -538,12 +538,19 @@
               </div>
               <div class="cal-grid" id="cal-grid"></div>
             </div>
-            <div class="widget">
-              <div class="w-title"><i class="ri-calendar-event-line"></i> Events</div>
-              <button class="btn prim full" onclick="openM('m-event')" style="margin-top:0"><i class="ri-add-line"></i>
-                Add Event</button>
-              <ul class="task-list" id="event-list" style="margin-top:1rem"></ul>
-              <div id="event-empty" class="center muted">No events yet.</div>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+              <div class="widget">
+                <div class="w-title"><i class="ri-calendar-event-line"></i> Events</div>
+                <button class="btn prim full" onclick="openM('m-event')" style="margin-top:0"><i class="ri-add-line"></i> Add Event</button>
+                <ul class="task-list" id="event-list" style="margin-top:1rem"></ul>
+                <div id="event-empty" class="center muted">No events yet.</div>
+              </div>
+
+              <div class="widget">
+                <div class="w-title"><i class="ri-sparkling-line"></i> Special Days & Festivals</div>
+                <ul class="task-list" id="holidays-list" style="margin-top:1rem"></ul>
+                <div id="holidays-empty" class="center muted">No special days this month.</div>
+              </div>
             </div>
           </div>
         </section>

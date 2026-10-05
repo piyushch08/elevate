@@ -603,11 +603,25 @@ function setFilter(f) {
 // ===== CALENDAR =====
 const publicHolidays = {
   '01-01': "New Year's Day",
+  '01-14': "Makar Sankranti",
+  '01-26': "Republic Day (IN)",
   '02-14': "Valentine's Day",
+  '03-08': "Intl. Women's Day",
+  '03-20': "Eid ul-Fitr",
+  '03-25': "Holi",
+  '04-22': "Earth Day",
+  '05-01': "Labour Day",
+  '06-21': "Intl. Yoga Day",
+  '07-04': "Independence Day (US)",
+  '08-15': "Independence Day (IN)",
+  '08-26': "Raksha Bandhan",
+  '09-04': "Janmashtami",
+  '10-02': "Gandhi Jayanti",
+  '10-18': "Dussehra",
   '10-31': "Halloween",
+  '11-08': "Diwali",
   '12-25': "Christmas",
-  '12-31': "New Year's Eve",
-  '07-04': "Independence Day"
+  '12-31': "New Year's Eve"
 };
 
 function changeCalDate(type, val) {
@@ -633,10 +647,17 @@ function renderCalendar() {
   const days = new Date(D.calY, D.calM + 1, 0).getDate(), today = new Date();
   
   let delay = 0;
+  let currentMonthHolidays = [];
+
   for (let day = 1; day <= days; day++) {
     const cell = document.createElement('div'); cell.className = 'cal-cell';
     const isToday = day === today.getDate() && D.calM === today.getMonth() && D.calY === today.getFullYear();
     if (isToday) cell.classList.add('cal-today');
+    
+    // Check if Sunday
+    if ((d.getDay() + day - 1) % 7 === 0) {
+      cell.classList.add('cal-sunday');
+    }
     
     cell.style.animation = `fadeScaleIn 0.3s ease forwards ${delay}s`;
     cell.style.opacity = '0';
@@ -653,6 +674,8 @@ function renderCalendar() {
       cell.classList.add('is-holiday');
       tooltip.push(publicHolidays[mmdd]);
       cell.innerHTML += `<div class="hol-name">${publicHolidays[mmdd]}</div>`;
+      
+      currentMonthHolidays.push({ date: day, name: publicHolidays[mmdd] });
     }
 
     if (dayEvents.length > 0) {
@@ -670,6 +693,27 @@ function renderCalendar() {
       openM('m-event');
     };
     grid.appendChild(cell);
+  }
+
+  // Render holidays in the widget below
+  const hList = document.getElementById('holidays-list');
+  const hEmpty = document.getElementById('holidays-empty');
+  if (hList && hEmpty) {
+    hList.innerHTML = '';
+    if (currentMonthHolidays.length === 0) {
+      hEmpty.style.display = 'block';
+    } else {
+      hEmpty.style.display = 'none';
+      currentMonthHolidays.forEach(h => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <div class="task-info">
+            <span class="task-text" style="font-weight: 600; color: var(--accent);"><i class="ri-sparkling-fill" style="margin-right:5px;"></i>${h.name}</span>
+            <span class="task-meta">${months[D.calM]} ${h.date}</span>
+          </div>`;
+        hList.appendChild(li);
+      });
+    }
   }
 }
 function calNav(dir) { D.calM += dir; if (D.calM > 11) { D.calM = 0; D.calY++; } if (D.calM < 0) { D.calM = 11; D.calY--; } renderCalendar(); }
