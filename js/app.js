@@ -601,27 +601,70 @@ function setFilter(f) {
 }
 
 // ===== CALENDAR =====
+const publicHolidays = {
+  '01-01': "New Year's Day",
+  '02-14': "Valentine's Day",
+  '10-31': "Halloween",
+  '12-25': "Christmas",
+  '12-31': "New Year's Eve",
+  '07-04': "Independence Day"
+};
+
+function changeCalDate(type, val) {
+  if (type === 'm') D.calM = parseInt(val);
+  else if (type === 'y') D.calY = parseInt(val);
+  renderCalendar();
+}
+
 function renderCalendar() {
   const grid = document.getElementById('cal-grid'); const lbl = document.getElementById('cal-label'); if (!grid) return;
   grid.innerHTML = '';
   const d = new Date(D.calY, D.calM, 1);
-  lbl.textContent = d.toLocaleString('default', { month: 'long' }) + ' ' + D.calY;
+  
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  let mOpts = months.map((m, i) => `<option value="${i}" ${i === D.calM ? 'selected' : ''}>${m}</option>`).join('');
+  let yOpts = '';
+  for(let y = 1900; y <= 2100; y++) yOpts += `<option value="${y}" ${y === D.calY ? 'selected' : ''}>${y}</option>`;
+  lbl.innerHTML = `<select class="cal-select" onchange="changeCalDate('m', this.value)">${mOpts}</select>
+                   <select class="cal-select" onchange="changeCalDate('y', this.value)">${yOpts}</select>`;
+
   ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(dy => { const h = document.createElement('div'); h.className = 'cal-hd'; h.textContent = dy; grid.appendChild(h); });
   for (let i = 0; i < d.getDay(); i++) { const e = document.createElement('div'); e.className = 'cal-cell cal-empty'; grid.appendChild(e); }
   const days = new Date(D.calY, D.calM + 1, 0).getDate(), today = new Date();
+  
+  let delay = 0;
   for (let day = 1; day <= days; day++) {
     const cell = document.createElement('div'); cell.className = 'cal-cell';
     const isToday = day === today.getDate() && D.calM === today.getMonth() && D.calY === today.getFullYear();
     if (isToday) cell.classList.add('cal-today');
+    
+    cell.style.animation = `fadeScaleIn 0.3s ease forwards ${delay}s`;
+    cell.style.opacity = '0';
+    delay += 0.01;
+
     const dateStr = `${D.calY}-${String(D.calM + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const mmdd = `${String(D.calM + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const dayEvents = D.events.filter(e => e.date === dateStr);
 
     cell.innerHTML = `<span>${day}</span>`;
+    
+    let tooltip = [];
+    if (publicHolidays[mmdd]) {
+      cell.classList.add('is-holiday');
+      tooltip.push(publicHolidays[mmdd]);
+      cell.innerHTML += `<div class="hol-name">${publicHolidays[mmdd]}</div>`;
+    }
+
     if (dayEvents.length > 0) {
       cell.classList.add('has-evt');
       cell.innerHTML += `<span class="evt-count">${dayEvents.length}</span>`;
-      cell.title = dayEvents.map(e => e.name).join(', ');
+      tooltip = tooltip.concat(dayEvents.map(e => e.name));
     }
+    
+    if (tooltip.length > 0) {
+      cell.title = tooltip.join(', ');
+    }
+
     cell.onclick = () => {
       document.getElementById('ev-date').value = dateStr;
       openM('m-event');

@@ -1818,6 +1818,30 @@ label {
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--accent);
+  display: flex;
+  gap: 10px;
+}
+
+.cal-select {
+  background: var(--surface);
+  color: var(--tp);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.cal-select:hover {
+  border-color: var(--accent);
+}
+
+@keyframes fadeScaleIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 .cal-grid {
@@ -1897,6 +1921,23 @@ label {
 
 .cal-cell.cal-today.has-evt::after {
   background: #fff;
+}
+
+.cal-cell.is-holiday {
+  color: var(--danger);
+}
+
+.hol-name {
+  font-size: 0.5rem;
+  position: absolute;
+  bottom: 12px;
+  text-align: center;
+  width: 90%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.8;
+  font-weight: 600;
 }
 
 .evt-count {
