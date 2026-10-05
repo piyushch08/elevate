@@ -750,17 +750,46 @@
           <h1 class="page-title">Personalization</h1>
           <p class="page-sub">Make ELEVATE truly yours — themes, profile, goals.</p>
           <div class="grid g2">
-            <div class="widget">
-              <div class="w-title"><i class="ri-palette-fill"></i> Theme</div>
-              <div class="theme-grid">
-                <div class="theme-card on" data-t="dark" onclick="applyTheme('dark',this)">
-                  <div class="th-dot" style="background:#1e293b;border:1px solid #334155;"></div>Minimal Dark
-                </div>
-                <div class="theme-card" data-t="light" onclick="applyTheme('light',this)">
-                  <div class="th-dot" style="background:#f1f5f9;border:1px solid #e2e8f0;"></div>Minimal Light
+            
+            <!-- Left Column for smaller widgets -->
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+              <div class="widget">
+                <div class="w-title"><i class="ri-palette-fill"></i> Theme</div>
+                <div class="theme-grid">
+                  <div class="theme-card on" data-t="dark" onclick="applyTheme('dark',this)">
+                    <div class="th-dot" style="background:#1e293b;border:1px solid #334155;"></div>Minimal Dark
+                  </div>
+                  <div class="theme-card" data-t="light" onclick="applyTheme('light',this)">
+                    <div class="th-dot" style="background:#f1f5f9;border:1px solid #e2e8f0;"></div>Minimal Light
+                  </div>
                 </div>
               </div>
+
+              <div class="widget">
+                <div class="w-title"><i class="ri-target-line"></i> Daily Goals</div>
+                <div class="form-row"><label>Study Goal (min/day)</label><input type="number" id="g-study"
+                    placeholder="e.g. 120"></div>
+                <div class="form-row"><label>Calorie Goal (kcal)</label><input type="number" id="g-cal"
+                    placeholder="e.g. 2200"></div>
+                <div class="form-row"><label>Protein Goal (g)</label><input type="number" id="g-prot"
+                    placeholder="e.g. 150"></div>
+                <div class="form-row"><label>Carbs Goal (g)</label><input type="number" id="g-carb"
+                    placeholder="e.g. 250"></div>
+                <div class="form-row"><label>Water Goal (ml)</label><input type="number" id="g-water"
+                    placeholder="e.g. 2000"></div>
+                <button class="btn prim full" onclick="saveGoals()"><i class="ri-save-line"></i> Save Goals</button>
+              </div>
+
+              <div class="widget"
+                style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+                <i class="ri-double-quotes-l" style="font-size:2rem;color:var(--accent);margin-bottom:10px"></i>
+                <p id="quote-text" style="font-size:1rem;font-weight:300;line-height:1.6"></p>
+                <p id="quote-auth" class="muted" style="margin-top:6px"></p>
+                <button class="btn sm mt2" onclick="newQuote()"><i class="ri-refresh-line"></i> New Quote</button>
+              </div>
             </div>
+
+            <!-- Right Column for the tall Profile widget -->
             <div class="widget">
               <div class="w-title"><i class="ri-user-settings-line"></i> Your Profile</div>
               
@@ -802,27 +831,7 @@
                   placeholder="On a roll today 🔥"></div>
               <button class="btn prim full" onclick="saveProfile()"><i class="ri-save-line"></i> Save Profile</button>
             </div>
-            <div class="widget">
-              <div class="w-title"><i class="ri-target-line"></i> Daily Goals</div>
-              <div class="form-row"><label>Study Goal (min/day)</label><input type="number" id="g-study"
-                  placeholder="e.g. 120"></div>
-              <div class="form-row"><label>Calorie Goal (kcal)</label><input type="number" id="g-cal"
-                  placeholder="e.g. 2200"></div>
-              <div class="form-row"><label>Protein Goal (g)</label><input type="number" id="g-prot"
-                  placeholder="e.g. 150"></div>
-              <div class="form-row"><label>Carbs Goal (g)</label><input type="number" id="g-carb"
-                  placeholder="e.g. 250"></div>
-              <div class="form-row"><label>Water Goal (ml)</label><input type="number" id="g-water"
-                  placeholder="e.g. 2000"></div>
-              <button class="btn prim full" onclick="saveGoals()"><i class="ri-save-line"></i> Save Goals</button>
-            </div>
-            <div class="widget"
-              style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
-              <i class="ri-double-quotes-l" style="font-size:2rem;color:var(--accent);margin-bottom:10px"></i>
-              <p id="quote-text" style="font-size:1rem;font-weight:300;line-height:1.6"></p>
-              <p id="quote-auth" class="muted" style="margin-top:6px"></p>
-              <button class="btn sm mt2" onclick="newQuote()"><i class="ri-refresh-line"></i> New Quote</button>
-            </div>
+            
           </div>
         </section>
 
