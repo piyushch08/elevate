@@ -1823,17 +1823,18 @@ label {
 .cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
+  gap: 8px;
 }
 
 .cal-hd {
   text-align: center;
   font-size: .75rem;
   color: var(--ts);
-  padding: 6px 0;
-  font-weight: 700;
+  padding: 8px 0;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
+  opacity: 0.7;
 }
 
 .cal-cell {
@@ -1842,57 +1843,55 @@ label {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
-  font-size: .85rem;
+  border-radius: 50%;
+  font-size: .9rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all .2s ease;
   position: relative;
-  border: 1px solid var(--gb);
-  background: var(--glass);
-  overflow: hidden;
-  color: var(--tp)
+  background: transparent;
+  color: var(--tp);
+  border: 2px solid transparent;
 }
 
 .cal-cell:not(.cal-empty):hover {
-  background: var(--glass);
-  border-color: var(--accent);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background: var(--sidebar-hover);
+  transform: scale(1.1);
 }
 
 .cal-cell.cal-today {
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   color: #fff;
   font-weight: 700;
-  border: none;
-  box-shadow: 0 0 15px var(--glow);
+  box-shadow: 0 4px 12px var(--glow);
 }
 
 .cal-cell.cal-today:hover {
-  filter: brightness(1.1);
-  transform: translateY(-3px);
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 6px 16px var(--glow);
 }
 
 .cal-cell.has-evt {
-  border-color: rgba(59, 70, 242, .2);
-  background: rgba(59, 70, 242, 0.05);
+  font-weight: 700;
+  color: var(--accent);
 }
 
 .cal-cell.has-evt::after {
   content: '';
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: var(--accent);
   position: absolute;
-  bottom: 6px;
-  box-shadow: 0 0 6px var(--glow);
+  bottom: 8px;
+}
+
+.cal-cell.cal-today.has-evt {
+  color: #fff;
 }
 
 .cal-cell.cal-today.has-evt::after {
   background: #fff;
-  box-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
 }
 
 .evt-count {
