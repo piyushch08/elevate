@@ -193,18 +193,31 @@ function tick() {
 function pad(n) { return String(n).padStart(2, '0') }
 function fmtSec(s) { return `${pad(Math.floor(s / 60))}:${pad(s % 60)}` }
 function updateGreeting() {
-  const h = new Date().getHours();
-  const g = h < 12 ? 'Good Morning ☀️' : h < 17 ? 'Good Afternoon 🌤️' : 'Good Evening 🌙';
-  const name = document.getElementById('u-name')?.textContent || 'Explorer';
-  const el = document.getElementById('greeting'); if (el) el.textContent = `${g}, ${name}!`;
   const hr = new Date().getHours();
-  let dashG = 'Good evening';
-  if (hr < 12) dashG = 'Good morning';
-  else if (hr < 18) dashG = 'Good afternoon';
+  let dashG = 'Good Evening';
+  let emoji = '🌙';
+
+  if (hr >= 5 && hr < 12) {
+    dashG = 'Good Morning';
+    emoji = '☀️';
+  } else if (hr >= 12 && hr < 17) {
+    dashG = 'Good Afternoon';
+    emoji = '🌤️';
+  } else if (hr >= 17 && hr < 22) {
+    dashG = 'Good Evening';
+    emoji = '🌙';
+  } else {
+    dashG = 'Late Night Hustle';
+    emoji = '🦉';
+  }
+
+  const name = document.getElementById('u-name')?.textContent || 'Explorer';
   
-  const dashName = document.getElementById('u-name')?.textContent || 'Explorer';
+  const el = document.getElementById('greeting'); 
+  if (el) el.textContent = `${dashG}, ${name}! ${emoji}`;
+
   const gt = document.getElementById('greeting-title');
-  if (gt) gt.innerHTML = `${dashG}, ${dashName}! 👋`;
+  if (gt) gt.innerHTML = `${dashG}, ${name}! ${emoji}`;
   
   const gs = document.getElementById('greeting-sub');
   if (gs) {
