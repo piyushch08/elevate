@@ -66,7 +66,6 @@ html {
   scroll-behavior: smooth;
   text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
-  overscroll-behavior: none;
 }
 
 a,
@@ -123,7 +122,6 @@ body {
   min-height: 100vh;
   overflow: hidden;
   transition: color 0.3s, background 0.3s;
-  overscroll-behavior: none;
 }
 
 /* ===== BACKGROUND ===== */
@@ -808,7 +806,8 @@ body {
   flex-direction: column;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
-  width: 100%
+  width: 100%;
+  overscroll-behavior-y: contain;
 }
 
 .top-nav-bar {
@@ -852,7 +851,7 @@ body {
 /* ===== PAGES ===== */
 .page {
   display: none;
-  animation: pgIn .3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: pgIn .15s cubic-bezier(0.0, 0.0, 0.2, 1);
   will-change: transform, opacity;
 }
 
@@ -929,6 +928,13 @@ body {
   grid-template-columns: 1fr
 }
 
+.g-sidebar-layout {
+  display: grid;
+  grid-template-columns: minmax(250px, 300px) 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
 /* ===== WIDGETS / STAT CARDS ===== */
 .widget {
   background: var(--glass);
@@ -940,6 +946,7 @@ body {
   position: relative;
   overflow: hidden;
   will-change: transform, box-shadow;
+  contain: content;
 }
 
 .widget:hover {
@@ -1871,8 +1878,8 @@ label {
   font-size: .9rem;
   font-weight: 500;
   cursor: pointer;
-  /* Include border-color in the transition for smooth outline changes */
-  transition: transform .35s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color .2s, border-color .2s, box-shadow .2s;
+  /* Ultra-smooth, performant transition */
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.3s ease;
   position: relative;
   background-color: transparent;
   color: var(--tp);
@@ -1885,10 +1892,11 @@ label {
 }
 
 .cal-cell:not(.cal-empty):hover {
-  background-color: var(--sidebar-hover);
-  transform: scale(1.15) translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  background-color: var(--surface);
+  transform: scale(1.12) translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), inset 0 0 0 1px var(--accent);
   border-color: var(--accent);
+  color: var(--accent);
   z-index: 10;
 }
 
@@ -1901,9 +1909,10 @@ label {
 }
 
 .cal-cell.cal-today:hover {
-  transform: scale(1.25) translateY(-4px);
+  transform: scale(1.18) translateY(-3px);
   border-color: transparent;
-  box-shadow: 0 10px 25px var(--glow);
+  box-shadow: 0 12px 28px var(--glow);
+  color: #fff;
 }
 
 .cal-cell.has-evt {
@@ -2449,11 +2458,20 @@ label {
   }
 
   .main {
-    padding: 1.25rem .9rem 5.5rem
+    padding: 1.25rem .9rem 5.5rem;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    transform: translate3d(0, 0, 0);
+  }
+
+  .g-sidebar-layout {
+    grid-template-columns: 1fr !important;
   }
 
   .widget {
     padding: 1.1rem;
+    box-shadow: none;
+    will-change: auto;
   }
 
   .page-title {

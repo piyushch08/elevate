@@ -41,6 +41,10 @@ window.checkNewDay = function() {
       D.streak = [0, 0, 0, 0, 0, 0, 0];
       D.habits.forEach(h => h.days = [0, 0, 0, 0, 0, 0, 0]);
     }
+    
+    // Reset daily checklists
+    D.supplements = { multi: false, omega: false, veg: false, sugar: false };
+    
     D.lastActiveDate = today;
     return true; // indicates it was reset
   }
@@ -95,13 +99,16 @@ function renderAll() {
   renderStreak(); renderHabits(); renderNotes();
   renderCalendar(); updateRings(); updateMacros(); updateWaterUI();
   renderSubjects();
+  
+  // Extra widgets
+  renderStudyExtras(); renderDietExtras(); renderPRs();
 }
 let localSaveTimeout = null;
 let firestoreSaveTimeout = null;
 function save() {
   D.lastUid = window.currentUserUid || 'guest';
   
-  // Debounce localStorage writes (300ms) to prevent micro-stutters
+  // Debounce localStorage writes (50ms) for almost zero latency saves
   clearTimeout(localSaveTimeout);
   localSaveTimeout = setTimeout(() => {
     const performSave = () => {
@@ -111,7 +118,7 @@ function save() {
     };
     if (window.requestIdleCallback) requestIdleCallback(performSave);
     else performSave();
-  }, 300);
+  }, 50);
 
   // Sync to Firebase if the user is logged in (debounced to 1000ms)
   if (window.saveToFirestore) {
@@ -939,6 +946,29 @@ function renderHabits() {
       }).join('');
     }
   }
+
+  // Calculate consistency and perfect days
+  let perfectDays = 0;
+  let totalCompletions = 0;
+  let activeHabits = D.habits.length;
+  if (activeHabits > 0) {
+    for (let d = 0; d < 7; d++) {
+      let dailyScore = 0;
+      D.habits.forEach(h => { if (h.days[d]) dailyScore++; });
+      if (dailyScore === activeHabits) perfectDays++;
+      totalCompletions += dailyScore;
+    }
+    const consistency = Math.round((totalCompletions / (activeHabits * 7)) * 100);
+    const cd = document.getElementById('habit-consistency');
+    if (cd) cd.textContent = consistency + '%';
+    const pd = document.getElementById('perfect-days-disp');
+    if (pd) pd.textContent = perfectDays + (perfectDays === 1 ? ' Day' : ' Days');
+  } else {
+    const cd = document.getElementById('habit-consistency');
+    if (cd) cd.textContent = '0%';
+    const pd = document.getElementById('perfect-days-disp');
+    if (pd) pd.textContent = '0 Days';
+  }
 }
 function calcStreak(days) { const td = (new Date().getDay() + 6) % 7; let s = 0; for (let i = td; i >= 0; i--) { if (days[i]) s++; else break; } return s; }
 function delHabit(id) { D.habits = D.habits.filter(h => h.id !== id); renderHabits(); save(); toast('Habit removed.', 'info'); }
@@ -978,6 +1008,11 @@ function renderNotes() {
     card.onclick = () => editNote(n.id); grid.appendChild(card);
   });
 
+  const statTotal = document.getElementById('stat-total-notes');
+  if(statTotal) statTotal.textContent = D.notes.length;
+  const statLast = document.getElementById('stat-last-note');
+  if(statLast) statLast.textContent = D.notes.length > 0 ? D.notes[0].date : 'N/A';
+
   const dashNotes = document.getElementById('dash-notes');
   if (dashNotes) {
     if (!D.notes.length) {
@@ -1004,6 +1039,15 @@ function editNote(id) {
   openM('m-note');
 }
 function delNote(id) { D.notes = D.notes.filter(x => x.id !== id); renderNotes(); save(); toast('Note deleted.', 'info'); }
+
+window.filterNotes = function(q) {
+  q = q.toLowerCase();
+  const cards = document.querySelectorAll('#notes-grid .note-card');
+  cards.forEach(card => {
+    const txt = card.innerText.toLowerCase();
+    card.style.display = txt.includes(q) ? 'flex' : 'none';
+  });
+};
 
 // ===== PERSONALIZE =====
 function applyTheme(t, card, silent=false) {
@@ -1152,6 +1196,136 @@ function setupSearch() {
       }
     }
   });
+}
+
+
+// ===== EXTRA WIDGETS LOGIC =====
+window.saveScratchpad = function() {
+  D.studyNotes = document.getElementById('study-scratchpad').value;
+  save();
+};
+window.saveStudyGoal = function() {
+  const val = document.getElementById('study-goal-input').value.trim();
+  if(val) {
+    D.studyGoal = val;
+    save();
+    renderStudyExtras();
+    document.getElementById('study-goal-input').value = '';
+    toast('Study goal set!', 'success');
+  }
+};
+window.clearStudyGoal = function() {
+  D.studyGoal = '';
+  save();
+  renderStudyExtras();
+};
+function renderStudyExtras() {
+  const sp = document.getElementById('study-scratchpad');
+  if(sp) sp.value = D.studyNotes || '';
+  const sg = document.getElementById('study-goal-disp');
+  if(sg) {
+    if(D.studyGoal) sg.innerHTML = `<i class="ri-focus-3-fill"></i> ${D.studyGoal} <button class="btn sm dng" onclick="clearStudyGoal()" style="margin-left:10px; padding:2px 6px;"><i class="ri-close-line"></i></button>`;
+    else sg.innerHTML = 'No goal set.';
+  }
+}
+
+window.saveSupplements = function() {
+  if(!D.supplements) D.supplements = { multi: false, omega: false, veg: false, sugar: false };
+  D.supplements.multi = document.getElementById('diet-multi').checked;
+  D.supplements.omega = document.getElementById('diet-omega').checked;
+  D.supplements.veg = document.getElementById('diet-veg').checked;
+  D.supplements.sugar = document.getElementById('diet-sugar').checked;
+  save();
+};
+function renderDietExtras() {
+  if(!D.supplements) D.supplements = { multi: false, omega: false, veg: false, sugar: false };
+  const dmulti = document.getElementById('diet-multi');
+  if(dmulti) {
+    dmulti.checked = D.supplements.multi;
+    document.getElementById('diet-omega').checked = D.supplements.omega;
+    document.getElementById('diet-veg').checked = D.supplements.veg;
+    document.getElementById('diet-sugar').checked = D.supplements.sugar;
+  }
+}
+window.calcBMI = function() {
+  const w = parseFloat(document.getElementById('bmi-weight').value);
+  const h = parseFloat(document.getElementById('bmi-height').value) / 100;
+  const res = document.getElementById('bmi-result');
+  if(w && h) {
+    const bmi = (w / (h * h)).toFixed(1);
+    let cat = 'Normal'; let col = 'var(--success)';
+    if(bmi < 18.5) { cat = 'Underweight'; col = 'var(--warning)'; }
+    else if(bmi >= 25 && bmi < 30) { cat = 'Overweight'; col = 'var(--warning)'; }
+    else if(bmi >= 30) { cat = 'Obese'; col = 'var(--danger)'; }
+    res.innerHTML = `BMI: ${bmi} <span style="color:${col}">(${cat})</span>`;
+  }
+};
+
+let restTimer;
+let restLeft = 0;
+window.startRest = function(sec) {
+  clearInterval(restTimer);
+  restLeft = sec;
+  updateRestDisp();
+  restTimer = setInterval(() => {
+    restLeft--;
+    updateRestDisp();
+    if(restLeft <= 0) {
+      clearInterval(restTimer);
+      toast('Rest time is over! Back to work! 🚀', 'info');
+    }
+  }, 1000);
+};
+window.stopRest = function() {
+  clearInterval(restTimer);
+  restLeft = 0;
+  updateRestDisp();
+};
+function updateRestDisp() {
+  const el = document.getElementById('rest-disp');
+  if(!el) return;
+  if(restLeft === 0) { el.textContent = '00:00'; return; }
+  const m = String(Math.floor(restLeft / 60)).padStart(2, '0');
+  const s = String(restLeft % 60).padStart(2, '0');
+  el.textContent = `${m}:${s}`;
+}
+
+window.addPR = function() {
+  const n = document.getElementById('pr-name').value.trim();
+  const w = document.getElementById('pr-weight').value.trim();
+  if(n && w) {
+    if(!D.prs) D.prs = [];
+    D.prs.push({ lift: n, weight: w });
+    save();
+    document.getElementById('pr-name').value = '';
+    document.getElementById('pr-weight').value = '';
+    renderPRs();
+    toast('Personal record added!', 'success');
+  }
+};
+window.deletePR = function(idx) {
+  D.prs.splice(idx, 1);
+  save();
+  renderPRs();
+};
+function renderPRs() {
+  const list = document.getElementById('pr-list');
+  if(!list) return;
+  if(!D.prs || D.prs.length === 0) {
+    list.innerHTML = '<div class="center muted" style="padding:10px 0;">No PRs added yet.</div>';
+    return;
+  }
+  list.innerHTML = D.prs.map((pr, i) => `
+    <li>
+      <div class="task-info">
+        <span class="task-text" style="font-weight:600"><i class="ri-medal-line" style="margin-right:5px; color:var(--accent);"></i>${pr.lift}</span>
+        <span class="task-meta" style="color:var(--accent); font-weight:700;">${pr.weight}</span>
+      </div>
+      <div class="task-actions">
+        <button class="btn sm dng" onclick="deletePR(${i})"><i class="ri-delete-bin-line"></i></button>
+      </div>
+    </li>
+  `).join('');
 }
 
 

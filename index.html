@@ -593,6 +593,18 @@
                   placeholder="Topics covered…"></div>
               <button class="btn prim full" onclick="logStudy()"><i class="ri-save-line"></i> Log Session</button>
             </div>
+            <div class="widget">
+              <div class="w-title"><i class="ri-sticky-note-line"></i> Quick Notes</div>
+              <textarea id="study-scratchpad" placeholder="Jot down quick thoughts, formulas, or reminders..." style="width:100%; height:120px; resize:none; padding:10px; border-radius:12px; border:1px solid var(--sidebar-border); background:var(--bg); color:var(--tp); font-family:inherit; margin-bottom:10px;" onblur="saveScratchpad()"></textarea>
+            </div>
+            <div class="widget">
+              <div class="w-title"><i class="ri-focus-3-line"></i> Today's Study Goal</div>
+              <div class="form-row">
+                <input type="text" id="study-goal-input" placeholder="e.g. Complete Chapter 4...">
+              </div>
+              <button class="btn prim full" onclick="saveStudyGoal()"><i class="ri-checkbox-circle-line"></i> Set Goal</button>
+              <div id="study-goal-disp" class="center muted mt2" style="font-weight:600; color:var(--accent);">No goal set.</div>
+            </div>
             <div class="widget" style="grid-column:1/-1">
               <div class="flex-b" style="margin-bottom:1rem">
                 <div class="w-title" style="margin:0"><i class="ri-alarm-warning-line"></i> Deadlines</div><button
@@ -664,6 +676,24 @@
               <ul class="task-list" id="meal-list"></ul>
               <div id="meal-empty" class="center muted">No meals logged. Eat well! 🥗</div>
             </div>
+            <div class="widget">
+              <div class="w-title"><i class="ri-capsule-line"></i> Daily Checklist</div>
+              <ul class="task-list" style="margin-top:0.5rem">
+                <li><label style="display:flex; gap:10px; align-items:center; cursor:pointer"><input type="checkbox" id="diet-multi" class="diet-check" onchange="saveSupplements()"> Multivitamin / Supplements</label></li>
+                <li><label style="display:flex; gap:10px; align-items:center; cursor:pointer"><input type="checkbox" id="diet-omega" class="diet-check" onchange="saveSupplements()"> Omega-3 / Fish Oil</label></li>
+                <li><label style="display:flex; gap:10px; align-items:center; cursor:pointer"><input type="checkbox" id="diet-veg" class="diet-check" onchange="saveSupplements()"> 5+ Servings Veggies</label></li>
+                <li><label style="display:flex; gap:10px; align-items:center; cursor:pointer"><input type="checkbox" id="diet-sugar" class="diet-check" onchange="saveSupplements()"> No Added Sugar</label></li>
+              </ul>
+            </div>
+            <div class="widget">
+              <div class="w-title"><i class="ri-calculator-line"></i> BMI Calculator</div>
+              <div style="display:flex; gap:8px;">
+                <input type="number" id="bmi-weight" placeholder="Weight (kg)">
+                <input type="number" id="bmi-height" placeholder="Height (cm)">
+              </div>
+              <button class="btn full mt1" onclick="calcBMI()">Calculate BMI</button>
+              <div id="bmi-result" class="center mt1" style="font-weight:600; font-size:1.1rem; color:var(--accent); min-height:1.5rem"></div>
+            </div>
           </div>
         </section>
 
@@ -698,6 +728,25 @@
                   class="btn sm" onclick="saveGoal()">Save</button></div>
               <p class="muted mt1" id="goal-disp">Set your weekly target above.</p>
             </div>
+            <div class="widget" style="text-align:center; display:flex; flex-direction:column; justify-content:center;">
+              <div class="w-title" style="justify-content:center"><i class="ri-timer-flash-line"></i> Rest Timer</div>
+              <div class="timer-disp" id="rest-disp" style="font-size:3rem; margin:15px 0;">00:00</div>
+              <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap">
+                <button class="btn sm" onclick="startRest(30)">30s</button>
+                <button class="btn sm" onclick="startRest(60)">60s</button>
+                <button class="btn sm" onclick="startRest(90)">90s</button>
+                <button class="btn sm dng" onclick="stopRest()"><i class="ri-stop-circle-line"></i></button>
+              </div>
+            </div>
+            <div class="widget">
+              <div class="w-title"><i class="ri-trophy-line"></i> Personal Records</div>
+              <ul class="task-list" id="pr-list" style="margin-bottom:10px;"></ul>
+              <div style="display:flex; gap:6px;">
+                <input type="text" id="pr-name" placeholder="Lift (e.g. Bench)" style="flex:2">
+                <input type="text" id="pr-weight" placeholder="Weight" style="flex:1">
+                <button class="btn prim sm" onclick="addPR()"><i class="ri-add-line"></i></button>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -709,31 +758,46 @@
               <p class="page-sub">Build powerful habits one day at a time.</p>
             </div><button class="btn prim" onclick="showHabitForm()"><i class="ri-add-line"></i> New Habit</button>
           </div>
-          <div class="grid g1 mt2">
-            <div class="widget" id="habit-form" style="display:none">
-              <div class="w-title"><i class="ri-add-circle-line"></i> New Habit</div>
-              <div style="display:flex;gap:8px;flex-wrap:wrap">
-                <input type="text" id="h-name" placeholder="Habit name (e.g. Morning Run)"
-                  style="flex:2;min-width:150px">
-                <select id="h-icon" style="flex:1;min-width:120px">
-                  <option value="🏃">🏃 Exercise</option>
-                  <option value="📚">📚 Study</option>
-                  <option value="💧">💧 Hydrate</option>
-                  <option value="🧘">🧘 Meditate</option>
-                  <option value="🥗">🥗 Eat Healthy</option>
-                  <option value="😴">😴 Sleep Early</option>
-                  <option value="✍️">✍️ Journal</option>
-                  <option value="🎯">🎯 Custom</option>
-                </select>
-                <button class="btn prim sm" onclick="saveHabit()">Add</button>
-                <button class="btn sm" onclick="hideHabitForm()">Cancel</button>
+          <div class="grid g2 mt2" style="align-items:start;">
+            <div style="display:flex; flex-direction:column; gap:20px;">
+              <div class="widget" id="habit-form" style="display:none">
+                <div class="w-title"><i class="ri-add-circle-line"></i> New Habit</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <input type="text" id="h-name" placeholder="Habit name (e.g. Morning Run)"
+                    style="flex:2;min-width:150px">
+                  <select id="h-icon" style="flex:1;min-width:120px">
+                    <option value="🏃">🏃 Exercise</option>
+                    <option value="📚">📚 Study</option>
+                    <option value="💧">💧 Hydrate</option>
+                    <option value="🧘">🧘 Meditate</option>
+                    <option value="🥗">🥗 Eat Healthy</option>
+                    <option value="😴">😴 Sleep Early</option>
+                    <option value="✍️">✍️ Journal</option>
+                    <option value="🎯">🎯 Custom</option>
+                  </select>
+                  <button class="btn prim sm" onclick="saveHabit()">Add</button>
+                  <button class="btn sm" onclick="hideHabitForm()">Cancel</button>
+                </div>
+              </div>
+              <div class="widget">
+                <div class="w-title"><i class="ri-seedling-line"></i> This Week</div>
+                <div id="habit-list"></div>
+                <div id="habit-empty" class="center muted"><i class="ri-seedling-line"
+                    style="font-size:2rem;display:block;color:var(--accent)"></i>No habits yet. Start building!</div>
               </div>
             </div>
-            <div class="widget">
-              <div class="w-title"><i class="ri-seedling-line"></i> This Week</div>
-              <div id="habit-list"></div>
-              <div id="habit-empty" class="center muted"><i class="ri-seedling-line"
-                  style="font-size:2rem;display:block;color:var(--accent)"></i>No habits yet. Start building!</div>
+            
+            <div style="display:flex; flex-direction:column; gap:20px;">
+              <div class="widget" style="text-align:center;">
+                <div class="w-title" style="justify-content:center"><i class="ri-fire-fill"></i> Overall Consistency</div>
+                <div class="timer-disp" id="habit-consistency" style="font-size:3rem; margin:15px 0; color:var(--accent)">0%</div>
+                <p class="muted">Average completion this week</p>
+              </div>
+              <div class="widget">
+                <div class="w-title"><i class="ri-award-line"></i> Perfect Days</div>
+                <div id="perfect-days-disp" class="center mt1" style="font-size:1.5rem; font-weight:700; color:var(--success)">0 Days</div>
+                <p class="muted center mt1">Days where all habits were completed.</p>
+              </div>
             </div>
           </div>
         </section>
@@ -746,9 +810,29 @@
               <p class="page-sub">Capture thoughts, ideas, and reflections.</p>
             </div><button class="btn prim" onclick="openNoteForm()"><i class="ri-add-line"></i> New Note</button>
           </div>
-          <div class="notes-grid" id="notes-grid"></div>
-          <div id="notes-empty" class="center muted" style="padding:3rem 0"><i class="ri-sticky-note-line"
-              style="font-size:2.5rem;display:block;color:var(--accent)"></i>No notes yet. Capture your first thought!
+          <div class="g-sidebar-layout mt2">
+            <!-- Left Side: Stats / Search -->
+            <div style="display:flex; flex-direction:column; gap:20px;">
+              <div class="widget">
+                <div class="w-title"><i class="ri-search-line"></i> Search Notes</div>
+                <input type="text" id="note-search" placeholder="Search by title or content..." style="width:100%; padding:0.6rem;" onkeyup="filterNotes(this.value)">
+              </div>
+              <div class="widget">
+                <div class="w-title"><i class="ri-bar-chart-box-line"></i> Notebook Stats</div>
+                <ul class="task-list mt1">
+                  <li><span class="task-text">Total Notes</span><span class="task-meta" id="stat-total-notes" style="font-weight:700; color:var(--accent); font-size:1.1rem">0</span></li>
+                  <li><span class="task-text">Last Updated</span><span class="task-meta" id="stat-last-note" style="font-weight:700; color:var(--accent);">N/A</span></li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Right Side: Grid -->
+            <div>
+              <div class="notes-grid" id="notes-grid" style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));"></div>
+              <div id="notes-empty" class="center muted" style="padding:3rem 0"><i class="ri-sticky-note-line"
+                  style="font-size:2.5rem;display:block;color:var(--accent)"></i>No notes yet. Capture your first thought!
+              </div>
+            </div>
           </div>
         </section>
 
