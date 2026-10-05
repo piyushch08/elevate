@@ -892,6 +892,11 @@ body {
   transform: translateY(10px);
 }
 
+.greeting-emoji {
+  -webkit-text-fill-color: initial;
+  background: none;
+}
+
 [data-theme=dark] .page-title,
 [data-theme=dark] .dash-title {
   background: linear-gradient(135deg, var(--accent), var(--accent2));

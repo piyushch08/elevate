@@ -214,10 +214,10 @@ function updateGreeting() {
   const name = document.getElementById('u-name')?.textContent || 'Explorer';
   
   const el = document.getElementById('greeting'); 
-  if (el) el.textContent = `${dashG}, ${name}! ${emoji}`;
+  if (el) el.innerHTML = `${dashG}, ${name}! <span class="greeting-emoji">${emoji}</span>`;
 
   const gt = document.getElementById('greeting-title');
-  if (gt) gt.innerHTML = `${dashG}, ${name}! ${emoji}`;
+  if (gt) gt.innerHTML = `${dashG}, ${name}! <span class="greeting-emoji">${emoji}</span>`;
   
   const gs = document.getElementById('greeting-sub');
   if (gs) {
