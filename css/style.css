@@ -1847,16 +1847,20 @@ label {
   font-size: .9rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all .2s ease;
+  transition: all .4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
   background: transparent;
   color: var(--tp);
   border: 2px solid transparent;
+  z-index: 0;
 }
 
 .cal-cell:not(.cal-empty):hover {
   background: var(--sidebar-hover);
-  transform: scale(1.1);
+  transform: scale(1.15) translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  border-color: var(--sidebar-border);
 }
 
 .cal-cell.cal-today {
@@ -1867,8 +1871,9 @@ label {
 }
 
 .cal-cell.cal-today:hover {
-  transform: scale(1.1) translateY(-2px);
-  box-shadow: 0 6px 16px var(--glow);
+  transform: scale(1.25) translateY(-4px);
+  box-shadow: 0 10px 25px var(--glow);
+  z-index: 10;
 }
 
 .cal-cell.has-evt {
