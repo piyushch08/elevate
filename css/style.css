@@ -340,8 +340,8 @@ body {
 }
 
 .tb-avatar {
-  width: 34px;
-  height: 34px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   display: flex;
@@ -710,8 +710,8 @@ body {
 }
 
 .s-avatar {
-  width: 36px;
-  height: 36px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   display: flex;
@@ -738,8 +738,8 @@ body {
 }
 
 .avatar-option {
-  width: 56px;
-  height: 56px;
+  width: 76px;
+  height: 76px;
   border-radius: 50%;
   cursor: pointer;
   border: 2px solid transparent;
