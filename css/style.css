@@ -231,7 +231,7 @@ body {
   border-radius: 20px;
   padding: 6px 16px;
   position: relative;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s ease;
 }
 
 .tb-search:focus-within {
@@ -306,7 +306,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all .25s;
+  transition: background-color 0.25s, color 0.25s, border-color 0.25s, transform 0.25s;
   position: relative
 }
 
@@ -655,7 +655,7 @@ body {
   color: var(--sidebar-ts);
   font-weight: 500;
   font-size: .875rem;
-  transition: all .25s;
+  transition: background-color 0.25s, color 0.25s, transform 0.25s;
   position: relative;
   overflow: hidden
 }
@@ -741,7 +741,7 @@ body {
   border-radius: 50%;
   cursor: pointer;
   border: 2px solid transparent;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   background: var(--surface);
   object-fit: contain;
   object-position: center;
@@ -808,6 +808,7 @@ body {
   -webkit-overflow-scrolling: touch;
   width: 100%;
   overscroll-behavior-y: contain;
+  transform: translateZ(0);
 }
 
 .top-nav-bar {
