@@ -2667,3 +2667,8 @@ label {
 img {
   image-rendering: -webkit-optimize-contrast;
 }
+
+/* Disable 300ms tap delay for faster click feedback on mobile */
+button, .btn, .tb-btn, .nav-item, .bn-item, .s-settings-btn, .sr-item, .avatar-option, a {
+  touch-action: manipulation;
+}

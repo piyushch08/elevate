@@ -1145,27 +1145,31 @@ function setupSearch() {
 
   let selectedIndex = -1;
 
+  let searchTimeout;
   inp.addEventListener('input', () => {
-    selectedIndex = -1;
-    const q = inp.value.trim().toLowerCase(); 
-    
-    // Toggle clear button
-    const clearBtn = document.getElementById('search-clear');
-    if (clearBtn) clearBtn.style.display = q ? 'block' : 'none';
-    
-    if (!q) { drop.classList.remove('show'); return; } 
-    drop.classList.add('show');
-    const res = [];
-    D.tasks.forEach(t => { if (t.name.toLowerCase().includes(q)) res.push({ ico: 'ri-list-check', label: t.name, sub: 'Task · ' + t.cat, page: 'todo' }); });
-    D.notes.forEach(n => { if ((n.title || '').toLowerCase().includes(q) || (n.body || '').toLowerCase().includes(q)) res.push({ ico: 'ri-sticky-note-line', label: n.title || 'Untitled', sub: 'Note', page: 'notes' }); });
-    D.habits.forEach(h => { if (h.name.toLowerCase().includes(q)) res.push({ ico: 'ri-seedling-line', label: h.name, sub: 'Habit', page: 'habits' }); });
-    if(D.meals) D.meals.forEach(m => { if (m.name.toLowerCase().includes(q)) res.push({ ico: 'ri-restaurant-line', label: m.name, sub: 'Meal', page: 'diet' }); });
-    Object.entries(PAGES).forEach(([k, v]) => { if (v.toLowerCase().includes(q)) res.push({ ico: 'ri-dashboard-line', label: v, sub: 'Page', page: k }); });
-    
-    if (!res.length) { drop.innerHTML = '<div class="sr-empty"><i class="ri-search-line"></i> No results</div>'; }
-    else { 
-      drop.innerHTML = res.slice(0, 8).map((r, i) => `<div class="sr-item" id="sr-item-${i}" onclick="goTo('${r.page}');document.getElementById('global-search').value='';closePop('search-drop')"><i class="${r.ico}"></i><div><div>${r.label}</div><div class="muted">${r.sub}</div></div></div>`).join(''); 
-    }
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      selectedIndex = -1;
+      const q = inp.value.trim().toLowerCase(); 
+      
+      // Toggle clear button
+      const clearBtn = document.getElementById('search-clear');
+      if (clearBtn) clearBtn.style.display = q ? 'block' : 'none';
+      
+      if (!q) { drop.classList.remove('show'); return; } 
+      drop.classList.add('show');
+      const res = [];
+      D.tasks.forEach(t => { if (t.name.toLowerCase().includes(q)) res.push({ ico: 'ri-list-check', label: t.name, sub: 'Task · ' + t.cat, page: 'todo' }); });
+      D.notes.forEach(n => { if ((n.title || '').toLowerCase().includes(q) || (n.body || '').toLowerCase().includes(q)) res.push({ ico: 'ri-sticky-note-line', label: n.title || 'Untitled', sub: 'Note', page: 'notes' }); });
+      D.habits.forEach(h => { if (h.name.toLowerCase().includes(q)) res.push({ ico: 'ri-seedling-line', label: h.name, sub: 'Habit', page: 'habits' }); });
+      if(D.meals) D.meals.forEach(m => { if (m.name.toLowerCase().includes(q)) res.push({ ico: 'ri-restaurant-line', label: m.name, sub: 'Meal', page: 'diet' }); });
+      Object.entries(PAGES).forEach(([k, v]) => { if (v.toLowerCase().includes(q)) res.push({ ico: 'ri-dashboard-line', label: v, sub: 'Page', page: k }); });
+      
+      if (!res.length) { drop.innerHTML = '<div class="sr-empty"><i class="ri-search-line"></i> No results</div>'; }
+      else { 
+        drop.innerHTML = res.slice(0, 8).map((r, i) => `<div class="sr-item" id="sr-item-${i}" onclick="goTo('${r.page}');document.getElementById('global-search').value='';closePop('search-drop')"><i class="${r.ico}"></i><div><div>${r.label}</div><div class="muted">${r.sub}</div></div></div>`).join(''); 
+      }
+    }, 150);
   });
 
   inp.addEventListener('keydown', e => { 
