@@ -947,8 +947,6 @@ body {
   overflow: hidden;
   will-change: transform, box-shadow;
   contain: content;
-  content-visibility: auto;
-  contain-intrinsic-size: auto 300px;
 }
 
 .widget:hover {
