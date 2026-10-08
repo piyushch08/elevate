@@ -7,6 +7,7 @@ const D = window.D = {
   tasks: [], events: [], deadlines: [], studyLog: [], meals: [],
   exercises: [{ name: 'Bench Press', sets: '4×8', done: false }, { name: 'Overhead Press', sets: '3×10', done: false }, { name: 'Tricep Pushdown', sets: '3×12', done: false }],
   streak: [0, 0, 0, 0, 0, 0, 0], habits: [], notes: [],
+  dailyStreak: 1, lastStreakDate: new Date().toDateString(),
   filter: 'all', theme: 'dark',
   calY: new Date().getFullYear(), calM: new Date().getMonth(), calEvents: {},
   timerSec: 25 * 60, timerBase: 25 * 60, timerOn: false, workoutOn: false,
@@ -35,6 +36,24 @@ function getWeekStart(date) {
 
 window.checkNewDay = function() {
   const today = new Date().toDateString();
+  let updated = false;
+
+  if (D.lastStreakDate !== today) {
+    if (D.lastStreakDate) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      if (yesterday.toDateString() === D.lastStreakDate) {
+        D.dailyStreak = (D.dailyStreak || 0) + 1;
+      } else {
+        D.dailyStreak = 1;
+      }
+    } else {
+      D.dailyStreak = 1;
+    }
+    D.lastStreakDate = today;
+    updated = true;
+  }
+
   if (D.lastActiveDate !== today) {
     D.today = { study: 0, cal: 0, prot: 0, carb: 0, water: 0 };
     if (getWeekStart(new Date()) > getWeekStart(new Date(D.lastActiveDate))) {
@@ -46,9 +65,9 @@ window.checkNewDay = function() {
     D.supplements = { multi: false, omega: false, veg: false, sugar: false };
     
     D.lastActiveDate = today;
-    return true; // indicates it was reset
+    updated = true;
   }
-  return false;
+  return updated; // indicates if any date-based reset happened
 };
 
 const QUOTES = [
@@ -93,7 +112,15 @@ window.addEventListener('DOMContentLoaded', () => {
   applyTheme(D.theme, document.querySelector(`.theme-card[data-t="${D.theme}"]`), true);
 });
 
+window.renderDailyStreak = function() {
+  const el = document.getElementById('topbar-streak');
+  if (el) el.textContent = D.dailyStreak || 1;
+  const elDash = document.getElementById('dash-streak-count');
+  if (elDash) elDash.textContent = D.dailyStreak || 1;
+};
+
 function renderAll() {
+  renderDailyStreak();
   renderTasks(); renderEvents(); renderDeadlines();
   renderStudyLog(); renderMeals(); renderExercises();
   renderStreak(); renderHabits(); renderNotes();
@@ -130,7 +157,7 @@ function save() {
 }
 function load() {
   try { const s = localStorage.getItem('elevate2'); if (s) Object.assign(D, JSON.parse(s)); } catch (e) { }
-  window.checkNewDay();
+  if (window.checkNewDay()) save();
 }
 
 // ===== TOAST =====
