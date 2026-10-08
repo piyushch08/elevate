@@ -123,6 +123,78 @@ window.addEventListener('DOMContentLoaded', () => {
   applyTheme(D.theme, document.querySelector(`.theme-card[data-t="${D.theme}"]`), true);
 });
 
+let streakCalY = new Date().getFullYear();
+let streakCalM = new Date().getMonth();
+
+window.openStreakCalendar = function() {
+  streakCalY = new Date().getFullYear();
+  streakCalM = new Date().getMonth();
+  openM('m-streak');
+  renderStreakCalendar();
+};
+
+window.streakCalNav = function(dir) {
+  streakCalM += dir;
+  if (streakCalM > 11) { streakCalM = 0; streakCalY++; }
+  if (streakCalM < 0) { streakCalM = 11; streakCalY--; }
+  renderStreakCalendar();
+};
+
+window.renderStreakCalendar = function() {
+  const grid = document.getElementById('streak-cal-grid');
+  const lbl = document.getElementById('streak-cal-label');
+  if (!grid) return;
+  grid.innerHTML = '';
+  
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  lbl.textContent = `${months[streakCalM]} ${streakCalY}`;
+  
+  const countEl = document.getElementById('streak-cal-count');
+  if (countEl) countEl.textContent = D.dailyStreak || 0;
+
+  ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(dy => { 
+    const h = document.createElement('div'); h.className = 'cal-hd'; h.textContent = dy; grid.appendChild(h); 
+  });
+  
+  const d = new Date(streakCalY, streakCalM, 1);
+  for (let i = 0; i < d.getDay(); i++) { 
+    const e = document.createElement('div'); e.className = 'cal-cell cal-empty'; grid.appendChild(e); 
+  }
+  
+  const days = new Date(streakCalY, streakCalM + 1, 0).getDate();
+  const today = new Date();
+  
+  // Calculate date boundaries for streak
+  let lastActive = new Date(); // If lastStreakDate exists, use it. Else today.
+  if (D.lastStreakDate) {
+    lastActive = new Date(D.lastStreakDate);
+  }
+  lastActive.setHours(23,59,59,999); // End of the streak day
+
+  // The streak started `D.dailyStreak` days before lastActive
+  let streakStart = new Date(lastActive);
+  streakStart.setDate(streakStart.getDate() - ((D.dailyStreak || 1) - 1));
+  streakStart.setHours(0,0,0,0);
+
+  for (let day = 1; day <= days; day++) {
+    const cell = document.createElement('div'); cell.className = 'cal-cell';
+    const isToday = day === today.getDate() && streakCalM === today.getMonth() && streakCalY === today.getFullYear();
+    if (isToday) cell.classList.add('cal-today');
+    
+    // Check if within streak
+    const cellDate = new Date(streakCalY, streakCalM, day);
+    if (cellDate >= streakStart && cellDate <= lastActive) {
+      cell.style.background = 'rgba(255,152,0,0.15)';
+      cell.style.color = 'var(--warn)';
+      cell.style.fontWeight = 'bold';
+      cell.style.border = '1px solid rgba(255,152,0,0.3)';
+    }
+    
+    cell.innerHTML = `<span>${day}</span>`;
+    grid.appendChild(cell);
+  }
+};
+
 window.restoreStreak = function() {
   if (D.lostStreak > 0 && D.streakRestores > 0) {
     D.dailyStreak = D.lostStreak + 1;
