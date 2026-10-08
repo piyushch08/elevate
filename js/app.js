@@ -17,7 +17,7 @@ const D = window.D = {
 };
 
 // ===== REPORT BUG =====
-window.sendBugReport = function(e) {
+window.sendBugReport = function (e) {
   e.preventDefault();
   const title = document.getElementById('bug-title').value;
   const desc = document.getElementById('bug-desc').value;
@@ -30,11 +30,11 @@ function getWeekStart(date) {
   const day = d.getDay();
   const diff = d.getDate() - day + (day === 0 ? -6 : 1);
   d.setDate(diff);
-  d.setHours(0,0,0,0);
+  d.setHours(0, 0, 0, 0);
   return d.getTime();
 }
 
-window.checkNewDay = function() {
+window.checkNewDay = function () {
   const today = new Date().toDateString();
   let updated = false;
 
@@ -71,10 +71,10 @@ window.checkNewDay = function() {
       D.streak = [0, 0, 0, 0, 0, 0, 0];
       D.habits.forEach(h => h.days = [0, 0, 0, 0, 0, 0, 0]);
     }
-    
+
     // Reset daily checklists
     D.supplements = { multi: false, omega: false, veg: false, sugar: false };
-    
+
     D.lastActiveDate = today;
     updated = true;
   }
@@ -116,7 +116,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (!e.target.closest('.tb-search') && !e.target.closest('#search-drop')) closePop('search-drop');
     if (!e.target.closest('.sidebar') && !e.target.closest('.hamburger') && !e.target.closest('#mobile-menu-btn') && document.getElementById('sidebar').classList.contains('open')) {
       // Allow the overlay click to handle closing, or close it here safely if overlay isn't clicked
-      if(!e.target.closest('.sidebar-overlay')) toggleSidebar();
+      if (!e.target.closest('.sidebar-overlay')) toggleSidebar();
     }
   });
   // restore theme
@@ -126,61 +126,61 @@ window.addEventListener('DOMContentLoaded', () => {
 let streakCalY = new Date().getFullYear();
 let streakCalM = new Date().getMonth();
 
-window.openStreakCalendar = function() {
+window.openStreakCalendar = function () {
   streakCalY = new Date().getFullYear();
   streakCalM = new Date().getMonth();
   openM('m-streak');
   renderStreakCalendar();
 };
 
-window.streakCalNav = function(dir) {
+window.streakCalNav = function (dir) {
   streakCalM += dir;
   if (streakCalM > 11) { streakCalM = 0; streakCalY++; }
   if (streakCalM < 0) { streakCalM = 11; streakCalY--; }
   renderStreakCalendar();
 };
 
-window.renderStreakCalendar = function() {
+window.renderStreakCalendar = function () {
   const grid = document.getElementById('streak-cal-grid');
   const lbl = document.getElementById('streak-cal-label');
   if (!grid) return;
   grid.innerHTML = '';
-  
-  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   lbl.textContent = `${months[streakCalM]} ${streakCalY}`;
-  
+
   const countEl = document.getElementById('streak-cal-count');
   if (countEl) countEl.textContent = D.dailyStreak || 0;
 
-  ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(dy => { 
-    const h = document.createElement('div'); h.className = 'cal-hd'; h.textContent = dy; grid.appendChild(h); 
+  ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(dy => {
+    const h = document.createElement('div'); h.className = 'cal-hd'; h.textContent = dy; grid.appendChild(h);
   });
-  
+
   const d = new Date(streakCalY, streakCalM, 1);
-  for (let i = 0; i < d.getDay(); i++) { 
-    const e = document.createElement('div'); e.className = 'cal-cell cal-empty'; grid.appendChild(e); 
+  for (let i = 0; i < d.getDay(); i++) {
+    const e = document.createElement('div'); e.className = 'cal-cell cal-empty'; grid.appendChild(e);
   }
-  
+
   const days = new Date(streakCalY, streakCalM + 1, 0).getDate();
   const today = new Date();
-  
+
   // Calculate date boundaries for streak
   let lastActive = new Date(); // If lastStreakDate exists, use it. Else today.
   if (D.lastStreakDate) {
     lastActive = new Date(D.lastStreakDate);
   }
-  lastActive.setHours(23,59,59,999); // End of the streak day
+  lastActive.setHours(23, 59, 59, 999); // End of the streak day
 
   // The streak started `D.dailyStreak` days before lastActive
   let streakStart = new Date(lastActive);
   streakStart.setDate(streakStart.getDate() - ((D.dailyStreak || 1) - 1));
-  streakStart.setHours(0,0,0,0);
+  streakStart.setHours(0, 0, 0, 0);
 
   for (let day = 1; day <= days; day++) {
     const cell = document.createElement('div'); cell.className = 'cal-cell';
     const isToday = day === today.getDate() && streakCalM === today.getMonth() && streakCalY === today.getFullYear();
     if (isToday) cell.classList.add('cal-today');
-    
+
     // Check if within streak
     const cellDate = new Date(streakCalY, streakCalM, day);
     if (cellDate >= streakStart && cellDate <= lastActive) {
@@ -189,13 +189,13 @@ window.renderStreakCalendar = function() {
       cell.style.fontWeight = 'bold';
       cell.style.border = '1px solid rgba(255,152,0,0.3)';
     }
-    
+
     cell.innerHTML = `<span>${day}</span>`;
     grid.appendChild(cell);
   }
 };
 
-window.restoreStreak = function() {
+window.restoreStreak = function () {
   if (D.lostStreak > 0 && D.streakRestores > 0) {
     D.dailyStreak = D.lostStreak + 1;
     D.streakRestores -= 1;
@@ -206,7 +206,7 @@ window.restoreStreak = function() {
   }
 };
 
-window.renderDailyStreak = function() {
+window.renderDailyStreak = function () {
   const streak = D.dailyStreak || 1;
   const el = document.getElementById('topbar-streak');
   if (el) el.textContent = streak;
@@ -260,7 +260,7 @@ function renderAll() {
   renderStreak(); renderHabits(); renderNotes();
   renderCalendar(); updateRings(); updateMacros(); updateWaterUI();
   renderSubjects();
-  
+
   // Extra widgets
   renderStudyExtras(); renderDietExtras(); renderPRs();
 }
@@ -268,7 +268,7 @@ let localSaveTimeout = null;
 let firestoreSaveTimeout = null;
 function save() {
   D.lastUid = window.currentUserUid || 'guest';
-  
+
   // Debounce localStorage writes (50ms) for almost zero latency saves
   clearTimeout(localSaveTimeout);
   localSaveTimeout = setTimeout(() => {
@@ -318,7 +318,7 @@ function goTo(pg) {
   const bc = document.getElementById('bc-page'); if (bc) bc.textContent = PAGES[pg] || pg;
   if (document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
 }
-function toggleSidebar() { 
+function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('open');
   const overlay = document.getElementById('sidebar-overlay');
   if (overlay) overlay.classList.toggle('show');
@@ -334,14 +334,14 @@ function tick() {
     const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     if (cachedTbTime.textContent !== timeStr) cachedTbTime.textContent = timeStr;
   }
-  
-  if (D.timerOn) { 
-    D.timerSec--; 
-    if (D.timerSec <= 0) { 
-      D.timerSec = 0; 
-      D.timerOn = false; 
-      const b = document.getElementById('timer-btn'); 
-      if (b) b.innerHTML = '<i class="ri-play-fill"></i> Start'; 
+
+  if (D.timerOn) {
+    D.timerSec--;
+    if (D.timerSec <= 0) {
+      D.timerSec = 0;
+      D.timerOn = false;
+      const b = document.getElementById('timer-btn');
+      if (b) b.innerHTML = '<i class="ri-play-fill"></i> Start';
       try {
         const a = new (window.AudioContext || window.webkitAudioContext)();
         const o = a.createOscillator(), g = a.createGain();
@@ -350,11 +350,11 @@ function tick() {
         g.gain.linearRampToValueAtTime(0.06, a.currentTime + 0.01);
         g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + 0.5);
         o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime + 0.5);
-      } catch (e) {}
-      toast('⏰ Timer done! Great work!', 'success'); 
-    } 
+      } catch (e) { }
+      toast('⏰ Timer done! Great work!', 'success');
+    }
   }
-  const td = document.getElementById('timer-disp'); 
+  const td = document.getElementById('timer-disp');
   const tStr = fmtSec(D.timerSec);
   if (td && td.textContent !== tStr) td.textContent = tStr;
 }
@@ -380,13 +380,13 @@ function updateGreeting() {
   }
 
   const name = document.getElementById('u-name')?.textContent || 'Explorer';
-  
-  const el = document.getElementById('greeting'); 
+
+  const el = document.getElementById('greeting');
   if (el) el.innerHTML = `${dashG}, ${name}! <span class="greeting-emoji">${emoji}</span>`;
 
   const gt = document.getElementById('greeting-title');
   if (gt) gt.innerHTML = `${dashG}, ${name}! <span class="greeting-emoji">${emoji}</span>`;
-  
+
   const gs = document.getElementById('greeting-sub');
   if (gs) {
     const opts = { weekday: 'long', month: 'long', day: 'numeric' };
@@ -444,14 +444,14 @@ function updateRings() {
   // Update the 4 top cards
   const focusHours = Number(((D.today.study || 0) / 60).toFixed(1));
   const tasksDone = D.tasks.filter(t => t.done).length;
-  const mealsToday = D.meals.filter(m => m.id >= new Date().setHours(0,0,0,0)).length;
+  const mealsToday = D.meals.filter(m => m.id >= new Date().setHours(0, 0, 0, 0)).length;
   const activeDays = D.streak.filter(Boolean).length;
-  
-  const elFocus = document.getElementById('stat-focus'); if(elFocus) elFocus.textContent = focusHours;
-  const elTasks = document.getElementById('stat-tasks'); if(elTasks) elTasks.textContent = tasksDone;
-  const elMeals = document.getElementById('stat-meals'); if(elMeals) elMeals.textContent = mealsToday;
-  const elActive = document.getElementById('stat-active'); if(elActive) elActive.textContent = activeDays;
-  
+
+  const elFocus = document.getElementById('stat-focus'); if (elFocus) elFocus.textContent = focusHours;
+  const elTasks = document.getElementById('stat-tasks'); if (elTasks) elTasks.textContent = tasksDone;
+  const elMeals = document.getElementById('stat-meals'); if (elMeals) elMeals.textContent = mealsToday;
+  const elActive = document.getElementById('stat-active'); if (elActive) elActive.textContent = activeDays;
+
   if (typeof Chart !== 'undefined') {
     clearTimeout(chartUpdateTimeout);
     chartUpdateTimeout = setTimeout(() => {
@@ -465,44 +465,44 @@ function updateRings() {
   }
 }
 
-window.updateProgressChart = function() {
+window.updateProgressChart = function () {
   const period = document.getElementById('progress-period')?.value || 'weekly';
   const ctx = document.getElementById('progressChart');
-  if(!ctx) return;
-  
+  if (!ctx) return;
+
   let labels = [];
   let data1 = [];
   let data2 = [];
   let xAxisTitle = 'Days of the Week';
   const now = Date.now();
   const currWeekStart = getWeekStart(now);
-  
+
   if (period === 'weekly') {
     labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const focusWeek = [0,0,0,0,0,0,0];
-    const sessionsWeek = [0,0,0,0,0,0,0];
-    
+    const focusWeek = [0, 0, 0, 0, 0, 0, 0];
+    const sessionsWeek = [0, 0, 0, 0, 0, 0, 0];
+
     D.studyLog.forEach(s => {
-      if(s.id >= currWeekStart) {
+      if (s.id >= currWeekStart) {
         let d = new Date(s.id).getDay();
         let day = (d + 6) % 7; // Mon=0
         focusWeek[day] += (s.mins / 60);
         sessionsWeek[day] += 1;
       }
     });
-    
+
     data1 = focusWeek.map(v => Number(v.toFixed(1))); // Real focus hours per day
     data2 = sessionsWeek; // Real study sessions per day
   } else if (period === 'monthly') {
     xAxisTitle = 'Weeks of the Month';
     labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
-    data1 = [0,0,0,0];
-    data2 = [0,0,0,0];
+    data1 = [0, 0, 0, 0];
+    data2 = [0, 0, 0, 0];
     const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime();
     D.studyLog.forEach(s => {
-      if(s.id >= monthStart) {
+      if (s.id >= monthStart) {
         let w = Math.floor(new Date(s.id).getDate() / 7);
-        if(w > 3) w = 3;
+        if (w > 3) w = 3;
         data1[w] += (s.mins / 60);
         data2[w] += 1; // Count of study sessions
       }
@@ -515,7 +515,7 @@ window.updateProgressChart = function() {
     data2 = Array(12).fill(0);
     const yearStart = new Date(new Date().getFullYear(), 0, 1).getTime();
     D.studyLog.forEach(s => {
-      if(s.id >= yearStart) {
+      if (s.id >= yearStart) {
         let m = new Date(s.id).getMonth();
         data1[m] += (s.mins / 60);
         data2[m] += 1;
@@ -523,7 +523,7 @@ window.updateProgressChart = function() {
     });
     data1 = data1.map(v => Number(v.toFixed(1)));
   }
-  
+
   if (progressChartInst) {
     progressChartInst.data.labels = labels;
     progressChartInst.data.datasets[0].data = data1;
@@ -533,12 +533,12 @@ window.updateProgressChart = function() {
   } else {
     const canvasCtx = ctx.getContext('2d');
     const grad1 = canvasCtx.createLinearGradient(0, 0, 0, 250);
-    grad1.addColorStop(0, '#1A73E8'); 
-    grad1.addColorStop(1, 'rgba(26, 115, 232, 0.1)'); 
-    
+    grad1.addColorStop(0, '#1A73E8');
+    grad1.addColorStop(1, 'rgba(26, 115, 232, 0.1)');
+
     const grad2 = canvasCtx.createLinearGradient(0, 0, 0, 250);
-    grad2.addColorStop(0, 'rgba(52, 168, 83, 0.4)'); 
-    grad2.addColorStop(1, 'rgba(52, 168, 83, 0.0)'); 
+    grad2.addColorStop(0, 'rgba(52, 168, 83, 0.4)');
+    grad2.addColorStop(1, 'rgba(52, 168, 83, 0.0)');
 
     progressChartInst = new Chart(ctx, {
       type: 'bar',
@@ -608,14 +608,14 @@ window.updateProgressChart = function() {
               font: { size: 12, family: "'Outfit', sans-serif" }
             },
             beginAtZero: true,
-            grid: { 
+            grid: {
               color: 'rgba(150,150,150,0.1)',
               borderDash: [5, 5]
             },
             border: { display: false },
             ticks: {
               stepSize: 1, // Only show whole numbers (1hr, 2hr)
-              callback: function(value) {
+              callback: function (value) {
                 return value + 'hr';
               }
             }
@@ -635,7 +635,7 @@ window.updateProgressChart = function() {
             border: { display: false },
             ticks: {
               stepSize: 1, // Whole numbers only
-              callback: function(value) {
+              callback: function (value) {
                 return value;
               }
             }
@@ -656,15 +656,15 @@ window.updateProgressChart = function() {
   }
 };
 
-window.updatePieChart = function() {
+window.updatePieChart = function () {
   const period = document.getElementById('breakdown-period')?.value || 'today';
   const ctx = document.getElementById('pieChart');
-  if(!ctx) return;
-  
+  if (!ctx) return;
+
   let data = [];
   if (period === 'today') {
     const todayStudyHours = Number(((D.today.study || 0) / 60).toFixed(1));
-    data = [todayStudyHours, D.tasks.filter(t=>t.cat==='Exercise' && t.done).length || 0, D.meals.filter(m=>m.id >= new Date().setHours(0,0,0,0)).length || 0];
+    data = [todayStudyHours, D.tasks.filter(t => t.cat === 'Exercise' && t.done).length || 0, D.meals.filter(m => m.id >= new Date().setHours(0, 0, 0, 0)).length || 0];
   } else {
     // weekly
     const currWeekStart = getWeekStart(Date.now());
@@ -675,11 +675,11 @@ window.updatePieChart = function() {
     data = [weekStudyHours, weekWorkouts, weekMeals];
   }
   // Ensure chart renders something if all values are 0
-  if(data[0]===0 && data[1]===0 && data[2]===0) data = [1,1,1];
-  
+  if (data[0] === 0 && data[1] === 0 && data[2] === 0) data = [1, 1, 1];
+
   let labels = ['Study', 'Exercise', 'Diet'];
   let colors = ['#1A73E8', '#34A853', '#FBBC04'];
-  
+
   if (pieChartInst) {
     pieChartInst.data.labels = labels;
     pieChartInst.data.datasets[0].data = data;
@@ -720,13 +720,13 @@ window.updatePieChart = function() {
       }
     });
   }
-  
+
   // Update custom legend
   const leg = document.getElementById('pie-legend');
   if (leg) {
-    const total = data.reduce((a,b)=>a+b, 0);
+    const total = data.reduce((a, b) => a + b, 0);
     leg.innerHTML = data.map((d, i) => {
-      const pct = Math.round((d/total)*100) || 0;
+      const pct = Math.round((d / total) * 100) || 0;
       return `<div class="pie-legend-item">
                 <div class="pie-legend-label"><div class="pie-legend-dot" style="background:${colors[i]}"></div>${labels[i]}</div>
                 <div class="pie-legend-val">${d} <span class="pie-badge ${pct > 30 ? 'up' : ''}">${pct}%</span></div>
@@ -802,18 +802,18 @@ function renderCalendar() {
   const grid = document.getElementById('cal-grid'); const lbl = document.getElementById('cal-label'); if (!grid) return;
   grid.innerHTML = '';
   const d = new Date(D.calY, D.calM, 1);
-  
-  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   let mOpts = months.map((m, i) => `<option value="${i}" ${i === D.calM ? 'selected' : ''}>${m}</option>`).join('');
   let yOpts = '';
-  for(let y = 1900; y <= 2100; y++) yOpts += `<option value="${y}" ${y === D.calY ? 'selected' : ''}>${y}</option>`;
+  for (let y = 1900; y <= 2100; y++) yOpts += `<option value="${y}" ${y === D.calY ? 'selected' : ''}>${y}</option>`;
   lbl.innerHTML = `<select class="cal-select" onchange="changeCalDate('m', this.value)">${mOpts}</select>
                    <select class="cal-select" onchange="changeCalDate('y', this.value)">${yOpts}</select>`;
 
   ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(dy => { const h = document.createElement('div'); h.className = 'cal-hd'; h.textContent = dy; grid.appendChild(h); });
   for (let i = 0; i < d.getDay(); i++) { const e = document.createElement('div'); e.className = 'cal-cell cal-empty'; grid.appendChild(e); }
   const days = new Date(D.calY, D.calM + 1, 0).getDate(), today = new Date();
-  
+
   let delay = 0;
   let currentMonthHolidays = [];
 
@@ -821,12 +821,12 @@ function renderCalendar() {
     const cell = document.createElement('div'); cell.className = 'cal-cell';
     const isToday = day === today.getDate() && D.calM === today.getMonth() && D.calY === today.getFullYear();
     if (isToday) cell.classList.add('cal-today');
-    
+
     // Check if Sunday
     if ((d.getDay() + day - 1) % 7 === 0) {
       cell.classList.add('cal-sunday');
     }
-    
+
     cell.style.animation = `fadeScaleIn 0.3s ease forwards ${delay}s`;
     cell.style.opacity = '0';
     delay += 0.01;
@@ -836,13 +836,13 @@ function renderCalendar() {
     const dayEvents = D.events.filter(e => e.date === dateStr);
 
     cell.innerHTML = `<span>${day}</span>`;
-    
+
     let tooltip = [];
     if (publicHolidays[mmdd]) {
       cell.classList.add('is-holiday');
       tooltip.push(publicHolidays[mmdd]);
       cell.innerHTML += `<div class="hol-name">${publicHolidays[mmdd]}</div>`;
-      
+
       currentMonthHolidays.push({ date: day, name: publicHolidays[mmdd] });
     }
 
@@ -851,7 +851,7 @@ function renderCalendar() {
       cell.innerHTML += `<span class="evt-count">${dayEvents.length}</span>`;
       tooltip = tooltip.concat(dayEvents.map(e => e.name));
     }
-    
+
     if (tooltip.length > 0) {
       cell.title = tooltip.join(', ');
     }
@@ -893,23 +893,23 @@ function saveEvent() {
 }
 
 // ===== BUG REPORT =====
-window.sendBugReport = function() {
+window.sendBugReport = function () {
   const title = document.getElementById('bug-title').value.trim();
   const desc = document.getElementById('bug-desc').value.trim();
   if (!title || !desc) {
     if (typeof toast === 'function') toast('Please fill in both title and description', 'error');
     return;
   }
-  
+
   const subject = encodeURIComponent("Bug Report: " + title);
   const body = encodeURIComponent("Description & Steps to Reproduce:\n" + desc + "\n\n---\nReported via ELEVATE Planner App");
-  
+
   // Clear the fields
   document.getElementById('bug-title').value = '';
   document.getElementById('bug-desc').value = '';
-  
+
   if (typeof toast === 'function') toast('Opening email client...', 'success');
-  
+
   // Trigger mailto link
   window.location.href = `mailto:piyush.ch407@gmail.com?subject=${subject}&body=${body}`;
 };
@@ -929,10 +929,10 @@ function renderEvents() {
   if (dashEvents) {
     // Sort events by date and get upcoming ones
     const today = new Date();
-    today.setHours(0,0,0,0);
+    today.setHours(0, 0, 0, 0);
     const upcoming = [...D.events]
       .filter(e => new Date(e.date + 'T00:00:00') >= today)
-      .sort((a,b) => new Date(a.date) - new Date(b.date))
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
       .slice(0, 2);
 
     if (!upcoming.length) {
@@ -1170,9 +1170,9 @@ function renderNotes() {
   });
 
   const statTotal = document.getElementById('stat-total-notes');
-  if(statTotal) statTotal.textContent = D.notes.length;
+  if (statTotal) statTotal.textContent = D.notes.length;
   const statLast = document.getElementById('stat-last-note');
-  if(statLast) statLast.textContent = D.notes.length > 0 ? D.notes[0].date : 'N/A';
+  if (statLast) statLast.textContent = D.notes.length > 0 ? D.notes[0].date : 'N/A';
 
   const dashNotes = document.getElementById('dash-notes');
   if (dashNotes) {
@@ -1201,7 +1201,7 @@ function editNote(id) {
 }
 function delNote(id) { D.notes = D.notes.filter(x => x.id !== id); renderNotes(); save(); toast('Note deleted.', 'info'); }
 
-window.filterNotes = function(q) {
+window.filterNotes = function (q) {
   q = q.toLowerCase();
   const cards = document.querySelectorAll('#notes-grid .note-card');
   cards.forEach(card => {
@@ -1211,38 +1211,38 @@ window.filterNotes = function(q) {
 };
 
 // ===== PERSONALIZE =====
-function applyTheme(t, card, silent=false) {
+function applyTheme(t, card, silent = false) {
   D.theme = t; document.documentElement.setAttribute('data-theme', t);
   document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('on')); if (card) card.classList.add('on');
-  
+
   const icon = document.getElementById('theme-icon');
   if (icon) icon.className = t === 'dark' ? 'ri-sun-line' : 'ri-moon-line';
-  
+
   const tgl = document.getElementById('t-dark');
   if (tgl) tgl.classList.toggle('on', t === 'dark');
-  
-  save(); 
-  if(!silent) toast(`Theme: ${t}`, 'success');
+
+  save();
+  if (!silent) toast(`Theme: ${t}`, 'success');
 }
 window.selectedAvatar = null;
-window.selectAvatar = function(src, el) {
+window.selectAvatar = function (src, el) {
   window.selectedAvatar = src;
   document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
   if (el) el.classList.add('selected');
   document.getElementById('custom-avatar-name').textContent = '';
 };
-window.handleAvatarUpload = function(event) {
+window.handleAvatarUpload = function (event) {
   const file = event.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = function (e) {
     window.selectedAvatar = e.target.result;
     document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
     document.getElementById('custom-avatar-name').textContent = file.name;
   };
   reader.readAsDataURL(file);
 };
-window.updateAvatarUI = function(src) {
+window.updateAvatarUI = function (src) {
   const uAvatar = document.getElementById('u-avatar');
   const tbAvatar = document.getElementById('tb-avatar-btn');
   if (src) {
@@ -1295,7 +1295,7 @@ function closePop(id) { const el = document.getElementById(id); if (el && el.cla
 // ===== SEARCH =====
 function setupSearch() {
   const inp = document.getElementById('global-search'), drop = document.getElementById('search-drop'); if (!inp || !drop) return;
-  
+
   // global shortcut
   document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
@@ -1311,34 +1311,34 @@ function setupSearch() {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
       selectedIndex = -1;
-      const q = inp.value.trim().toLowerCase(); 
-      
+      const q = inp.value.trim().toLowerCase();
+
       // Toggle clear button
       const clearBtn = document.getElementById('search-clear');
       if (clearBtn) clearBtn.style.display = q ? 'block' : 'none';
-      
-      if (!q) { drop.classList.remove('show'); return; } 
+
+      if (!q) { drop.classList.remove('show'); return; }
       drop.classList.add('show');
       const res = [];
       D.tasks.forEach(t => { if (t.name.toLowerCase().includes(q)) res.push({ ico: 'ri-list-check', label: t.name, sub: 'Task · ' + t.cat, page: 'todo' }); });
       D.notes.forEach(n => { if ((n.title || '').toLowerCase().includes(q) || (n.body || '').toLowerCase().includes(q)) res.push({ ico: 'ri-sticky-note-line', label: n.title || 'Untitled', sub: 'Note', page: 'notes' }); });
       D.habits.forEach(h => { if (h.name.toLowerCase().includes(q)) res.push({ ico: 'ri-seedling-line', label: h.name, sub: 'Habit', page: 'habits' }); });
-      if(D.meals) D.meals.forEach(m => { if (m.name.toLowerCase().includes(q)) res.push({ ico: 'ri-restaurant-line', label: m.name, sub: 'Meal', page: 'diet' }); });
+      if (D.meals) D.meals.forEach(m => { if (m.name.toLowerCase().includes(q)) res.push({ ico: 'ri-restaurant-line', label: m.name, sub: 'Meal', page: 'diet' }); });
       Object.entries(PAGES).forEach(([k, v]) => { if (v.toLowerCase().includes(q)) res.push({ ico: 'ri-dashboard-line', label: v, sub: 'Page', page: k }); });
-      
+
       if (!res.length) { drop.innerHTML = '<div class="sr-empty"><i class="ri-search-line"></i> No results</div>'; }
-      else { 
-        drop.innerHTML = res.slice(0, 8).map((r, i) => `<div class="sr-item" id="sr-item-${i}" onclick="goTo('${r.page}');document.getElementById('global-search').value='';closePop('search-drop')"><i class="${r.ico}"></i><div><div>${r.label}</div><div class="muted">${r.sub}</div></div></div>`).join(''); 
+      else {
+        drop.innerHTML = res.slice(0, 8).map((r, i) => `<div class="sr-item" id="sr-item-${i}" onclick="goTo('${r.page}');document.getElementById('global-search').value='';closePop('search-drop')"><i class="${r.ico}"></i><div><div>${r.label}</div><div class="muted">${r.sub}</div></div></div>`).join('');
       }
     }, 150);
   });
 
-  inp.addEventListener('keydown', e => { 
+  inp.addEventListener('keydown', e => {
     const items = drop.querySelectorAll('.sr-item');
-    if (e.key === 'Escape') { drop.classList.remove('show'); inp.value = ''; inp.blur(); } 
+    if (e.key === 'Escape') { drop.classList.remove('show'); inp.value = ''; inp.blur(); }
     else if (e.key === 'ArrowDown') {
       e.preventDefault();
-      if(items.length > 0) {
+      if (items.length > 0) {
         selectedIndex = (selectedIndex + 1) % items.length;
         items.forEach(el => el.classList.remove('active'));
         items[selectedIndex].classList.add('active');
@@ -1346,7 +1346,7 @@ function setupSearch() {
       }
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      if(items.length > 0) {
+      if (items.length > 0) {
         selectedIndex = (selectedIndex - 1 + items.length) % items.length;
         items.forEach(el => el.classList.remove('active'));
         items[selectedIndex].classList.add('active');
@@ -1354,9 +1354,9 @@ function setupSearch() {
       }
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      if(selectedIndex >= 0 && items[selectedIndex]) {
+      if (selectedIndex >= 0 && items[selectedIndex]) {
         items[selectedIndex].click();
-      } else if(items.length > 0) {
+      } else if (items.length > 0) {
         items[0].click();
       }
     }
@@ -1365,13 +1365,13 @@ function setupSearch() {
 
 
 // ===== EXTRA WIDGETS LOGIC =====
-window.saveScratchpad = function() {
+window.saveScratchpad = function () {
   D.studyNotes = document.getElementById('study-scratchpad').value;
   save();
 };
-window.saveStudyGoal = function() {
+window.saveStudyGoal = function () {
   const val = document.getElementById('study-goal-input').value.trim();
-  if(val) {
+  if (val) {
     D.studyGoal = val;
     save();
     renderStudyExtras();
@@ -1379,23 +1379,23 @@ window.saveStudyGoal = function() {
     toast('Study goal set!', 'success');
   }
 };
-window.clearStudyGoal = function() {
+window.clearStudyGoal = function () {
   D.studyGoal = '';
   save();
   renderStudyExtras();
 };
 function renderStudyExtras() {
   const sp = document.getElementById('study-scratchpad');
-  if(sp) sp.value = D.studyNotes || '';
+  if (sp) sp.value = D.studyNotes || '';
   const sg = document.getElementById('study-goal-disp');
-  if(sg) {
-    if(D.studyGoal) sg.innerHTML = `<i class="ri-focus-3-fill"></i> ${D.studyGoal} <button class="btn sm dng" onclick="clearStudyGoal()" style="margin-left:10px; padding:2px 6px;"><i class="ri-close-line"></i></button>`;
+  if (sg) {
+    if (D.studyGoal) sg.innerHTML = `<i class="ri-focus-3-fill"></i> ${D.studyGoal} <button class="btn sm dng" onclick="clearStudyGoal()" style="margin-left:10px; padding:2px 6px;"><i class="ri-close-line"></i></button>`;
     else sg.innerHTML = 'No goal set.';
   }
 }
 
-window.saveSupplements = function() {
-  if(!D.supplements) D.supplements = { multi: false, omega: false, veg: false, sugar: false };
+window.saveSupplements = function () {
+  if (!D.supplements) D.supplements = { multi: false, omega: false, veg: false, sugar: false };
   D.supplements.multi = document.getElementById('diet-multi').checked;
   D.supplements.omega = document.getElementById('diet-omega').checked;
   D.supplements.veg = document.getElementById('diet-veg').checked;
@@ -1403,63 +1403,63 @@ window.saveSupplements = function() {
   save();
 };
 function renderDietExtras() {
-  if(!D.supplements) D.supplements = { multi: false, omega: false, veg: false, sugar: false };
+  if (!D.supplements) D.supplements = { multi: false, omega: false, veg: false, sugar: false };
   const dmulti = document.getElementById('diet-multi');
-  if(dmulti) {
+  if (dmulti) {
     dmulti.checked = D.supplements.multi;
     document.getElementById('diet-omega').checked = D.supplements.omega;
     document.getElementById('diet-veg').checked = D.supplements.veg;
     document.getElementById('diet-sugar').checked = D.supplements.sugar;
   }
 }
-window.calcBMI = function() {
+window.calcBMI = function () {
   const w = parseFloat(document.getElementById('bmi-weight').value);
   const h = parseFloat(document.getElementById('bmi-height').value) / 100;
   const res = document.getElementById('bmi-result');
-  if(w && h) {
+  if (w && h) {
     const bmi = (w / (h * h)).toFixed(1);
     let cat = 'Normal'; let col = 'var(--success)';
-    if(bmi < 18.5) { cat = 'Underweight'; col = 'var(--warning)'; }
-    else if(bmi >= 25 && bmi < 30) { cat = 'Overweight'; col = 'var(--warning)'; }
-    else if(bmi >= 30) { cat = 'Obese'; col = 'var(--danger)'; }
+    if (bmi < 18.5) { cat = 'Underweight'; col = 'var(--warning)'; }
+    else if (bmi >= 25 && bmi < 30) { cat = 'Overweight'; col = 'var(--warning)'; }
+    else if (bmi >= 30) { cat = 'Obese'; col = 'var(--danger)'; }
     res.innerHTML = `BMI: ${bmi} <span style="color:${col}">(${cat})</span>`;
   }
 };
 
 let restTimer;
 let restLeft = 0;
-window.startRest = function(sec) {
+window.startRest = function (sec) {
   clearInterval(restTimer);
   restLeft = sec;
   updateRestDisp();
   restTimer = setInterval(() => {
     restLeft--;
     updateRestDisp();
-    if(restLeft <= 0) {
+    if (restLeft <= 0) {
       clearInterval(restTimer);
       toast('Rest time is over! Back to work! 🚀', 'info');
     }
   }, 1000);
 };
-window.stopRest = function() {
+window.stopRest = function () {
   clearInterval(restTimer);
   restLeft = 0;
   updateRestDisp();
 };
 function updateRestDisp() {
   const el = document.getElementById('rest-disp');
-  if(!el) return;
-  if(restLeft === 0) { el.textContent = '00:00'; return; }
+  if (!el) return;
+  if (restLeft === 0) { el.textContent = '00:00'; return; }
   const m = String(Math.floor(restLeft / 60)).padStart(2, '0');
   const s = String(restLeft % 60).padStart(2, '0');
   el.textContent = `${m}:${s}`;
 }
 
-window.addPR = function() {
+window.addPR = function () {
   const n = document.getElementById('pr-name').value.trim();
   const w = document.getElementById('pr-weight').value.trim();
-  if(n && w) {
-    if(!D.prs) D.prs = [];
+  if (n && w) {
+    if (!D.prs) D.prs = [];
     D.prs.push({ lift: n, weight: w });
     save();
     document.getElementById('pr-name').value = '';
@@ -1468,15 +1468,15 @@ window.addPR = function() {
     toast('Personal record added!', 'success');
   }
 };
-window.deletePR = function(idx) {
+window.deletePR = function (idx) {
   D.prs.splice(idx, 1);
   save();
   renderPRs();
 };
 function renderPRs() {
   const list = document.getElementById('pr-list');
-  if(!list) return;
-  if(!D.prs || D.prs.length === 0) {
+  if (!list) return;
+  if (!D.prs || D.prs.length === 0) {
     list.innerHTML = '<div class="center muted" style="padding:10px 0;">No PRs added yet.</div>';
     return;
   }
@@ -1495,8 +1495,8 @@ function renderPRs() {
 
 
 // ===== LIGHTWEIGHT AUDIO STUBS =====
-window.playClick = function() {};
-window.playSuccess = function() {};
+window.playClick = function () { };
+window.playSuccess = function () { };
 
 // ===== THEME ON LOAD =====
 (() => { try { const s = localStorage.getItem('elevate2'); if (s) { const d = JSON.parse(s); if (d.theme) { document.documentElement.setAttribute('data-theme', d.theme); } } } catch (e) { } })();

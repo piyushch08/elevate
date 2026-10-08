@@ -1848,8 +1848,15 @@ label {
 }
 
 @keyframes fadeScaleIn {
-  from { opacity: 0; transform: scale(0.8); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .cal-grid {
@@ -2521,6 +2528,20 @@ label {
     margin-top: -2rem;
   }
 
+  .modal {
+    padding: 1.25rem;
+    width: 95%;
+  }
+  
+  .cal-grid {
+    gap: 4px;
+  }
+  
+  .habit-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .timer-disp {
     font-size: 2.5rem
   }
@@ -2669,6 +2690,14 @@ img {
 }
 
 /* Disable 300ms tap delay for faster click feedback on mobile */
-button, .btn, .tb-btn, .nav-item, .bn-item, .s-settings-btn, .sr-item, .avatar-option, a {
+button,
+.btn,
+.tb-btn,
+.nav-item,
+.bn-item,
+.s-settings-btn,
+.sr-item,
+.avatar-option,
+a {
   touch-action: manipulation;
 }
