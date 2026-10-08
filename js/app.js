@@ -38,13 +38,24 @@ window.checkNewDay = function() {
   const today = new Date().toDateString();
   let updated = false;
 
+  const currentMonth = today.substring(4, 7) + today.substring(11, 15);
+  if (D.restoreMonth !== currentMonth) {
+    D.restoreMonth = currentMonth;
+    D.streakRestores = 3;
+    updated = true;
+  }
+
   if (D.lastStreakDate !== today) {
     if (D.lastStreakDate) {
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       if (yesterday.toDateString() === D.lastStreakDate) {
         D.dailyStreak = (D.dailyStreak || 0) + 1;
+        D.lostStreak = 0;
       } else {
+        if ((D.dailyStreak || 0) > 1) {
+          D.lostStreak = D.dailyStreak;
+        }
         D.dailyStreak = 1;
       }
     } else {
@@ -112,12 +123,34 @@ window.addEventListener('DOMContentLoaded', () => {
   applyTheme(D.theme, document.querySelector(`.theme-card[data-t="${D.theme}"]`), true);
 });
 
+window.restoreStreak = function() {
+  if (D.lostStreak > 0 && D.streakRestores > 0) {
+    D.dailyStreak = D.lostStreak + 1;
+    D.streakRestores -= 1;
+    D.lostStreak = 0;
+    save();
+    renderAll();
+    toast("Streak Restored! 🔥", "success");
+  }
+};
+
 window.renderDailyStreak = function() {
   const streak = D.dailyStreak || 1;
   const el = document.getElementById('topbar-streak');
   if (el) el.textContent = streak;
   const elDash = document.getElementById('dash-streak-count');
   if (elDash) elDash.textContent = streak;
+
+  const restoreBtn = document.getElementById('dash-restore-btn');
+  if (restoreBtn) {
+    if (D.lostStreak > 0 && D.streakRestores > 0) {
+      restoreBtn.style.display = 'block';
+      const leftSpan = document.getElementById('dash-restores-left');
+      if (leftSpan) leftSpan.textContent = D.streakRestores;
+    } else {
+      restoreBtn.style.display = 'none';
+    }
+  }
 
   let level = 1;
   if (streak >= 365) level = 9;

@@ -376,8 +376,13 @@
               <h1 class="page-title" id="greeting-title">Welcome back! 👋</h1>
               <p class="page-sub" id="greeting-sub">Loading…</p>
             </div>
-            <div class="dash-streak" title="Daily Login Streak" style="display:flex; align-items:center; gap:8px; padding:10px 18px; background:linear-gradient(135deg, rgba(255,152,0,0.1), rgba(255,152,0,0.05)); border:1px solid rgba(255,152,0,0.2); border-radius:12px; font-weight:700; font-size:1.1rem; color:var(--warn);">
-              <i class="ri-fire-fill" style="font-size:1.6rem"></i> <span id="dash-streak-count">1</span> Day Streak
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+              <div class="dash-streak" title="Daily Login Streak" style="display:flex; align-items:center; gap:8px; padding:10px 18px; background:linear-gradient(135deg, rgba(255,152,0,0.1), rgba(255,152,0,0.05)); border:1px solid rgba(255,152,0,0.2); border-radius:12px; font-weight:700; font-size:1.1rem; color:var(--warn);">
+                <i class="ri-fire-fill" style="font-size:1.6rem"></i> <span id="dash-streak-count">1</span> Day Streak
+              </div>
+              <button id="dash-restore-btn" onclick="restoreStreak()" style="display:none; background:var(--warn); color:#fff; border:none; border-radius:8px; padding:6px 12px; font-weight:700; cursor:pointer; font-size:0.85rem; box-shadow:0 2px 4px rgba(255,152,0,0.3); transition: transform 0.2s;">
+                <i class="ri-restart-line"></i> Restore Streak (<span id="dash-restores-left">3</span> left)
+              </button>
             </div>
           </div>
 
