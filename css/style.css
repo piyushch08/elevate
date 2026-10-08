@@ -2522,6 +2522,14 @@ label {
 }
 
 @media(max-width:480px) {
+  input, select, textarea {
+    font-size: 16px !important; /* Prevents iOS auto-zoom on inputs */
+  }
+  
+  .f-inline {
+    flex-wrap: wrap;
+  }
+  
   .splash-content {
     flex-direction: column;
     gap: 1.5rem;
