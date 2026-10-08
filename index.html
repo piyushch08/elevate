@@ -345,10 +345,14 @@
           <li class="nav-item" data-page="report-bug"><i class="ri-bug-line"></i> Report Bug</li>
         </ul>
         <div class="s-footer">
-          <div class="user-card">
+          <div class="user-card" style="position:relative;">
             <div class="s-avatar" id="u-avatar"><i class="ri-user-smile-line"></i></div>
-            <div style="overflow:hidden">
-              <span class="u-name" id="u-name" contenteditable="true" spellcheck="false">Explorer</span>
+            <div id="u-level-badge" style="position:absolute; bottom:10px; left:46px; background:var(--accent); color:#fff; font-size:0.6rem; padding:1px 5px; border-radius:8px; font-weight:700; border:2px solid var(--sidebar); pointer-events:none; z-index:2; box-shadow:0 2px 4px rgba(0,0,0,0.2);">Lvl 1</div>
+            <div style="overflow:hidden; margin-left:6px; flex:1;">
+              <div style="display:flex; align-items:baseline; gap:6px;">
+                <span class="u-name" id="u-name" contenteditable="true" spellcheck="false">Explorer</span>
+                <span id="u-rank" style="font-size:0.65rem; color:var(--accent); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">NOVICE</span>
+              </div>
               <span class="u-status" id="u-status" contenteditable="true" spellcheck="false">On a roll today 🔥</span>
             </div>
           </div>

@@ -113,10 +113,39 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 window.renderDailyStreak = function() {
+  const streak = D.dailyStreak || 1;
   const el = document.getElementById('topbar-streak');
-  if (el) el.textContent = D.dailyStreak || 1;
+  if (el) el.textContent = streak;
   const elDash = document.getElementById('dash-streak-count');
-  if (elDash) elDash.textContent = D.dailyStreak || 1;
+  if (elDash) elDash.textContent = streak;
+
+  let level = 1;
+  if (streak >= 365) level = 9;
+  else if (streak >= 100) level = 8;
+  else if (streak >= 50) level = 7;
+  else if (streak >= 30) level = 6;
+  else if (streak >= 21) level = 5;
+  else if (streak >= 14) level = 4;
+  else if (streak >= 7) level = 3;
+  else if (streak >= 3) level = 2;
+
+  const badge = document.getElementById('u-level-badge');
+  if (badge) {
+    badge.textContent = 'Lvl ' + level;
+    if (level >= 6) {
+      badge.style.background = 'linear-gradient(135deg, #FFD700, #FF8C00)';
+      badge.style.color = '#000';
+    } else {
+      badge.style.background = 'var(--accent)';
+      badge.style.color = '#fff';
+    }
+  }
+
+  const rankEl = document.getElementById('u-rank');
+  if (rankEl) {
+    const ranks = ["Novice", "Beginner", "Consistent", "Dedicated", "Achiever", "Unstoppable", "Elite", "Legend", "Mythic"];
+    rankEl.textContent = ranks[level - 1];
+  }
 };
 
 function renderAll() {
