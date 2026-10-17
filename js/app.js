@@ -152,13 +152,14 @@ window.renderStreakCalendar = function () {
   const countEl = document.getElementById('streak-cal-count');
   if (countEl) countEl.textContent = D.dailyStreak || 0;
 
+  const frag = document.createDocumentFragment();
   ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(dy => {
-    const h = document.createElement('div'); h.className = 'cal-hd'; h.textContent = dy; grid.appendChild(h);
+    const h = document.createElement('div'); h.className = 'cal-hd'; h.textContent = dy; frag.appendChild(h);
   });
 
   const d = new Date(streakCalY, streakCalM, 1);
   for (let i = 0; i < d.getDay(); i++) {
-    const e = document.createElement('div'); e.className = 'cal-cell cal-empty'; grid.appendChild(e);
+    const e = document.createElement('div'); e.className = 'cal-cell cal-empty'; frag.appendChild(e);
   }
 
   const days = new Date(streakCalY, streakCalM + 1, 0).getDate();
@@ -191,8 +192,9 @@ window.renderStreakCalendar = function () {
     }
 
     cell.innerHTML = `<span>${day}</span>`;
-    grid.appendChild(cell);
+    frag.appendChild(cell);
   }
+  grid.appendChild(frag);
 };
 
 window.restoreStreak = function () {
@@ -253,16 +255,38 @@ window.renderDailyStreak = function () {
   }
 };
 
-function renderAll() {
-  renderDailyStreak();
-  renderTasks(); renderEvents(); renderDeadlines();
-  renderStudyLog(); renderMeals(); renderExercises();
-  renderStreak(); renderHabits(); renderNotes();
-  renderCalendar(); updateRings(); updateMacros(); updateWaterUI();
-  renderSubjects();
+const renderedPages = new Set(['dashboard']);
 
-  // Extra widgets
-  renderStudyExtras(); renderDietExtras(); renderPRs();
+function renderAll() {
+  // Critical dashboard & primary widgets rendered immediately
+  renderDailyStreak();
+  updateRings();
+  renderTasks();
+  renderHabits();
+  renderNotes();
+  renderEvents();
+
+  // Defer non-critical offscreen pages to idle or when navigated to
+  const runDeferred = () => {
+    renderDeadlines();
+    renderStudyLog();
+    renderMeals();
+    renderExercises();
+    renderStreak();
+    renderCalendar();
+    updateMacros();
+    updateWaterUI();
+    renderSubjects();
+    renderStudyExtras();
+    renderDietExtras();
+    renderPRs();
+  };
+
+  if (typeof requestIdleCallback !== 'undefined') {
+    requestIdleCallback(runDeferred, { timeout: 1200 });
+  } else {
+    setTimeout(runDeferred, 100);
+  }
 }
 let localSaveTimeout = null;
 let firestoreSaveTimeout = null;
@@ -317,6 +341,19 @@ function goTo(pg) {
   if (pg_el) pg_el.classList.add('active');
   const bc = document.getElementById('bc-page'); if (bc) bc.textContent = PAGES[pg] || pg;
   if (document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
+  renderPageOnDemand(pg);
+}
+
+function renderPageOnDemand(pg) {
+  if (renderedPages.has(pg)) return;
+  renderedPages.add(pg);
+  if (pg === 'calendar') renderCalendar();
+  else if (pg === 'todo') { renderTasks(); renderDeadlines(); }
+  else if (pg === 'study') { renderStudyLog(); renderSubjects(); renderStudyExtras(); }
+  else if (pg === 'diet') { renderMeals(); updateMacros(); updateWaterUI(); renderDietExtras(); }
+  else if (pg === 'exercise') { renderExercises(); renderPRs(); }
+  else if (pg === 'habits') { renderHabits(); renderStreak(); }
+  else if (pg === 'notes') renderNotes();
 }
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('open');
@@ -328,11 +365,14 @@ function toggleSidebar() {
 let timerInterval;
 let cachedTbTime = null;
 function tick() {
-  const now = new Date();
-  if (!cachedTbTime) cachedTbTime = document.getElementById('tb-time');
-  if (cachedTbTime) {
-    const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-    if (cachedTbTime.textContent !== timeStr) cachedTbTime.textContent = timeStr;
+  const isHidden = document.hidden;
+  if (!isHidden) {
+    const now = new Date();
+    if (!cachedTbTime) cachedTbTime = document.getElementById('tb-time');
+    if (cachedTbTime) {
+      const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      if (cachedTbTime.textContent !== timeStr) cachedTbTime.textContent = timeStr;
+    }
   }
 
   if (D.timerOn) {
@@ -457,11 +497,14 @@ function updateRings() {
     chartUpdateTimeout = setTimeout(() => {
       if (typeof updateProgressChart === 'function') updateProgressChart();
       if (typeof updatePieChart === 'function') updatePieChart();
-    }, 150);
+    }, 100);
   } else {
-    // If Chart.js isn't loaded yet, try again in 200ms
-    clearTimeout(chartUpdateTimeout);
-    chartUpdateTimeout = setTimeout(updateRings, 200);
+    // Event-driven listener on chart script without busy polling
+    const chartScript = document.querySelector('script[src*="chart"]');
+    if (chartScript && !chartScript._hasLoadListener) {
+      chartScript._hasLoadListener = true;
+      chartScript.addEventListener('load', () => updateRings(), { once: true });
+    }
   }
 }
 
@@ -749,11 +792,13 @@ function renderTasks() {
   list.innerHTML = '';
   const filtered = D.tasks.filter(t => D.filter === 'active' ? !t.done : D.filter === 'done' ? t.done : true);
   empty.style.display = filtered.length ? 'none' : 'block';
+  const frag = document.createDocumentFragment();
   filtered.forEach(t => {
     const li = document.createElement('li'); li.className = 'task-item' + (t.done ? ' done' : '');
     li.innerHTML = `<div class="chk${t.done ? ' on' : ''}" onclick="toggleTask(${t.id})"></div><span class="t-name">${t.name}</span><span class="badge ${t.pri === 'urgent' ? 'b-urg' : 'b-norm'}">${t.cat}</span>${t.mins ? `<span class="muted">${t.mins}m</span>` : ''}<div class="t-actions"><button class="btn ico dng" onclick="delTask(${t.id})"><i class="ri-delete-bin-line"></i></button></div>`;
-    list.appendChild(li);
+    frag.appendChild(li);
   });
+  list.appendChild(frag);
   const cnt = document.getElementById('todo-count'); if (cnt) cnt.textContent = `${D.tasks.length} tasks · ${D.tasks.filter(t => t.done).length} done`;
   // dash summary
   const dash = document.getElementById('dash-tasks'); if (!dash) return;
@@ -810,8 +855,9 @@ function renderCalendar() {
   lbl.innerHTML = `<select class="cal-select" onchange="changeCalDate('m', this.value)">${mOpts}</select>
                    <select class="cal-select" onchange="changeCalDate('y', this.value)">${yOpts}</select>`;
 
-  ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(dy => { const h = document.createElement('div'); h.className = 'cal-hd'; h.textContent = dy; grid.appendChild(h); });
-  for (let i = 0; i < d.getDay(); i++) { const e = document.createElement('div'); e.className = 'cal-cell cal-empty'; grid.appendChild(e); }
+  const frag = document.createDocumentFragment();
+  ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(dy => { const h = document.createElement('div'); h.className = 'cal-hd'; h.textContent = dy; frag.appendChild(h); });
+  for (let i = 0; i < d.getDay(); i++) { const e = document.createElement('div'); e.className = 'cal-cell cal-empty'; frag.appendChild(e); }
   const days = new Date(D.calY, D.calM + 1, 0).getDate(), today = new Date();
 
   let delay = 0;
@@ -860,8 +906,9 @@ function renderCalendar() {
       document.getElementById('ev-date').value = dateStr;
       openM('m-event');
     };
-    grid.appendChild(cell);
+    frag.appendChild(cell);
   }
+  grid.appendChild(frag);
 
   // Render holidays in the widget below
   const hList = document.getElementById('holidays-list');
@@ -916,14 +963,16 @@ window.sendBugReport = function () {
 function renderEvents() {
   const list = document.getElementById('event-list'); const empty = document.getElementById('event-empty'); if (!list) return;
   list.innerHTML = ''; empty.style.display = D.events.length ? 'none' : 'block';
+  const frag = document.createDocumentFragment();
   D.events.forEach(ev => {
     const li = document.createElement('li');
     li.className = 'task-item';
     const dateObj = new Date(ev.date + 'T00:00:00');
     const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     li.innerHTML = `<div class="h-ico" style="background:rgba(0,242,254,.15);color:var(--accent);width:32px;height:32px;border-radius:8px;font-size:1.1rem;display:flex;align-items:center;justify-content:center;"><i class="ri-calendar-event-fill"></i></div><div style="flex:1;"><span class="t-name" style="display:block;font-weight:600;">${ev.name}</span><span class="muted"><i class="ri-time-line"></i> ${formattedDate}</span></div><button class="btn ico dng" onclick="delEvent(${ev.id})"><i class="ri-delete-bin-line"></i></button>`;
-    list.appendChild(li);
+    frag.appendChild(li);
   });
+  list.appendChild(frag);
 
   const dashEvents = document.getElementById('dash-events');
   if (dashEvents) {
@@ -1158,6 +1207,7 @@ function saveNote() {
 function renderNotes() {
   const grid = document.getElementById('notes-grid'); const empty = document.getElementById('notes-empty'); if (!grid) return;
   grid.innerHTML = ''; empty.style.display = D.notes.length ? 'none' : 'block';
+  const frag = document.createDocumentFragment();
   D.notes.forEach(n => {
     const card = document.createElement('div'); card.className = 'note-card';
     const bar = document.createElement('div'); bar.className = 'color-bar'; bar.style.background = n.color; card.appendChild(bar);
@@ -1166,8 +1216,9 @@ function renderNotes() {
     card.appendChild(inner);
     const del = document.createElement('button'); del.className = 'btn ico dng n-del'; del.innerHTML = '<i class="ri-delete-bin-line"></i>'; del.onclick = e => { e.stopPropagation(); delNote(n.id); };
     card.appendChild(del);
-    card.onclick = () => editNote(n.id); grid.appendChild(card);
+    card.onclick = () => editNote(n.id); frag.appendChild(card);
   });
+  grid.appendChild(frag);
 
   const statTotal = document.getElementById('stat-total-notes');
   if (statTotal) statTotal.textContent = D.notes.length;
