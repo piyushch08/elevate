@@ -175,18 +175,17 @@ const loginModal = document.getElementById("m-login");
 // =====================================================
 
 function checkAuthEnvironment() {
+  if (window.location.hostname === "127.0.0.1") {
+    // Automatically redirect 127.0.0.1 to localhost so Firebase's authorized domain list matches perfectly
+    window.location.hostname = "localhost";
+    return;
+  }
   if (!authEnvNotice) return;
   if (window.location.protocol === "file:") {
-    authEnvNotice.innerHTML = `⚠️ <strong>Note:</strong> Firebase Authentication (Phone SMS & Google Sign-In) cannot run via <code>file://</code> URLs due to browser security restrictions. Please run via a local web server (e.g. <code>http://localhost:5500</code> via VS Code Live Server).`;
+    authEnvNotice.innerHTML = `⚠️ <strong>Note:</strong> Firebase Authentication (Phone SMS & Google Sign-In) cannot run via <code>file://</code> URLs due to browser security restrictions. Please run via a local web server (e.g. <code>http://localhost:5505</code> via VS Code Live Server).`;
     authEnvNotice.style.background = "rgba(239, 68, 68, 0.15)";
     authEnvNotice.style.border = "1px solid rgba(239, 68, 68, 0.35)";
     authEnvNotice.style.color = "#f87171";
-    authEnvNotice.style.display = "block";
-  } else if (window.location.hostname === "127.0.0.1") {
-    authEnvNotice.innerHTML = `💡 <strong>Tip:</strong> Firebase authorized domains list <code>localhost</code>. If you encounter authorization errors, visit <a href="http://localhost:${window.location.port || '5500'}${window.location.pathname}" style="color:#60a5fa;text-decoration:underline;">http://localhost:${window.location.port || '5500'}</a>.`;
-    authEnvNotice.style.background = "rgba(59, 130, 246, 0.15)";
-    authEnvNotice.style.border = "1px solid rgba(59, 130, 246, 0.35)";
-    authEnvNotice.style.color = "#60a5fa";
     authEnvNotice.style.display = "block";
   }
 }
