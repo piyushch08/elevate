@@ -8,6 +8,7 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  updateProfile,
   RecaptchaVerifier,
   signInWithPhoneNumber
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
@@ -139,6 +140,7 @@ const tabLogin = document.getElementById("tab-login");
 const tabSignup = document.getElementById("tab-signup");
 let authMode = 'login';
 
+// Phone Auth DOM Elements
 const btnPhoneStart = document.getElementById("btn-phone-start");
 const authEmailGoogleView = document.getElementById("auth-email-google-view");
 const authPhoneView = document.getElementById("auth-phone-view");
@@ -150,98 +152,184 @@ const phoneStep2 = document.getElementById("phone-step-2");
 const loginPhoneCodeInp = document.getElementById("login-phone-code");
 const btnPhoneVerify = document.getElementById("btn-phone-verify");
 
+const phoneTabLogin = document.getElementById("phone-tab-login");
+const phoneTabSignup = document.getElementById("phone-tab-signup");
+const phoneNameField = document.getElementById("phone-name-field");
+const loginPhoneNameInp = document.getElementById("login-phone-name");
+const phoneViewTitle = document.getElementById("phone-view-title");
+const phoneViewSub = document.getElementById("phone-view-sub");
+const phoneDisplaySent = document.getElementById("phone-display-sent");
+const btnPhoneEditNumber = document.getElementById("btn-phone-edit-number");
+const btnPhoneResend = document.getElementById("btn-phone-resend");
+const authEnvNotice = document.getElementById("auth-env-notice");
+
 let recaptchaVerifier = null;
 let confirmationResult = null;
+let resendTimer = null;
 
-const btnLogout =
-  document.getElementById("btn-logout");
+const btnLogout = document.getElementById("btn-logout");
+const loginModal = document.getElementById("m-login");
 
-const loginModal =
-  document.getElementById("m-login");
+// =====================================================
+// ENVIRONMENT & CONFIGURATION CHECK
+// =====================================================
 
+function checkAuthEnvironment() {
+  if (!authEnvNotice) return;
+  if (window.location.protocol === "file:") {
+    authEnvNotice.innerHTML = `⚠️ <strong>Note:</strong> Firebase Authentication (Phone SMS & Google Sign-In) cannot run via <code>file://</code> URLs due to browser security restrictions. Please run via a local web server (e.g. <code>http://localhost:5500</code> via VS Code Live Server).`;
+    authEnvNotice.style.background = "rgba(239, 68, 68, 0.15)";
+    authEnvNotice.style.border = "1px solid rgba(239, 68, 68, 0.35)";
+    authEnvNotice.style.color = "#f87171";
+    authEnvNotice.style.display = "block";
+  } else if (window.location.hostname === "127.0.0.1") {
+    authEnvNotice.innerHTML = `💡 <strong>Tip:</strong> Firebase authorized domains list <code>localhost</code>. If you encounter authorization errors, visit <a href="http://localhost:${window.location.port || '5500'}${window.location.pathname}" style="color:#60a5fa;text-decoration:underline;">http://localhost:${window.location.port || '5500'}</a>.`;
+    authEnvNotice.style.background = "rgba(59, 130, 246, 0.15)";
+    authEnvNotice.style.border = "1px solid rgba(59, 130, 246, 0.35)";
+    authEnvNotice.style.color = "#60a5fa";
+    authEnvNotice.style.display = "block";
+  }
+}
+checkAuthEnvironment();
+
+// Auto-detect default country code by timezone
+try {
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+  const countryCodeSelect = document.getElementById("login-country-code");
+  if (countryCodeSelect) {
+    if (timeZone.includes("Calcutta") || timeZone.includes("Kolkata") || timeZone.includes("India")) {
+      countryCodeSelect.value = "+91";
+    } else if (timeZone.includes("New_York") || timeZone.includes("Los_Angeles") || timeZone.includes("Chicago") || timeZone.includes("Denver")) {
+      countryCodeSelect.value = "+1";
+    } else if (timeZone.includes("London")) {
+      countryCodeSelect.value = "+44";
+    } else if (timeZone.includes("Sydney") || timeZone.includes("Melbourne")) {
+      countryCodeSelect.value = "+61";
+    } else if (timeZone.includes("Dubai")) {
+      countryCodeSelect.value = "+971";
+    }
+  }
+} catch (e) {}
 
 // =====================================================
 // GOOGLE LOGIN
 // =====================================================
 
 if (btnLogin && auth) {
-
   btnLogin.addEventListener("click", async () => {
-
-    const errEl =
-      document.getElementById("login-error");
-
+    const errEl = document.getElementById("login-error");
     if (errEl) {
       errEl.style.display = "none";
       errEl.textContent = "";
     }
 
     try {
-
       btnLogin.disabled = true;
+      btnLogin.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Signing in...';
 
-      btnLogin.innerHTML =
-        '<i class="ri-loader-4-line ri-spin"></i> Signing in...';
-
-      await signInWithPopup(
-        auth,
-        provider
-      );
-
+      await signInWithPopup(auth, provider);
       console.log("Google sign-in successful");
-
     } catch (error) {
-
-      console.error(
-        "Google login failed:",
-        error
-      );
-
+      console.error("Google login failed:", error);
       if (errEl) {
-
-        errEl.textContent =
-          "Login failed: " + error.message;
-
+        errEl.textContent = "Login failed: " + getAuthErrorMessage(error);
         errEl.style.display = "block";
-
       }
-
       btnLogin.disabled = false;
-
-      btnLogin.innerHTML =
-        '<i class="ri-google-fill"></i> Sign in with Google';
-
+      btnLogin.innerHTML = '<i class="ri-google-fill"></i> Sign in with Google';
     }
-
   });
-
 }
 
-
 // =====================================================
-// UI TABS FOR AUTH
+// UI TABS FOR AUTH (LOGIN vs SIGN UP)
 // =====================================================
 
 function setAuthMode(mode) {
   authMode = mode;
   const errEl = document.getElementById("login-error");
-  if (errEl) errEl.style.display = "none";
-
-  if (mode === 'login') {
-    if (tabLogin) { tabLogin.classList.add('prim'); tabLogin.style.background = ''; tabLogin.style.borderColor = ''; tabLogin.style.color = ''; }
-    if (tabSignup) { tabSignup.classList.remove('prim'); tabSignup.style.background = 'var(--glass)'; tabSignup.style.borderColor = 'var(--gb)'; tabSignup.style.color = 'var(--tp)'; }
-    if (loginPasswordConfirmInp) loginPasswordConfirmInp.style.display = 'none';
-    if (btnAuthAction) btnAuthAction.innerHTML = 'Sign In';
-  } else {
-    if (tabSignup) { tabSignup.classList.add('prim'); tabSignup.style.background = ''; tabSignup.style.borderColor = ''; tabSignup.style.color = ''; }
-    if (tabLogin) { tabLogin.classList.remove('prim'); tabLogin.style.background = 'var(--glass)'; tabLogin.style.borderColor = 'var(--gb)'; tabLogin.style.color = 'var(--tp)'; }
-    if (loginPasswordConfirmInp) loginPasswordConfirmInp.style.display = 'block';
-    if (btnAuthAction) btnAuthAction.innerHTML = 'Sign Up';
+  if (errEl) {
+    errEl.style.display = "none";
+    errEl.textContent = "";
   }
+
+  const isLogin = mode === 'login';
+
+  // Email view tabs
+  if (tabLogin) {
+    if (isLogin) {
+      tabLogin.classList.add('prim');
+      tabLogin.style.background = '';
+      tabLogin.style.borderColor = '';
+      tabLogin.style.color = '';
+    } else {
+      tabLogin.classList.remove('prim');
+      tabLogin.style.background = 'var(--glass)';
+      tabLogin.style.borderColor = 'var(--gb)';
+      tabLogin.style.color = 'var(--tp)';
+    }
+  }
+  if (tabSignup) {
+    if (!isLogin) {
+      tabSignup.classList.add('prim');
+      tabSignup.style.background = '';
+      tabSignup.style.borderColor = '';
+      tabSignup.style.color = '';
+    } else {
+      tabSignup.classList.remove('prim');
+      tabSignup.style.background = 'var(--glass)';
+      tabSignup.style.borderColor = 'var(--gb)';
+      tabSignup.style.color = 'var(--tp)';
+    }
+  }
+
+  // Phone view tabs
+  if (phoneTabLogin) {
+    if (isLogin) {
+      phoneTabLogin.classList.add('prim');
+      phoneTabLogin.style.background = '';
+      phoneTabLogin.style.borderColor = '';
+      phoneTabLogin.style.color = '';
+    } else {
+      phoneTabLogin.classList.remove('prim');
+      phoneTabLogin.style.background = 'var(--glass)';
+      phoneTabLogin.style.borderColor = 'var(--gb)';
+      phoneTabLogin.style.color = 'var(--tp)';
+    }
+  }
+  if (phoneTabSignup) {
+    if (!isLogin) {
+      phoneTabSignup.classList.add('prim');
+      phoneTabSignup.style.background = '';
+      phoneTabSignup.style.borderColor = '';
+      phoneTabSignup.style.color = '';
+    } else {
+      phoneTabSignup.classList.remove('prim');
+      phoneTabSignup.style.background = 'var(--glass)';
+      phoneTabSignup.style.borderColor = 'var(--gb)';
+      phoneTabSignup.style.color = 'var(--tp)';
+    }
+  }
+
+  // Email view elements
+  if (loginPasswordConfirmInp) loginPasswordConfirmInp.style.display = isLogin ? 'none' : 'block';
+  if (btnAuthAction) btnAuthAction.innerHTML = isLogin ? 'Sign In' : 'Sign Up';
+  if (btnPhoneStart) btnPhoneStart.innerHTML = `<i class="ri-phone-fill" style="color:var(--accent);"></i> ${isLogin ? 'Sign in with Phone' : 'Sign up with Phone'}`;
+
+  // Phone view elements
+  if (phoneNameField) phoneNameField.style.display = isLogin ? 'none' : 'block';
+  if (phoneViewTitle) phoneViewTitle.textContent = isLogin ? 'Mobile Sign In' : 'Mobile Sign Up';
+  if (phoneViewSub) phoneViewSub.textContent = isLogin
+    ? 'Enter your mobile number to sign in with an SMS code.'
+    : 'Enter your name and mobile number to create your planner account.';
+  if (btnPhoneSend) btnPhoneSend.innerHTML = isLogin ? 'Send SMS Code' : 'Send Verification Code';
+  if (btnPhoneVerify) btnPhoneVerify.innerHTML = isLogin ? 'Verify & Sign In' : 'Verify & Create Account';
 }
 
 if (tabLogin) tabLogin.addEventListener('click', () => setAuthMode('login'));
 if (tabSignup) tabSignup.addEventListener('click', () => setAuthMode('signup'));
+if (phoneTabLogin) phoneTabLogin.addEventListener('click', () => setAuthMode('login'));
+if (phoneTabSignup) phoneTabSignup.addEventListener('click', () => setAuthMode('signup'));
 
 // =====================================================
 // EMAIL / PASSWORD ACTION
@@ -286,10 +374,7 @@ if (btnAuthAction && auth) {
     } catch (error) {
       console.error("Auth failed:", error);
       if (errEl) {
-        let msg = error.message;
-        if (error.code === 'auth/invalid-credential') msg = "Invalid email or password.";
-        else if (error.code === 'auth/email-already-in-use') msg = "Email already in use. Please sign in.";
-        errEl.textContent = "Error: " + msg;
+        errEl.textContent = getAuthErrorMessage(error);
         errEl.style.display = "block";
       }
       btnAuthAction.disabled = false;
@@ -318,20 +403,197 @@ if (btnAuthAction && auth) {
 }
 
 // =====================================================
-// PHONE AUTHENTICATION
+// PHONE AUTHENTICATION HELPERS & LOGIC
 // =====================================================
 
-function setupRecaptcha() {
-  if (!recaptchaVerifier) {
-    recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-      'size': 'invisible',
-      'callback': (response) => {
-        // reCAPTCHA solved
-      }
-    });
+function clearRecaptcha() {
+  if (recaptchaVerifier) {
+    try {
+      recaptchaVerifier.clear();
+    } catch (e) {
+      console.warn("reCAPTCHA clear error:", e);
+    }
+    recaptchaVerifier = null;
+  }
+  const container = document.getElementById("recaptcha-container");
+  if (container) {
+    container.innerHTML = "";
   }
 }
 
+function getRecaptchaVerifier() {
+  clearRecaptcha();
+  const container = document.getElementById("recaptcha-container");
+  if (!container || !auth) return null;
+
+  recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+    size: "invisible",
+    callback: () => {
+      console.log("reCAPTCHA solved");
+    },
+    "expired-callback": () => {
+      console.warn("reCAPTCHA expired. Resetting...");
+      clearRecaptcha();
+    }
+  });
+
+  return recaptchaVerifier;
+}
+
+function formatPhoneNumber(countryCode, inputVal) {
+  if (!inputVal) return null;
+  let cleaned = inputVal.trim().replace(/[\s\-\(\)\.]/g, '');
+  if (cleaned.startsWith('+')) {
+    return cleaned;
+  }
+  cleaned = cleaned.replace(/^0+/, '');
+  const codeDigits = countryCode.replace('+', '');
+  if (cleaned.startsWith(codeDigits) && cleaned.length > codeDigits.length + 5) {
+    return '+' + cleaned;
+  }
+  return countryCode + cleaned;
+}
+
+function getAuthErrorMessage(error) {
+  if (!error) return "An unexpected error occurred.";
+  const code = error.code || "";
+  const msg = error.message || "";
+
+  if (code === "auth/invalid-phone-number") {
+    return "Invalid mobile number format. Please check your country code and digits.";
+  }
+  if (code === "auth/missing-phone-number") {
+    return "Please enter a valid mobile number.";
+  }
+  if (code === "auth/quota-exceeded") {
+    return "SMS quota for this project has been exceeded. Please try again later or sign in with Google / Email.";
+  }
+  if (code === "auth/too-many-requests") {
+    return "Too many requests. Please wait a few minutes before trying again.";
+  }
+  if (code === "auth/captcha-check-failed") {
+    return "reCAPTCHA verification failed. Please try again.";
+  }
+  if (code === "auth/invalid-verification-code") {
+    return "Invalid 6-digit verification code. Please check your SMS and try again.";
+  }
+  if (code === "auth/code-expired") {
+    return "Verification code has expired. Please click 'Resend Code'.";
+  }
+  if (code === "auth/network-request-failed") {
+    return "Network connection error. Please check your internet connection.";
+  }
+  if (code === "auth/invalid-credential") {
+    return "Invalid credentials. Please verify your details.";
+  }
+  if (code === "auth/email-already-in-use") {
+    return "Email already in use. Please sign in.";
+  }
+  if (code === "auth/operation-not-allowed" || msg.includes("SMS unable to be sent until this region enabled")) {
+    return "SMS sending is restricted by Firebase SMS Region Policy. In Firebase Console > Authentication > Settings > SMS region policy, allow your country (e.g. India) and ensure Phone provider is enabled in Sign-in method.";
+  }
+  if (code === "auth/operation-not-supported-in-this-environment" || code === "auth/unauthorized-domain") {
+    return "Phone login requires running on http://localhost or an authorized domain. It cannot run directly from file:// due to browser security restrictions.";
+  }
+  return msg || "Authentication failed. Please try again.";
+}
+
+function startResendCountdown(seconds = 30) {
+  if (resendTimer) clearInterval(resendTimer);
+  if (!btnPhoneResend) return;
+
+  btnPhoneResend.disabled = true;
+  let remaining = seconds;
+  btnPhoneResend.innerHTML = `Resend code in <span id="resend-timer">${remaining}</span>s`;
+
+  resendTimer = setInterval(() => {
+    remaining -= 1;
+    if (remaining <= 0) {
+      clearInterval(resendTimer);
+      btnPhoneResend.disabled = false;
+      btnPhoneResend.innerHTML = `<i class="ri-refresh-line"></i> Resend Code`;
+    } else {
+      const timerSpan = document.getElementById("resend-timer");
+      if (timerSpan) timerSpan.textContent = remaining;
+    }
+  }, 1000);
+}
+
+async function sendPhoneVerificationCode() {
+  const errEl = document.getElementById("login-error");
+  if (errEl) { errEl.style.display = "none"; errEl.textContent = ""; }
+
+  const countryCodeSelect = document.getElementById("login-country-code");
+  const countryCode = countryCodeSelect ? countryCodeSelect.value : "+91";
+  const rawPhone = loginPhoneInp ? loginPhoneInp.value : "";
+  const fullPhone = formatPhoneNumber(countryCode, rawPhone);
+
+  if (!fullPhone || !/^\+[1-9]\d{6,14}$/.test(fullPhone)) {
+    if (errEl) {
+      errEl.textContent = "Please enter a valid mobile number (e.g. 9876543210).";
+      errEl.style.display = "block";
+    }
+    if (loginPhoneInp) loginPhoneInp.focus();
+    return;
+  }
+
+  // If in sign up mode, validate name
+  if (authMode === "signup" && loginPhoneNameInp) {
+    const nameVal = loginPhoneNameInp.value.trim();
+    if (!nameVal) {
+      if (errEl) {
+        errEl.textContent = "Please enter your full name to create an account.";
+        errEl.style.display = "block";
+      }
+      loginPhoneNameInp.focus();
+      return;
+    }
+  }
+
+  try {
+    if (btnPhoneSend) {
+      btnPhoneSend.disabled = true;
+      btnPhoneSend.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Sending SMS...';
+    }
+    if (btnPhoneResend) {
+      btnPhoneResend.disabled = true;
+    }
+
+    const appVerifier = getRecaptchaVerifier();
+    if (!appVerifier) throw new Error("Could not initialize reCAPTCHA verifier.");
+
+    confirmationResult = await signInWithPhoneNumber(auth, fullPhone, appVerifier);
+    console.log("SMS sent successfully to", fullPhone);
+
+    if (phoneDisplaySent) {
+      phoneDisplaySent.textContent = fullPhone;
+    }
+
+    if (phoneStep1) phoneStep1.style.display = "none";
+    if (phoneStep2) phoneStep2.style.display = "flex";
+    if (loginPhoneCodeInp) {
+      loginPhoneCodeInp.value = "";
+      loginPhoneCodeInp.focus();
+    }
+
+    startResendCountdown(30);
+
+  } catch (error) {
+    console.error("SMS sending failed:", error);
+    clearRecaptcha();
+    if (errEl) {
+      errEl.textContent = getAuthErrorMessage(error);
+      errEl.style.display = "block";
+    }
+  } finally {
+    if (btnPhoneSend) {
+      btnPhoneSend.disabled = false;
+      btnPhoneSend.innerHTML = authMode === 'login' ? 'Send SMS Code' : 'Send Verification Code';
+    }
+  }
+}
+
+// Phone Start Button (from main view)
 if (btnPhoneStart) {
   btnPhoneStart.addEventListener('click', () => {
     if (authEmailGoogleView) authEmailGoogleView.style.display = 'none';
@@ -341,81 +603,76 @@ if (btnPhoneStart) {
     
     if (phoneStep1) phoneStep1.style.display = 'flex';
     if (phoneStep2) phoneStep2.style.display = 'none';
-    if (loginPhoneInp) loginPhoneInp.value = '';
     if (loginPhoneCodeInp) loginPhoneCodeInp.value = '';
     
-    setupRecaptcha();
+    setAuthMode(authMode);
+    if (authMode === 'signup' && loginPhoneNameInp && !loginPhoneNameInp.value) {
+      loginPhoneNameInp.focus();
+    } else if (loginPhoneInp) {
+      loginPhoneInp.focus();
+    }
   });
 }
 
+// Back to Email/Google Button
 if (btnPhoneBack) {
   btnPhoneBack.addEventListener('click', () => {
     if (authPhoneView) authPhoneView.style.display = 'none';
     if (authEmailGoogleView) authEmailGoogleView.style.display = 'block';
     const errEl = document.getElementById("login-error");
     if (errEl) { errEl.style.display = "none"; errEl.textContent = ""; }
+    clearRecaptcha();
+    if (resendTimer) clearInterval(resendTimer);
   });
 }
 
-if (btnPhoneSend && auth) {
-  btnPhoneSend.addEventListener('click', async () => {
+// Edit Phone Number Button (from step 2)
+if (btnPhoneEditNumber) {
+  btnPhoneEditNumber.addEventListener('click', () => {
+    if (phoneStep2) phoneStep2.style.display = 'none';
+    if (phoneStep1) phoneStep1.style.display = 'flex';
     const errEl = document.getElementById("login-error");
     if (errEl) { errEl.style.display = "none"; errEl.textContent = ""; }
-
-    const countryCodeSelect = document.getElementById("login-country-code");
-    const countryCode = countryCodeSelect ? countryCodeSelect.value : "+1";
-    const phoneInpVal = loginPhoneInp ? loginPhoneInp.value.trim() : "";
-    
-    if (!phoneInpVal) {
-      if (errEl) { errEl.textContent = "Please enter a valid phone number."; errEl.style.display = "block"; }
-      return;
-    }
-
-    const fullPhoneNumber = countryCode + phoneInpVal;
-
-    try {
-      btnPhoneSend.disabled = true;
-      btnPhoneSend.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Sending...';
-
-      if (!recaptchaVerifier) {
-        recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          'size': 'invisible'
-        });
-      }
-
-      confirmationResult = await signInWithPhoneNumber(auth, fullPhoneNumber, recaptchaVerifier);
-      
-      console.log("SMS sent successfully");
-      
-      if (phoneStep1) phoneStep1.style.display = 'none';
-      if (phoneStep2) phoneStep2.style.display = 'flex';
-      
-    } catch (error) {
-      console.error("SMS sending failed:", error);
-      if (errEl) {
-        errEl.textContent = "Failed to send SMS: " + error.message;
-        errEl.style.display = "block";
-      }
-      if (recaptchaVerifier) {
-        try { recaptchaVerifier.clear(); } catch(e) {}
-        recaptchaVerifier = null;
-      }
-    } finally {
-      btnPhoneSend.disabled = false;
-      btnPhoneSend.innerHTML = 'Send SMS Code';
-    }
+    clearRecaptcha();
+    if (loginPhoneInp) loginPhoneInp.focus();
   });
 }
 
+// Resend Code Button
+if (btnPhoneResend) {
+  btnPhoneResend.addEventListener('click', () => {
+    sendPhoneVerificationCode();
+  });
+}
+
+// Send SMS Button
+if (btnPhoneSend && auth) {
+  btnPhoneSend.addEventListener('click', () => {
+    sendPhoneVerificationCode();
+  });
+}
+
+// Verify Code Button
 if (btnPhoneVerify && auth) {
   btnPhoneVerify.addEventListener('click', async () => {
     const errEl = document.getElementById("login-error");
     if (errEl) { errEl.style.display = "none"; errEl.textContent = ""; }
 
     const code = loginPhoneCodeInp ? loginPhoneCodeInp.value.trim() : "";
-    
-    if (!code) {
-      if (errEl) { errEl.textContent = "Please enter the 6-digit code."; errEl.style.display = "block"; }
+    if (!code || code.length < 6) {
+      if (errEl) {
+        errEl.textContent = "Please enter the complete 6-digit verification code.";
+        errEl.style.display = "block";
+      }
+      if (loginPhoneCodeInp) loginPhoneCodeInp.focus();
+      return;
+    }
+
+    if (!confirmationResult) {
+      if (errEl) {
+        errEl.textContent = "Session expired. Please click 'Change' and send the code again.";
+        errEl.style.display = "block";
+      }
       return;
     }
 
@@ -423,21 +680,75 @@ if (btnPhoneVerify && auth) {
       btnPhoneVerify.disabled = true;
       btnPhoneVerify.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Verifying...';
 
-      await confirmationResult.confirm(code);
-      console.log("Phone sign-in successful");
-      
-      btnPhoneVerify.disabled = false;
-      btnPhoneVerify.innerHTML = 'Verify & Login';
+      const userCredential = await confirmationResult.confirm(code);
+      const user = userCredential.user;
+      console.log("Phone sign-in successful for UID:", user.uid);
+
+      // If user provided a name during Sign Up, update displayName
+      const enteredName = loginPhoneNameInp ? loginPhoneNameInp.value.trim() : "";
+      if (enteredName) {
+        try {
+          await updateProfile(user, { displayName: enteredName });
+          console.log("Updated displayName to:", enteredName);
+        } catch (profileErr) {
+          console.warn("Could not update displayName:", profileErr);
+        }
+        if (window.D) {
+          window.D.profile = window.D.profile || {};
+          window.D.profile.name = enteredName;
+        }
+        const uNameEl = document.getElementById("u-name");
+        if (uNameEl) uNameEl.textContent = enteredName;
+      }
+
+      clearRecaptcha();
+      if (resendTimer) clearInterval(resendTimer);
+
     } catch (error) {
       console.error("Phone verification failed:", error);
       if (errEl) {
-        let msg = error.message;
-        if (error.code === 'auth/invalid-verification-code') msg = "Invalid code. Please try again.";
-        errEl.textContent = "Error: " + msg;
+        errEl.textContent = getAuthErrorMessage(error);
         errEl.style.display = "block";
       }
+    } finally {
       btnPhoneVerify.disabled = false;
-      btnPhoneVerify.innerHTML = 'Verify & Login';
+      btnPhoneVerify.innerHTML = authMode === 'login' ? 'Verify & Sign In' : 'Verify & Create Account';
+    }
+  });
+}
+
+// Enter key and input handling
+if (loginPhoneInp) {
+  loginPhoneInp.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (btnPhoneSend) btnPhoneSend.click();
+    }
+  });
+}
+
+if (loginPhoneNameInp) {
+  loginPhoneNameInp.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (loginPhoneInp) loginPhoneInp.focus();
+    }
+  });
+}
+
+if (loginPhoneCodeInp) {
+  loginPhoneCodeInp.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (btnPhoneVerify) btnPhoneVerify.click();
+    }
+  });
+
+  loginPhoneCodeInp.addEventListener("input", () => {
+    const errEl = document.getElementById("login-error");
+    if (errEl) errEl.style.display = "none";
+    if (loginPhoneCodeInp.value.trim().length === 6) {
+      if (btnPhoneVerify) btnPhoneVerify.click();
     }
   });
 }
@@ -499,7 +810,7 @@ if (auth) {
 
         console.log(
           "Authenticated user:",
-          user.email
+          user.email || user.phoneNumber || user.uid
         );
 
 
@@ -520,7 +831,10 @@ if (auth) {
         if (uNameEl) {
 
           uNameEl.textContent =
-            user.displayName || "User";
+            user.displayName ||
+            (window.D && window.D.profile && window.D.profile.name && window.D.profile.name !== 'Explorer' ? window.D.profile.name : null) ||
+            user.phoneNumber ||
+            "User";
 
         }
 
@@ -699,9 +1013,13 @@ if (auth) {
         if (loginPasswordInp) loginPasswordInp.value = '';
         if (loginPhoneInp) loginPhoneInp.value = '';
         if (loginPhoneCodeInp) loginPhoneCodeInp.value = '';
+        if (loginPhoneNameInp) loginPhoneNameInp.value = '';
+        clearRecaptcha();
+        if (resendTimer) clearInterval(resendTimer);
+
         if (btnPhoneVerify) {
           btnPhoneVerify.disabled = false;
-          btnPhoneVerify.innerHTML = 'Verify & Login';
+          btnPhoneVerify.innerHTML = authMode === 'login' ? 'Verify & Sign In' : 'Verify & Create Account';
         }
 
         if (btnLogout) btnLogout.disabled = false;
