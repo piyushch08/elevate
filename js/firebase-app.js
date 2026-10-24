@@ -166,6 +166,7 @@ const authEnvNotice = document.getElementById("auth-env-notice");
 let recaptchaVerifier = null;
 let confirmationResult = null;
 let resendTimer = null;
+let pendingPhoneDisplayName = "";
 
 const btnLogout = document.getElementById("btn-logout");
 const loginModal = document.getElementById("m-login");
@@ -323,6 +324,12 @@ function setAuthMode(mode) {
     : 'Enter your name and mobile number to create your planner account.';
   if (btnPhoneSend) btnPhoneSend.innerHTML = isLogin ? 'Send SMS Code' : 'Send Verification Code';
   if (btnPhoneVerify) btnPhoneVerify.innerHTML = isLogin ? 'Verify & Sign In' : 'Verify & Create Account';
+
+  // If user toggles tabs while in step 2, reset to step 1 so they can view and update fields
+  if (phoneStep2 && phoneStep2.style.display !== 'none') {
+    phoneStep2.style.display = 'none';
+    if (phoneStep1) phoneStep1.style.display = 'flex';
+  }
 }
 
 if (tabLogin) tabLogin.addEventListener('click', () => setAuthMode('login'));
@@ -425,7 +432,7 @@ function getRecaptchaVerifier() {
   const container = document.getElementById("recaptcha-container");
   if (!container || !auth) return null;
 
-  recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+  recaptchaVerifier = new RecaptchaVerifier(auth, container, {
     size: "invisible",
     callback: () => {
       console.log("reCAPTCHA solved");
@@ -441,16 +448,24 @@ function getRecaptchaVerifier() {
 
 function formatPhoneNumber(countryCode, inputVal) {
   if (!inputVal) return null;
-  let cleaned = inputVal.trim().replace(/[\s\-\(\)\.]/g, '');
-  if (cleaned.startsWith('+')) {
-    return cleaned;
+  const val = inputVal.trim();
+  const hasPlus = val.startsWith('+');
+  let digits = val.replace(/\D/g, '');
+  if (!digits) return null;
+
+  if (hasPlus) {
+    return '+' + digits;
   }
-  cleaned = cleaned.replace(/^0+/, '');
-  const codeDigits = countryCode.replace('+', '');
-  if (cleaned.startsWith(codeDigits) && cleaned.length > codeDigits.length + 5) {
-    return '+' + cleaned;
+
+  // Strip leading national trunk zeros (e.g. 09876543210 -> 9876543210)
+  digits = digits.replace(/^0+/, '');
+  const codeDigits = countryCode.replace(/\D/g, '');
+
+  if (digits.startsWith(codeDigits) && digits.length > codeDigits.length + 5) {
+    return '+' + digits;
   }
-  return countryCode + cleaned;
+
+  return countryCode + digits;
 }
 
 function getAuthErrorMessage(error) {
@@ -547,6 +562,7 @@ async function sendPhoneVerificationCode() {
       loginPhoneNameInp.focus();
       return;
     }
+    pendingPhoneDisplayName = nameVal;
   }
 
   try {
@@ -679,12 +695,19 @@ if (btnPhoneVerify && auth) {
       btnPhoneVerify.disabled = true;
       btnPhoneVerify.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Verifying...';
 
+      const enteredName = (loginPhoneNameInp && authMode === 'signup') ? loginPhoneNameInp.value.trim() : (pendingPhoneDisplayName || "");
+      if (enteredName) {
+        pendingPhoneDisplayName = enteredName;
+        if (window.D) {
+          window.D.profile = window.D.profile || {};
+          window.D.profile.name = enteredName;
+        }
+      }
+
       const userCredential = await confirmationResult.confirm(code);
       const user = userCredential.user;
       console.log("Phone sign-in successful for UID:", user.uid);
 
-      // If user provided a name during Sign Up, update displayName
-      const enteredName = loginPhoneNameInp ? loginPhoneNameInp.value.trim() : "";
       if (enteredName) {
         try {
           await updateProfile(user, { displayName: enteredName });
@@ -698,6 +721,10 @@ if (btnPhoneVerify && auth) {
         }
         const uNameEl = document.getElementById("u-name");
         if (uNameEl) uNameEl.textContent = enteredName;
+        const pNameInp = document.getElementById("p-name");
+        if (pNameInp) pNameInp.value = enteredName;
+        if (typeof window.updateGreeting === "function") window.updateGreeting();
+        if (window.saveToFirestore) window.saveToFirestore();
       }
 
       clearRecaptcha();
@@ -724,6 +751,31 @@ if (loginPhoneInp) {
       if (btnPhoneSend) btnPhoneSend.click();
     }
   });
+
+  // Auto-detect country code if pasted with + prefix
+  loginPhoneInp.addEventListener("input", () => {
+    const errEl = document.getElementById("login-error");
+    if (errEl) errEl.style.display = "none";
+    const val = loginPhoneInp.value.trim();
+    if (val.startsWith("+")) {
+      const countryCodeSelect = document.getElementById("login-country-code");
+      if (countryCodeSelect) {
+        const options = Array.from(countryCodeSelect.options);
+        let matchedOpt = null;
+        for (const opt of options) {
+          if (val.startsWith(opt.value)) {
+            if (!matchedOpt || opt.value.length > matchedOpt.value.length) {
+              matchedOpt = opt;
+            }
+          }
+        }
+        if (matchedOpt) {
+          countryCodeSelect.value = matchedOpt.value;
+          loginPhoneInp.value = val.slice(matchedOpt.value.length).trim();
+        }
+      }
+    }
+  });
 }
 
 if (loginPhoneNameInp) {
@@ -746,7 +798,8 @@ if (loginPhoneCodeInp) {
   loginPhoneCodeInp.addEventListener("input", () => {
     const errEl = document.getElementById("login-error");
     if (errEl) errEl.style.display = "none";
-    if (loginPhoneCodeInp.value.trim().length === 6) {
+    loginPhoneCodeInp.value = loginPhoneCodeInp.value.replace(/\D/g, '').slice(0, 6);
+    if (loginPhoneCodeInp.value.length === 6) {
       if (btnPhoneVerify) btnPhoneVerify.click();
     }
   });
@@ -759,32 +812,23 @@ if (loginPhoneCodeInp) {
 // =====================================================
 
 if (btnLogout && auth) {
-
   btnLogout.addEventListener("click", async () => {
-
+    if (!currentUser) {
+      // User is currently Guest, open login modal
+      if (loginModal) loginModal.style.display = "flex";
+      return;
+    }
     try {
-
       btnLogout.disabled = true;
-
       await signOut(auth);
-
       console.log("User logged out");
       try { localStorage.removeItem("elevate2"); } catch (e) {}
       window.location.reload();
-
     } catch (error) {
-
-      console.error(
-        "Logout failed:",
-        error
-      );
-
+      console.error("Logout failed:", error);
       btnLogout.disabled = false;
-
     }
-
   });
-
 }
 
 
@@ -823,18 +867,30 @@ if (auth) {
 
 
         // Update username
+        const resolvedName = pendingPhoneDisplayName ||
+          user.displayName ||
+          (window.D && window.D.profile && window.D.profile.name && window.D.profile.name !== 'Explorer' ? window.D.profile.name : null) ||
+          user.phoneNumber ||
+          "User";
 
-        const uNameEl =
-          document.getElementById("u-name");
+        if (window.D && window.D.profile && (pendingPhoneDisplayName || user.displayName)) {
+          window.D.profile.name = pendingPhoneDisplayName || user.displayName;
+        }
 
+        const uNameEl = document.getElementById("u-name");
         if (uNameEl) {
+          uNameEl.textContent = resolvedName;
+        }
 
-          uNameEl.textContent =
-            user.displayName ||
-            (window.D && window.D.profile && window.D.profile.name && window.D.profile.name !== 'Explorer' ? window.D.profile.name : null) ||
-            user.phoneNumber ||
-            "User";
+        const pNameInp = document.getElementById("p-name");
+        if (pNameInp && resolvedName) {
+          pNameInp.value = resolvedName;
+        }
 
+        if (btnLogout) {
+          btnLogout.disabled = false;
+          btnLogout.innerHTML = '<i class="ri-logout-box-r-line"></i> Logout';
+          btnLogout.title = "Log out of your account";
         }
 
 
@@ -892,10 +948,22 @@ if (auth) {
                 if (window.D.profile.name) {
                   const nameEl = document.getElementById("u-name");
                   if (nameEl) nameEl.textContent = window.D.profile.name;
+                  const pNameInp = document.getElementById("p-name");
+                  if (pNameInp) pNameInp.value = window.D.profile.name;
+                }
+                if (window.D.profile.status) {
+                  const statusEl = document.getElementById("u-status");
+                  if (statusEl) statusEl.textContent = window.D.profile.status;
+                  const pStatusInp = document.getElementById("p-status");
+                  if (pStatusInp) pStatusInp.value = window.D.profile.status;
                 }
                 if (window.D.profile.avatar && typeof window.updateAvatarUI === 'function') {
                   window.updateAvatarUI(window.D.profile.avatar);
                 }
+              }
+
+              if (typeof window.populatePersonalization === 'function') {
+                window.populatePersonalization();
               }
 
               // Refresh UI
@@ -906,23 +974,32 @@ if (auth) {
             else {
               console.log("New user. Creating Firestore profile...");
 
+              const newUserName = pendingPhoneDisplayName || user.displayName || 'Explorer';
+
               // Prevent data leak from another authenticated user
               if (window.D && window.D.lastUid && window.D.lastUid !== 'guest' && window.D.lastUid !== user.uid) {
                 console.log("Wiping leftover data from previous user.");
                 Object.assign(window.D, {
+                  profile: { name: newUserName, status: 'On a roll today 🔥' },
                   goals: { study: 120, cal: 2200, prot: 150, carb: 250, water: 2000, weeklyWorkouts: 0 },
                   today: { study: 0, cal: 0, prot: 0, carb: 0, water: 0 },
                   tasks: [], events: [], deadlines: [], studyLog: [], meals: [],
                   exercises: [{ name: 'Bench Press', sets: '4×8', done: false }, { name: 'Overhead Press', sets: '3×10', done: false }, { name: 'Tricep Pushdown', sets: '3×12', done: false }],
                   streak: [0, 0, 0, 0, 0, 0, 0], habits: [], notes: [],
+                  dailyStreak: 1, lastStreakDate: new Date().toDateString(),
                   filter: 'all', theme: 'dark',
                   calY: new Date().getFullYear(), calM: new Date().getMonth(), calEvents: {},
                   timerSec: 25 * 60, timerBase: 25 * 60, timerOn: false, workoutOn: false,
                   editNoteId: null, noteColor: '#00f2fe',
-                  lastUid: user.uid, lastActiveDate: new Date().toDateString()
+                  lastUid: user.uid, lastActiveDate: new Date().toDateString(),
+                  subjects: ['Mathematics', 'Programming', 'Physics', 'Data Science', 'English', 'Other']
                 });
               } else if (window.D) {
                 window.D.lastUid = user.uid;
+                window.D.profile = window.D.profile || {};
+                if (newUserName !== 'Explorer') {
+                  window.D.profile.name = newUserName;
+                }
               }
 
               await setDoc(userRef, {
@@ -1021,7 +1098,11 @@ if (auth) {
           btnPhoneVerify.innerHTML = authMode === 'login' ? 'Verify & Sign In' : 'Verify & Create Account';
         }
 
-        if (btnLogout) btnLogout.disabled = false;
+        if (btnLogout) {
+          btnLogout.disabled = false;
+          btnLogout.innerHTML = '<i class="ri-login-box-r-line"></i> Sign In';
+          btnLogout.title = "Sign in or Create Account";
+        }
 
       }
 

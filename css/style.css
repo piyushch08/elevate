@@ -1491,6 +1491,8 @@ label {
   padding: 2rem;
   width: 90%;
   max-width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
   box-shadow: var(--shadow);
   position: relative;
   animation: mIn .4s cubic-bezier(.34, 1.56, .64, 1);

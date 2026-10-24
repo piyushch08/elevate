@@ -18,9 +18,9 @@ const D = window.D = {
 
 // ===== REPORT BUG =====
 window.sendBugReport = function (e) {
-  e.preventDefault();
-  const title = document.getElementById('bug-title').value;
-  const desc = document.getElementById('bug-desc').value;
+  if (e && typeof e.preventDefault === 'function') e.preventDefault();
+  const title = document.getElementById('bug-title')?.value || '';
+  const desc = document.getElementById('bug-desc')?.value || '';
   const mailto = `mailto:piyush.ch407@gmail.com?subject=Bug Report: ${encodeURIComponent(title)}&body=${encodeURIComponent(desc)}`;
   window.location.href = mailto;
 };
@@ -280,6 +280,7 @@ function renderAll() {
     renderStudyExtras();
     renderDietExtras();
     renderPRs();
+    if (typeof window.populatePersonalization === 'function') window.populatePersonalization();
   };
 
   if (typeof requestIdleCallback !== 'undefined') {
@@ -354,6 +355,7 @@ function renderPageOnDemand(pg) {
   else if (pg === 'exercise') { renderExercises(); renderPRs(); }
   else if (pg === 'habits') { renderHabits(); renderStreak(); }
   else if (pg === 'notes') renderNotes();
+  else if (pg === 'personalize') { if (typeof window.populatePersonalization === 'function') window.populatePersonalization(); }
 }
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('open');
@@ -1300,7 +1302,25 @@ window.updateAvatarUI = function (src) {
     if (uAvatar) uAvatar.innerHTML = `<img src="${src}" alt="Profile">`;
     if (tbAvatar) tbAvatar.innerHTML = `<img src="${src}" alt="Profile">`;
   }
+window.populatePersonalization = function () {
+  const pName = document.getElementById('p-name');
+  const pStatus = document.getElementById('p-status');
+  if (pName && D.profile && D.profile.name) pName.value = D.profile.name;
+  if (pStatus && D.profile && D.profile.status) pStatus.value = D.profile.status;
+
+  const gStudy = document.getElementById('g-study');
+  const gCal = document.getElementById('g-cal');
+  const gProt = document.getElementById('g-prot');
+  const gCarb = document.getElementById('g-carb');
+  const gWater = document.getElementById('g-water');
+
+  if (gStudy && D.goals) gStudy.value = D.goals.study || '';
+  if (gCal && D.goals) gCal.value = D.goals.cal || '';
+  if (gProt && D.goals) gProt.value = D.goals.prot || '';
+  if (gCarb && D.goals) gCarb.value = D.goals.carb || '';
+  if (gWater && D.goals) gWater.value = D.goals.water || '';
 };
+
 function saveProfile() {
   const name = document.getElementById('p-name').value.trim(); const status = document.getElementById('p-status').value.trim();
   D.profile = D.profile || {};
