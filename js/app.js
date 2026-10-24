@@ -1302,6 +1302,8 @@ window.updateAvatarUI = function (src) {
     if (uAvatar) uAvatar.innerHTML = `<img src="${src}" alt="Profile">`;
     if (tbAvatar) tbAvatar.innerHTML = `<img src="${src}" alt="Profile">`;
   }
+};
+
 window.populatePersonalization = function () {
   const pName = document.getElementById('p-name');
   const pStatus = document.getElementById('p-status');
