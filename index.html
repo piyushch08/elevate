@@ -288,6 +288,14 @@
               style="flex:1; padding:0.8rem; border:1px solid var(--gb); border-radius:8px; background:var(--glass); color:var(--tp);">
           </div>
           <button class="btn prim full" id="btn-phone-send" style="font-size:1rem;padding:0.8rem; margin-top:5px;">Send SMS Code</button>
+
+          <!-- SMS Policy & Free Testing guidance note -->
+          <div style="font-size:0.8rem; color:var(--ts); background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.22); padding:9px 12px; border-radius:8px; line-height:1.45; text-align:left;">
+            <div style="font-weight:600; color:var(--tp); display:flex; align-items:center; gap:6px; margin-bottom:3px;">
+              <i class="ri-information-line" style="color:var(--accent); font-size:1rem;"></i> Real SMS & Free Test Numbers
+            </div>
+            Sending SMS to real phone numbers requires the Firebase <strong>Blaze Plan</strong>. For free testing without billing, add a test phone number (e.g. <code>+91 9999999999</code> with code <code>123456</code>) in your <a href="https://console.firebase.google.com/project/elevate-8d5c4/authentication/providers" target="_blank" rel="noopener noreferrer" style="color:var(--accent); text-decoration:underline;">Firebase Console > Phone</a>.
+          </div>
         </div>
 
         <!-- Step 2: Verification Code -->
@@ -317,7 +325,7 @@
 
       <!-- SINGLE reCAPTCHA container -->
       <div id="recaptcha-container" style="margin: 8px auto 0; min-height: 1px;"></div>
-      <p id="login-error" class="muted" style="color:var(--danger);margin-top:1rem;display:none;font-size:0.88rem;line-height:1.4;background:rgba(239,68,68,0.1);padding:8px 12px;border-radius:6px;border:1px solid rgba(239,68,68,0.25);"></p>
+      <div id="login-error" class="muted" style="color:var(--danger);margin-top:1rem;display:none;font-size:0.88rem;line-height:1.4;background:rgba(239,68,68,0.1);padding:10px 14px;border-radius:8px;border:1px solid rgba(239,68,68,0.25); text-align:left;"></div>
     </div>
   </div>
 
