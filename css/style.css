@@ -999,56 +999,6 @@ body {
   flex: 1;
 }
 
-.dash-hero-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.dash-hero-status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  background: rgba(59, 130, 246, 0.12);
-  border: 1px solid rgba(59, 130, 246, 0.25);
-  border-radius: 20px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--accent);
-  letter-spacing: 0.3px;
-}
-
-[data-theme=dark] .dash-hero-status-pill {
-  background: rgba(59, 130, 246, 0.18);
-  border-color: rgba(96, 165, 250, 0.35);
-  color: #93c5fd;
-}
-
-.pulse-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 8px var(--accent);
-  animation: pulse-glow 2s infinite ease-in-out;
-}
-
-@keyframes pulse-glow {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.4); opacity: 0.6; }
-}
-
-.dash-hero-date {
-  font-size: 0.82rem;
-  color: var(--ts);
-  font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
 
 .dash-hero-title {
   font-size: 2rem;
@@ -3244,6 +3194,43 @@ label {
 
   .splash-name {
     font-size: 2.2rem;
+  }
+
+  .chart-controls-group {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .chart-controls-group .chart-segment {
+    display: flex;
+    width: 100%;
+  }
+
+  .chart-controls-group .chart-segment .cs-btn {
+    flex: 1;
+    text-align: center;
+    padding: 6px 4px;
+    font-size: 0.72rem;
+  }
+
+  .trend-stats-strip {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    padding: 8px 10px;
+  }
+
+  .tss-val {
+    font-size: 0.95rem;
+  }
+
+  .tss-lbl {
+    font-size: 0.62rem;
+  }
+
+  .chart-canvas-container {
+    height: 220px !important;
   }
 }
 
