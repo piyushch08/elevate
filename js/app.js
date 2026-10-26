@@ -434,6 +434,12 @@ function updateGreeting() {
     const opts = { weekday: 'long', month: 'long', day: 'numeric' };
     gs.innerHTML = `Here is your <span style="color:var(--accent);font-weight:600;">Progress Report</span> for ${new Date().toLocaleDateString('en-US', opts)}`;
   }
+
+  const hd = document.getElementById('dash-hero-date');
+  if (hd) {
+    const opts = { weekday: 'short', month: 'short', day: 'numeric' };
+    hd.innerHTML = `<i class="ri-calendar-line"></i> ${new Date().toLocaleDateString('en-US', opts)}`;
+  }
 }
 
 // ===== MODALS =====
@@ -486,6 +492,7 @@ function updateRings() {
   // Update the 4 top cards
   const focusHours = Number(((D.today.study || 0) / 60).toFixed(1));
   const tasksDone = D.tasks.filter(t => t.done).length;
+  const totalTasks = D.tasks.length;
   const mealsToday = D.meals.filter(m => m.id >= new Date().setHours(0, 0, 0, 0)).length;
   const activeDays = D.streak.filter(Boolean).length;
 
@@ -494,6 +501,72 @@ function updateRings() {
   const elMeals = document.getElementById('stat-meals'); if (elMeals) elMeals.textContent = mealsToday;
   const elActive = document.getElementById('stat-active'); if (elActive) elActive.textContent = activeDays;
 
+  // Micro progress bars & trends
+  const studyGoalHours = ((D.goals?.study || 120) / 60) || 2;
+  const focusPct = Math.min(100, Math.round((focusHours / studyGoalHours) * 100));
+  const elFocusBar = document.getElementById('stat-focus-bar');
+  if (elFocusBar) elFocusBar.style.width = `${focusPct}%`;
+  const elFocusSub = document.getElementById('stat-focus-sub');
+  if (elFocusSub) elFocusSub.innerHTML = `<i class="ri-flag-line"></i> ${focusPct}% of ${studyGoalHours}h target`;
+
+  const tasksPct = totalTasks ? Math.min(100, Math.round((tasksDone / totalTasks) * 100)) : 0;
+  const elTasksBar = document.getElementById('stat-tasks-bar');
+  if (elTasksBar) elTasksBar.style.width = `${tasksPct}%`;
+  const elTasksSub = document.getElementById('stat-tasks-sub');
+  if (elTasksSub) elTasksSub.innerHTML = totalTasks ? `<i class="ri-check-line"></i> ${tasksDone} of ${totalTasks} completed` : `<i class="ri-add-line"></i> All clear · Add task`;
+
+  const mealGoal = 3;
+  const mealsPct = Math.min(100, Math.round((mealsToday / mealGoal) * 100));
+  const elMealsBar = document.getElementById('stat-meals-bar');
+  if (elMealsBar) elMealsBar.style.width = `${mealsPct}%`;
+  const elMealsSub = document.getElementById('stat-meals-sub');
+  if (elMealsSub) elMealsSub.innerHTML = `<i class="ri-restaurant-line"></i> ${mealsToday} of ${mealGoal} logged`;
+
+  const activePct = Math.min(100, Math.round((activeDays / 7) * 100));
+  const elActiveBar = document.getElementById('stat-active-bar');
+  if (elActiveBar) elActiveBar.style.width = `${activePct}%`;
+  const elActiveSub = document.getElementById('stat-active-sub');
+  if (elActiveSub) elActiveSub.innerHTML = `<i class="ri-run-line"></i> ${activeDays}/7 days this week`;
+
+  // Overall Daily Productivity Score (0-100)
+  const todayIdx = (new Date().getDay() + 6) % 7; // Mon=0
+  const habitsDone = D.habits.filter(h => h.days && h.days[todayIdx]).length;
+  const totalHabits = D.habits.length;
+  const habitsPct = totalHabits ? (habitsDone / totalHabits) * 100 : 0;
+
+  let totalScoreWeight = 0;
+  let scoreSum = 0;
+
+  scoreSum += (focusPct / 100) * 35; totalScoreWeight += 35;
+  if (totalTasks > 0) {
+    scoreSum += (tasksPct / 100) * 35; totalScoreWeight += 35;
+  } else {
+    scoreSum += 20; totalScoreWeight += 35;
+  }
+  if (totalHabits > 0) {
+    scoreSum += (habitsPct / 100) * 30; totalScoreWeight += 30;
+  } else {
+    scoreSum += 15; totalScoreWeight += 30;
+  }
+
+  const dailyScore = Math.min(100, Math.max(0, Math.round((scoreSum / totalScoreWeight) * 100)));
+
+  const scoreEl = document.getElementById('dash-score-pct');
+  if (scoreEl) scoreEl.textContent = `${dailyScore}%`;
+  const scoreCircle = document.getElementById('dash-score-circle');
+  if (scoreCircle) {
+    const circumference = 226.2;
+    const offset = circumference - (dailyScore / 100) * circumference;
+    scoreCircle.style.strokeDashoffset = offset;
+  }
+  const scoreMsg = document.getElementById('dash-score-status');
+  if (scoreMsg) {
+    if (dailyScore >= 80) scoreMsg.textContent = 'Unstoppable Momentum 🔥';
+    else if (dailyScore >= 50) scoreMsg.textContent = 'Great Progress 🚀';
+    else if (dailyScore >= 20) scoreMsg.textContent = 'Building Rhythm ⚡';
+    else scoreMsg.textContent = 'Ready to Start 🎯';
+  }
+
   if (typeof Chart !== 'undefined') {
     clearTimeout(chartUpdateTimeout);
     chartUpdateTimeout = setTimeout(() => {
@@ -501,7 +574,6 @@ function updateRings() {
       if (typeof updatePieChart === 'function') updatePieChart();
     }, 100);
   } else {
-    // Event-driven listener on chart script without busy polling
     const chartScript = document.querySelector('script[src*="chart"]');
     if (chartScript && !chartScript._hasLoadListener) {
       chartScript._hasLoadListener = true;
@@ -509,6 +581,24 @@ function updateRings() {
     }
   }
 }
+
+window.setProgressPeriod = function (p) {
+  const sel = document.getElementById('progress-period');
+  if (sel) sel.value = p;
+  document.querySelectorAll('#progress-segment .cs-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.period === p);
+  });
+  if (typeof updateProgressChart === 'function') updateProgressChart();
+};
+
+window.setBreakdownPeriod = function (p) {
+  const sel = document.getElementById('breakdown-period');
+  if (sel) sel.value = p;
+  document.querySelectorAll('#breakdown-segment .cs-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.period === p);
+  });
+  if (typeof updatePieChart === 'function') updatePieChart();
+};
 
 window.updateProgressChart = function () {
   const period = document.getElementById('progress-period')?.value || 'weekly';
@@ -805,7 +895,21 @@ function renderTasks() {
   // dash summary
   const dash = document.getElementById('dash-tasks'); if (!dash) return;
   const rec = D.tasks.slice(-4).reverse();
-  dash.innerHTML = rec.length ? rec.map(t => `<div class="task-item${t.done ? ' done' : ''}"><div class="chk${t.done ? ' on' : ''}" onclick="toggleTask(${t.id})"></div><span class="t-name">${t.name}</span></div>`).join('') : '<div class="muted">No tasks yet — add some!</div>';
+  dash.innerHTML = rec.length ? rec.map(t => `
+    <div class="dash-activity-item" style="cursor:pointer;" onclick="toggleTask(${t.id})">
+      <div class="chk${t.done ? ' on' : ''}" style="flex-shrink:0;"></div>
+      <div style="flex:1; overflow:hidden;">
+        <span class="t-name${t.done ? ' done' : ''}" style="display:block; font-size:0.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${t.name}</span>
+        <span class="muted" style="font-size:0.75rem;"><span class="badge ${t.pri === 'urgent' ? 'b-urg' : 'b-norm'}" style="font-size:0.65rem; padding:1px 6px;">${t.cat || 'General'}</span> ${t.mins ? `· ${t.mins}m` : ''}</span>
+      </div>
+    </div>
+  `).join('') : `
+    <div class="dash-activity-empty">
+      <i class="ri-checkbox-circle-line"></i>
+      <p>No tasks yet</p>
+      <button class="btn sm prim" onclick="openM('m-task')"><i class="ri-add-line"></i> Add Task</button>
+    </div>
+  `;
 }
 function toggleTask(id) { const t = D.tasks.find(t => String(t.id) === String(id)); if (t) { t.done = !t.done; try { if (t.done) playSuccess(); else playClick(); } catch (e) { } renderTasks(); updateRings(); save(); } }
 function delTask(id) { D.tasks = D.tasks.filter(t => String(t.id) !== String(id)); renderTasks(); updateRings(); save(); toast('Task removed.', 'info'); }
@@ -987,18 +1091,24 @@ function renderEvents() {
       .slice(0, 2);
 
     if (!upcoming.length) {
-      dashEvents.innerHTML = '<div class="muted" style="padding:1rem 0; text-align:center;">No upcoming events!</div>';
+      dashEvents.innerHTML = `
+        <div class="dash-activity-empty">
+          <i class="ri-calendar-event-line"></i>
+          <p>No upcoming events</p>
+          <button class="btn sm" onclick="goTo('calendar')"><i class="ri-add-line"></i> Open Calendar</button>
+        </div>
+      `;
     } else {
       dashEvents.innerHTML = upcoming.map(ev => {
         const dateObj = new Date(ev.date + 'T00:00:00');
         const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        return `<div class="event-card" style="margin-bottom:8px; background:var(--sidebar-glass); padding:10px; border-radius:8px; display:flex; align-items:center; gap:12px;">
-          <div class="h-ico" style="background:rgba(0,242,254,.15); color:var(--accent); width:32px; height:32px; border-radius:8px; font-size:1.1rem; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+        return `<div class="dash-activity-item" style="cursor:pointer;" onclick="goTo('calendar')">
+          <div style="background:rgba(139,92,246,0.15); color:#8b5cf6; width:38px; height:38px; border-radius:10px; font-size:1.1rem; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
             <i class="ri-calendar-event-fill"></i>
           </div>
           <div style="flex:1; overflow:hidden;">
-            <div style="font-weight:600; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${ev.name}</div>
-            <div class="muted" style="font-size:0.85rem;"><i class="ri-time-line"></i> ${formattedDate}</div>
+            <div style="font-weight:600; font-size:0.9rem; color:var(--tp); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${ev.name}</div>
+            <div class="muted" style="font-size:0.75rem;"><i class="ri-time-line"></i> ${formattedDate}</div>
           </div>
         </div>`;
       }).join('');
@@ -1147,13 +1257,24 @@ function renderHabits() {
   const dashHabits = document.getElementById('dash-habits');
   if (dashHabits) {
     if (!D.habits.length) {
-      dashHabits.innerHTML = '<div class="muted" style="padding:1rem 0; text-align:center;">No habits tracked yet — create one!</div>';
+      dashHabits.innerHTML = `
+        <div class="dash-activity-empty">
+          <i class="ri-seedling-line"></i>
+          <p>No habits tracked yet</p>
+          <button class="btn sm prim" onclick="openM('m-habit')"><i class="ri-add-line"></i> Create Habit</button>
+        </div>
+      `;
     } else {
       dashHabits.innerHTML = D.habits.slice(0, 3).map(h => {
         const streak = calcStreak(h.days);
-        return `<div class="habit-info" style="margin-bottom:8px; background:var(--sidebar-glass); padding:8px 12px; border-radius:8px; display:flex; align-items:center; gap:12px;">
-          <div class="h-ico" style="background:rgba(0,242,254,.1); font-size:1.2rem; min-width:36px; height:36px;">${h.icon}</div>
-          <div><div class="h-name" style="font-size:0.95rem;">${h.name}</div><div class="h-streak" style="font-size:0.8rem;">🔥 ${streak} day streak</div></div>
+        const todayIdx = (new Date().getDay() + 6) % 7;
+        const doneToday = h.days && h.days[todayIdx];
+        return `<div class="dash-activity-item" style="cursor:pointer;" onclick="goTo('habits')">
+          <div style="background:rgba(6,182,212,0.15); font-size:1.2rem; width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">${h.icon}</div>
+          <div style="flex:1; overflow:hidden;">
+            <div style="font-weight:600; font-size:0.9rem; color:var(--tp); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${h.name}</div>
+            <div class="muted" style="font-size:0.75rem;">🔥 ${streak}d streak · ${doneToday ? '<span style="color:var(--success);font-weight:600;">Done today ✓</span>' : '<span style="color:var(--ts);">Pending today</span>'}</div>
+          </div>
         </div>`;
       }).join('');
     }
@@ -1230,15 +1351,21 @@ function renderNotes() {
   const dashNotes = document.getElementById('dash-notes');
   if (dashNotes) {
     if (!D.notes.length) {
-      dashNotes.innerHTML = '<div class="muted" style="padding:1rem 0; text-align:center;">No notes yet — jot something down!</div>';
+      dashNotes.innerHTML = `
+        <div class="dash-activity-empty">
+          <i class="ri-sticky-note-line"></i>
+          <p>No notes written yet</p>
+          <button class="btn sm prim" onclick="openM('m-note')"><i class="ri-add-line"></i> Jot Note</button>
+        </div>
+      `;
     } else {
       dashNotes.innerHTML = [...D.notes].reverse().slice(0, 2).map(n => {
-        return `<div class="note-card" style="margin-bottom:8px; background:var(--sidebar-glass); padding:10px; border-radius:8px; cursor:pointer;" onclick="goTo('notes'); setTimeout(() => editNote(${n.id}), 100);">
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-            <div style="width:10px; height:10px; border-radius:50%; background:${n.color}; flex-shrink:0;"></div>
-            <div style="font-weight:600; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${n.title || 'Untitled'}</div>
+        return `<div class="dash-activity-item" style="cursor:pointer;" onclick="goTo('notes'); setTimeout(() => editNote(${n.id}), 100);">
+          <div style="width:10px; height:34px; border-radius:4px; background:${n.color || '#3b82f6'}; flex-shrink:0;"></div>
+          <div style="flex:1; overflow:hidden;">
+            <div style="font-weight:600; font-size:0.9rem; color:var(--tp); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${n.title || 'Untitled Note'}</div>
+            <div class="muted" style="font-size:0.75rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${n.body ? n.body.replace(/<[^>]*>/g, '') : 'No details'}</div>
           </div>
-          <div class="muted" style="font-size:0.85rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${n.body || '<em>No content</em>'}</div>
         </div>`;
       }).join('');
     }

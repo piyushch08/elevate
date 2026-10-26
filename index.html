@@ -360,61 +360,145 @@
 
         <!-- DASHBOARD -->
         <section class="page active" id="page-dashboard">
-          <div class="dash-header flex-b" style="margin-bottom:1.5rem">
-            <div>
-              <h1 class="page-title" id="greeting-title">Welcome back! 👋</h1>
-              <p class="page-sub" id="greeting-sub">Loading…</p>
-            </div>
-            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
-              <div class="dash-streak" title="View Streak Calendar" onclick="openStreakCalendar()" style="display:flex; align-items:center; gap:8px; padding:10px 18px; background:linear-gradient(135deg, rgba(255,152,0,0.1), rgba(255,152,0,0.05)); border:1px solid rgba(255,152,0,0.2); border-radius:12px; font-weight:700; font-size:1.1rem; color:var(--warn); cursor:pointer;">
-                <i class="ri-fire-fill" style="font-size:1.6rem"></i> <span id="dash-streak-count">1</span> Day Streak
+          <!-- HERO BANNER -->
+          <div class="dash-hero">
+            <div class="dash-hero-glow"></div>
+            <div class="dash-hero-main">
+              <div class="dash-hero-header">
+                <div class="dash-hero-status-pill">
+                  <span class="pulse-dot"></span>
+                  <span id="dash-score-status">Building Momentum ⚡</span>
+                </div>
+                <span class="dash-hero-date" id="dash-hero-date"><i class="ri-calendar-line"></i> Today</span>
               </div>
-              <button id="dash-restore-btn" onclick="restoreStreak()" style="display:none; background:var(--warn); color:#fff; border:none; border-radius:8px; padding:6px 12px; font-weight:700; cursor:pointer; font-size:0.85rem; box-shadow:0 2px 4px rgba(255,152,0,0.3); transition: transform 0.2s;">
-                <i class="ri-restart-line"></i> Restore Streak (<span id="dash-restores-left">3</span> left)
-              </button>
+              <h1 class="dash-hero-title" id="greeting-title">Welcome back! 👋</h1>
+              <p class="dash-hero-sub" id="greeting-sub">Track your progress and elevate your daily potential.</p>
+              
+              <!-- Quick Action Pills -->
+              <div class="dash-quick-actions">
+                <button class="qa-btn" onclick="openM('m-task')">
+                  <i class="ri-add-circle-fill"></i> New Task
+                </button>
+                <button class="qa-btn" onclick="goTo('study')">
+                  <i class="ri-timer-flash-fill"></i> Focus Timer
+                </button>
+                <button class="qa-btn" onclick="openM('m-meal')">
+                  <i class="ri-restaurant-fill"></i> Log Meal
+                </button>
+                <button class="qa-btn" onclick="openM('m-habit')">
+                  <i class="ri-seedling-fill"></i> New Habit
+                </button>
+              </div>
+            </div>
+
+            <!-- Hero Right Stats: Daily Ring & Streak -->
+            <div class="dash-hero-stats">
+              <div class="dash-score-card" title="Overall Daily Productivity Score">
+                <div class="score-ring-wrap">
+                  <svg class="score-ring-svg" viewBox="0 0 88 88">
+                    <circle class="score-ring-bg" cx="44" cy="44" r="36"></circle>
+                    <circle class="score-ring-progress" id="dash-score-circle" cx="44" cy="44" r="36"></circle>
+                  </svg>
+                  <div class="score-ring-inner">
+                    <span class="score-ring-val" id="dash-score-pct">0%</span>
+                    <span class="score-ring-lbl">SCORE</span>
+                  </div>
+                </div>
+                <div class="score-details">
+                  <span class="score-title">Daily Score</span>
+                  <span class="score-sub">Focus · Tasks · Habits</span>
+                </div>
+              </div>
+
+              <div class="dash-streak-card" title="View Streak Calendar" onclick="openStreakCalendar()">
+                <div class="streak-icon-wrap">
+                  <i class="ri-fire-fill"></i>
+                </div>
+                <div class="streak-details">
+                  <div class="streak-count"><span id="dash-streak-count">1</span> <small>Days</small></div>
+                  <div class="streak-lbl">Active Streak 🔥</div>
+                </div>
+                <button id="dash-restore-btn" onclick="event.stopPropagation(); restoreStreak()" class="streak-restore-pill" style="display:none;">
+                  <i class="ri-restart-line"></i> Restore (<span id="dash-restores-left">3</span>)
+                </button>
+              </div>
             </div>
           </div>
 
+          <!-- 4 STAT CARDS -->
           <div class="grid g4 stat-cards-row">
-            <div class="widget stat-card dark-green-card">
+            <!-- Focus Hours -->
+            <div class="widget stat-card stat-card-cyan" onclick="goTo('study')">
               <div class="sc-head">
-                <div class="sc-ico"><i class="ri-timer-line"></i></div>
+                <div class="sc-ico"><i class="ri-timer-flash-line"></i></div>
+                <span class="sc-tag">Study Goal</span>
               </div>
               <div class="sc-label">Focus Hours Today</div>
-              <div class="sc-val"><span id="stat-focus">0</span> <small
-                  style="font-size:0.5em;font-weight:400">h</small></div>
+              <div class="sc-val"><span id="stat-focus">0</span> <small>h</small></div>
+              <div class="sc-progress-wrap">
+                <div class="sc-progress-bar" id="stat-focus-bar" style="width:0%"></div>
+              </div>
+              <div class="sc-footer" id="stat-focus-sub"><i class="ri-flag-line"></i> Daily study target</div>
             </div>
-            <div class="widget stat-card">
+
+            <!-- Tasks Completed -->
+            <div class="widget stat-card stat-card-emerald" onclick="goTo('todo')">
               <div class="sc-head">
-                <div class="sc-ico"><i class="ri-list-check"></i></div>
+                <div class="sc-ico"><i class="ri-checkbox-circle-line"></i></div>
+                <span class="sc-tag">Todo List</span>
               </div>
               <div class="sc-label">Tasks Completed</div>
               <div class="sc-val" id="stat-tasks">0</div>
-            </div>
-            <div class="widget stat-card">
-              <div class="sc-head">
-                <div class="sc-ico"><i class="ri-restaurant-line"></i></div>
+              <div class="sc-progress-wrap">
+                <div class="sc-progress-bar" id="stat-tasks-bar" style="width:0%"></div>
               </div>
-              <div class="sc-label">Meals Today</div>
-              <div class="sc-val" id="stat-meals">0</div>
+              <div class="sc-footer" id="stat-tasks-sub"><i class="ri-check-line"></i> Active tasks</div>
             </div>
-            <div class="widget stat-card">
+
+            <!-- Nutrition / Meals -->
+            <div class="widget stat-card stat-card-amber" onclick="goTo('diet')">
+              <div class="sc-head">
+                <div class="sc-ico"><i class="ri-restaurant-2-line"></i></div>
+                <span class="sc-tag">Nutrition</span>
+              </div>
+              <div class="sc-label">Meals Logged</div>
+              <div class="sc-val" id="stat-meals">0</div>
+              <div class="sc-progress-wrap">
+                <div class="sc-progress-bar" id="stat-meals-bar" style="width:0%"></div>
+              </div>
+              <div class="sc-footer" id="stat-meals-sub"><i class="ri-restaurant-line"></i> Daily diet</div>
+            </div>
+
+            <!-- Weekly Workouts -->
+            <div class="widget stat-card stat-card-violet" onclick="goTo('exercise')">
               <div class="sc-head">
                 <div class="sc-ico"><i class="ri-fire-line"></i></div>
+                <span class="sc-tag">Fitness</span>
               </div>
-              <div class="sc-label">Weekly Workouts</div>
-              <div class="sc-val" id="stat-active">0</div>
+              <div class="sc-label">Weekly Consistency</div>
+              <div class="sc-val"><span id="stat-active">0</span> <small>days</small></div>
+              <div class="sc-progress-wrap">
+                <div class="sc-progress-bar" id="stat-active-bar" style="width:0%"></div>
+              </div>
+              <div class="sc-footer" id="stat-active-sub"><i class="ri-run-line"></i> 7-day target</div>
             </div>
           </div>
 
+          <!-- CHARTS ROW -->
           <div class="grid g2-7-3 mt2" style="align-items: stretch;">
+            <!-- Progress Line/Bar Chart -->
             <div class="widget chart-widget">
               <div class="flex-b w-title" style="margin-bottom: 1.5rem;">
                 <div style="margin:0; text-transform:none; letter-spacing:0;">
-                  <h3 class="dash-title" style="font-size:1.25rem;margin-bottom:4px">User Progress</h3>
-                  <span class="muted" style="font-weight:400">Track your progress</span>
+                  <h3 class="dash-title" style="font-size:1.25rem;margin-bottom:4px"><i class="ri-line-chart-line" style="color:var(--accent);margin-right:6px"></i>Productivity Trends</h3>
+                  <span class="muted" style="font-weight:400">Focus hours and sessions tracked</span>
                 </div>
-                <select id="progress-period" class="sm-select" onchange="updateProgressChart()">
+                <div class="chart-segment" id="progress-segment">
+                  <button class="cs-btn active" data-period="weekly" onclick="setProgressPeriod('weekly')">Week</button>
+                  <button class="cs-btn" data-period="monthly" onclick="setProgressPeriod('monthly')">Month</button>
+                  <button class="cs-btn" data-period="yearly" onclick="setProgressPeriod('yearly')">Year</button>
+                </div>
+                <select id="progress-period" style="display:none;" onchange="updateProgressChart()">
                   <option value="weekly">This week</option>
                   <option value="monthly">This month</option>
                   <option value="yearly">This year</option>
@@ -425,14 +509,18 @@
               </div>
             </div>
 
-            <div class="widget chart-widget green-gradient">
+            <!-- Progress Breakdown Donut -->
+            <div class="widget chart-widget">
               <div class="flex-b w-title" style="margin-bottom: 1.5rem;">
                 <div style="margin:0; text-transform:none; letter-spacing:0;">
-                  <h3 class="dash-title" style="font-size:1.25rem;margin-bottom:4px">Progress Breakdown</h3>
-                  <span class="muted" style="font-weight:400;color:var(--ts) !important">Today's
-                    breakdown</span>
+                  <h3 class="dash-title" style="font-size:1.25rem;margin-bottom:4px"><i class="ri-pie-chart-2-line" style="color:#10b981;margin-right:6px"></i>Breakdown</h3>
+                  <span class="muted" style="font-weight:400">Today's breakdown</span>
                 </div>
-                <select id="breakdown-period" class="sm-select" onchange="updatePieChart()">
+                <div class="chart-segment" id="breakdown-segment">
+                  <button class="cs-btn active" data-period="today" onclick="setBreakdownPeriod('today')">Today</button>
+                  <button class="cs-btn" data-period="weekly" onclick="setBreakdownPeriod('weekly')">Week</button>
+                </div>
+                <select id="breakdown-period" style="display:none;" onchange="updatePieChart()">
                   <option value="today">Today</option>
                   <option value="weekly">This week</option>
                 </select>
@@ -446,11 +534,11 @@
             </div>
           </div>
 
-          <!-- NEW RELEVANT INFO ROW -->
+          <!-- RECENT ACTIVITY ROW -->
           <div class="grid g4 mt2" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); align-items: stretch;">
-            <div class="widget">
+            <div class="widget dash-activity-widget">
               <div class="flex-b w-title" style="margin-bottom: 1rem;">
-                <div style="margin:0;"><h3 class="dash-title"><i class="ri-list-check"></i> Recent Tasks</h3></div>
+                <div style="margin:0;"><h3 class="dash-title"><i class="ri-list-check" style="color:#10b981"></i> Recent Tasks</h3></div>
                 <button class="btn sm" onclick="goTo('todo')">View All</button>
               </div>
               <div class="task-list" id="dash-tasks">
@@ -458,9 +546,9 @@
               </div>
             </div>
             
-            <div class="widget">
+            <div class="widget dash-activity-widget">
               <div class="flex-b w-title" style="margin-bottom: 1rem;">
-                <div style="margin:0;"><h3 class="dash-title"><i class="ri-leaf-line"></i> Active Habits</h3></div>
+                <div style="margin:0;"><h3 class="dash-title"><i class="ri-leaf-line" style="color:#06b6d4"></i> Active Habits</h3></div>
                 <button class="btn sm" onclick="goTo('habits')">View All</button>
               </div>
               <div id="dash-habits">
@@ -468,9 +556,9 @@
               </div>
             </div>
 
-            <div class="widget">
+            <div class="widget dash-activity-widget">
               <div class="flex-b w-title" style="margin-bottom: 1rem;">
-                <div style="margin:0;"><h3 class="dash-title"><i class="ri-sticky-note-line"></i> Recent Notes</h3></div>
+                <div style="margin:0;"><h3 class="dash-title"><i class="ri-sticky-note-line" style="color:#f59e0b"></i> Recent Notes</h3></div>
                 <button class="btn sm" onclick="goTo('notes')">View All</button>
               </div>
               <div id="dash-notes">
@@ -478,9 +566,9 @@
               </div>
             </div>
 
-            <div class="widget">
+            <div class="widget dash-activity-widget">
               <div class="flex-b w-title" style="margin-bottom: 1rem;">
-                <div style="margin:0;"><h3 class="dash-title"><i class="ri-calendar-event-line"></i> Upcoming Events</h3></div>
+                <div style="margin:0;"><h3 class="dash-title"><i class="ri-calendar-event-line" style="color:#8b5cf6"></i> Upcoming Events</h3></div>
                 <button class="btn sm" onclick="goTo('calendar')">View All</button>
               </div>
               <div id="dash-events">
