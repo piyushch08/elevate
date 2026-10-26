@@ -364,9 +364,6 @@
           <div class="dash-hero">
             <div class="dash-hero-glow"></div>
             <div class="dash-hero-main">
-              <div class="dash-hero-header">
-                <span class="dash-hero-date" id="dash-hero-date"><i class="ri-calendar-line"></i> Today</span>
-              </div>
               <h1 class="dash-hero-title" id="greeting-title">Welcome back! 👋</h1>
               <p class="dash-hero-sub" id="greeting-sub">Track your progress and elevate your daily potential.</p>
               
@@ -484,15 +481,28 @@
           <div class="grid g2-7-3 mt2" style="align-items: stretch;">
             <!-- Progress Line/Bar Chart -->
             <div class="widget chart-widget">
-              <div class="flex-b w-title" style="margin-bottom: 1.5rem;">
-                <div style="margin:0; text-transform:none; letter-spacing:0;">
-                  <h3 class="dash-title" style="font-size:1.25rem;margin-bottom:4px"><i class="ri-line-chart-line" style="color:var(--accent);margin-right:6px"></i>Productivity Trends</h3>
-                  <span class="muted" style="font-weight:400">Focus hours and sessions tracked</span>
+              <div class="chart-header-row">
+                <div class="chart-title-group">
+                  <div class="chart-title-flex">
+                    <span class="trend-icon-badge"><i class="ri-pulse-line"></i></span>
+                    <h3 class="dash-title">Productivity Trends</h3>
+                  </div>
+                  <span class="muted text-xs">Real-time focus and session metrics</span>
                 </div>
-                <div class="chart-segment" id="progress-segment">
-                  <button class="cs-btn active" data-period="weekly" onclick="setProgressPeriod('weekly')">Week</button>
-                  <button class="cs-btn" data-period="monthly" onclick="setProgressPeriod('monthly')">Month</button>
-                  <button class="cs-btn" data-period="yearly" onclick="setProgressPeriod('yearly')">Year</button>
+                
+                <div class="chart-controls-group">
+                  <!-- Metric Filter -->
+                  <div class="chart-segment" id="metric-segment">
+                    <button class="cs-btn active" data-metric="all" onclick="setChartMetric('all')">All</button>
+                    <button class="cs-btn" data-metric="focus" onclick="setChartMetric('focus')">Focus</button>
+                    <button class="cs-btn" data-metric="sessions" onclick="setChartMetric('sessions')">Sessions</button>
+                  </div>
+                  <!-- Period Filter -->
+                  <div class="chart-segment" id="progress-segment">
+                    <button class="cs-btn active" data-period="weekly" onclick="setProgressPeriod('weekly')">Week</button>
+                    <button class="cs-btn" data-period="monthly" onclick="setProgressPeriod('monthly')">Month</button>
+                    <button class="cs-btn" data-period="yearly" onclick="setProgressPeriod('yearly')">Year</button>
+                  </div>
                 </div>
                 <select id="progress-period" style="display:none;" onchange="updateProgressChart()">
                   <option value="weekly">This week</option>
@@ -500,7 +510,28 @@
                   <option value="yearly">This year</option>
                 </select>
               </div>
-              <div style="position: relative; height: 300px; width: 100%;">
+
+              <!-- Minimal Stats Strip -->
+              <div class="trend-stats-strip" id="trend-stats-strip">
+                <div class="tss-item">
+                  <span class="tss-lbl">Total Focus</span>
+                  <span class="tss-val" id="tss-total">0.0h</span>
+                </div>
+                <div class="tss-item">
+                  <span class="tss-lbl">Daily Avg</span>
+                  <span class="tss-val" id="tss-avg">0.0h</span>
+                </div>
+                <div class="tss-item">
+                  <span class="tss-lbl">Sessions</span>
+                  <span class="tss-val" id="tss-sessions">0</span>
+                </div>
+                <div class="tss-item">
+                  <span class="tss-lbl">Peak Time</span>
+                  <span class="tss-val" id="tss-peak">—</span>
+                </div>
+              </div>
+
+              <div class="chart-canvas-container" style="position: relative; height: 270px; width: 100%;">
                 <canvas id="progressChart"></canvas>
               </div>
             </div>

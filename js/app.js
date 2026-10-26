@@ -431,14 +431,7 @@ function updateGreeting() {
 
   const gs = document.getElementById('greeting-sub');
   if (gs) {
-    const opts = { weekday: 'long', month: 'long', day: 'numeric' };
-    gs.innerHTML = `Here is your <span style="color:var(--accent);font-weight:600;">Progress Report</span> for ${new Date().toLocaleDateString('en-US', opts)}`;
-  }
-
-  const hd = document.getElementById('dash-hero-date');
-  if (hd) {
-    const opts = { weekday: 'short', month: 'short', day: 'numeric' };
-    hd.innerHTML = `<i class="ri-calendar-line"></i> ${new Date().toLocaleDateString('en-US', opts)}`;
+    gs.innerHTML = 'Track your daily momentum, stay focused, and elevate your routine.';
   }
 }
 
@@ -575,6 +568,16 @@ function updateRings() {
   }
 }
 
+let currentChartMetric = 'all';
+
+window.setChartMetric = function (m) {
+  currentChartMetric = m;
+  document.querySelectorAll('#metric-segment .cs-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.metric === m);
+  });
+  if (typeof updateProgressChart === 'function') updateProgressChart();
+};
+
 window.setProgressPeriod = function (p) {
   const sel = document.getElementById('progress-period');
   if (sel) sel.value = p;
@@ -601,7 +604,6 @@ window.updateProgressChart = function () {
   let labels = [];
   let data1 = [];
   let data2 = [];
-  let xAxisTitle = 'Days of the Week';
   const now = Date.now();
   const currWeekStart = getWeekStart(now);
 
@@ -619,10 +621,9 @@ window.updateProgressChart = function () {
       }
     });
 
-    data1 = focusWeek.map(v => Number(v.toFixed(1))); // Real focus hours per day
-    data2 = sessionsWeek; // Real study sessions per day
+    data1 = focusWeek.map(v => Number(v.toFixed(1)));
+    data2 = sessionsWeek;
   } else if (period === 'monthly') {
-    xAxisTitle = 'Weeks of the Month';
     labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
     data1 = [0, 0, 0, 0];
     data2 = [0, 0, 0, 0];
@@ -632,12 +633,11 @@ window.updateProgressChart = function () {
         let w = Math.floor(new Date(s.id).getDate() / 7);
         if (w > 3) w = 3;
         data1[w] += (s.mins / 60);
-        data2[w] += 1; // Count of study sessions
+        data2[w] += 1;
       }
     });
     data1 = data1.map(v => Number(v.toFixed(1)));
   } else { // yearly
-    xAxisTitle = 'Months of the Year';
     labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     data1 = Array(12).fill(0);
     data2 = Array(12).fill(0);
@@ -652,21 +652,65 @@ window.updateProgressChart = function () {
     data1 = data1.map(v => Number(v.toFixed(1)));
   }
 
+  // Update Minimal Live Stats Strip
+  const totalFocus = data1.reduce((sum, v) => sum + v, 0);
+  const totalSessions = data2.reduce((sum, v) => sum + v, 0);
+  const divisor = (period === 'weekly') ? 7 : (period === 'monthly' ? 4 : 12);
+  const avgFocus = totalFocus > 0 ? (totalFocus / divisor).toFixed(1) : '0.0';
+
+  let peakIdx = -1;
+  let peakVal = 0;
+  data1.forEach((val, idx) => {
+    if (val > peakVal) {
+      peakVal = val;
+      peakIdx = idx;
+    }
+  });
+  const peakStr = peakIdx >= 0 ? `${labels[peakIdx]} (${peakVal}h)` : '—';
+
+  const elTot = document.getElementById('tss-total');
+  if (elTot) elTot.textContent = `${totalFocus.toFixed(1)}h`;
+  const elAvg = document.getElementById('tss-avg');
+  if (elAvg) elAvg.textContent = `${avgFocus}${period === 'weekly' ? 'h/d' : 'h/p'}`;
+  const elSes = document.getElementById('tss-sessions');
+  if (elSes) elSes.textContent = totalSessions;
+  const elPeak = document.getElementById('tss-peak');
+  if (elPeak) elPeak.textContent = peakStr;
+
+  const showFocus = currentChartMetric === 'all' || currentChartMetric === 'focus';
+  const showSessions = currentChartMetric === 'all' || currentChartMetric === 'sessions';
+
   if (progressChartInst) {
     progressChartInst.data.labels = labels;
     progressChartInst.data.datasets[0].data = data1;
+    progressChartInst.data.datasets[0].hidden = !showFocus;
     progressChartInst.data.datasets[1].data = data2;
-    progressChartInst.options.scales.x.title.text = xAxisTitle;
+    progressChartInst.data.datasets[1].hidden = !showSessions;
+    
+    // Scale visibility & format
+    if (currentChartMetric === 'sessions') {
+      progressChartInst.data.datasets[1].yAxisID = 'y';
+      progressChartInst.options.scales.y.ticks.callback = function (val) { return val; };
+      progressChartInst.options.scales.y1.display = false;
+    } else if (currentChartMetric === 'focus') {
+      progressChartInst.data.datasets[1].yAxisID = 'y1';
+      progressChartInst.options.scales.y.ticks.callback = function (val) { return val + 'h'; };
+      progressChartInst.options.scales.y1.display = false;
+    } else { // 'all'
+      progressChartInst.data.datasets[1].yAxisID = 'y1';
+      progressChartInst.options.scales.y.ticks.callback = function (val) { return val + 'h'; };
+      progressChartInst.options.scales.y1.display = true;
+    }
     progressChartInst.update();
   } else {
     const canvasCtx = ctx.getContext('2d');
-    const grad1 = canvasCtx.createLinearGradient(0, 0, 0, 250);
+    const grad1 = canvasCtx.createLinearGradient(0, 0, 0, 240);
     grad1.addColorStop(0, '#1A73E8');
-    grad1.addColorStop(1, 'rgba(26, 115, 232, 0.1)');
+    grad1.addColorStop(1, 'rgba(26, 115, 232, 0.08)');
 
-    const grad2 = canvasCtx.createLinearGradient(0, 0, 0, 250);
-    grad2.addColorStop(0, 'rgba(52, 168, 83, 0.4)');
-    grad2.addColorStop(1, 'rgba(52, 168, 83, 0.0)');
+    const grad2 = canvasCtx.createLinearGradient(0, 0, 0, 240);
+    grad2.addColorStop(0, 'rgba(16, 185, 129, 0.35)');
+    grad2.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
 
     progressChartInst = new Chart(ctx, {
       type: 'bar',
@@ -677,10 +721,11 @@ window.updateProgressChart = function () {
             label: 'Focus Hours',
             data: data1,
             backgroundColor: grad1,
-            borderRadius: 6,
+            borderRadius: 8,
             borderSkipped: false,
-            barPercentage: 0.5,
-            categoryPercentage: 0.7,
+            barPercentage: 0.45,
+            categoryPercentage: 0.65,
+            hidden: !showFocus,
             yAxisID: 'y'
           },
           {
@@ -688,16 +733,17 @@ window.updateProgressChart = function () {
             data: data2,
             type: 'line',
             backgroundColor: grad2,
-            borderColor: '#34A853',
-            borderWidth: 3,
-            tension: 0.4, // Smooth curve
+            borderColor: '#10b981',
+            borderWidth: 2.5,
+            tension: 0.4,
             pointBackgroundColor: '#FFFFFF',
-            pointBorderColor: '#34A853',
+            pointBorderColor: '#10b981',
             pointBorderWidth: 2,
             pointRadius: 4,
             pointHoverRadius: 6,
             fill: true,
-            yAxisID: 'y1'
+            hidden: !showSessions,
+            yAxisID: currentChartMetric === 'sessions' ? 'y' : 'y1'
           }
         ]
       },
@@ -705,23 +751,31 @@ window.updateProgressChart = function () {
         responsive: true,
         maintainAspectRatio: false,
         animation: {
-          duration: 400,
+          duration: 350,
           easing: 'easeOutQuart'
         },
         interaction: {
           mode: 'index',
-          intersect: false,
+          intersect: false
         },
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: 'rgba(0,0,0,0.85)',
-            titleFont: { family: "'Outfit', sans-serif", size: 13 },
-            bodyFont: { family: "'Outfit', sans-serif", size: 13 },
-            padding: 12,
-            cornerRadius: 8,
+            backgroundColor: 'rgba(15, 23, 42, 0.92)',
+            titleFont: { family: "'Outfit', sans-serif", size: 12, weight: '600' },
+            bodyFont: { family: "'Outfit', sans-serif", size: 12 },
+            padding: 10,
+            cornerRadius: 10,
             boxPadding: 4,
-            usePointStyle: true
+            usePointStyle: true,
+            callbacks: {
+              label: function (context) {
+                if (context.datasetIndex === 0) {
+                  return ` Focus: ${context.parsed.y} hrs`;
+                }
+                return ` Sessions: ${context.parsed.y}`;
+              }
+            }
           }
         },
         scales: {
@@ -729,54 +783,44 @@ window.updateProgressChart = function () {
             type: 'linear',
             display: true,
             position: 'left',
-            title: {
-              display: true,
-              text: 'Focus Hours',
-              color: 'var(--ts)',
-              font: { size: 12, family: "'Outfit', sans-serif" }
-            },
             beginAtZero: true,
             grid: {
-              color: 'rgba(150,150,150,0.1)',
-              borderDash: [5, 5]
+              color: 'rgba(150, 150, 150, 0.08)',
+              borderDash: [4, 4]
             },
             border: { display: false },
             ticks: {
-              stepSize: 1, // Only show whole numbers (1hr, 2hr)
-              callback: function (value) {
-                return value + 'hr';
+              stepSize: 1,
+              font: { family: "'Outfit', sans-serif", size: 11 },
+              color: 'var(--ts)',
+              callback: function (val) {
+                return currentChartMetric === 'sessions' ? val : val + 'h';
               }
             }
           },
           y1: {
             type: 'linear',
-            display: true,
+            display: currentChartMetric === 'all',
             position: 'right',
-            title: {
-              display: true,
-              text: 'Study Sessions',
-              color: 'var(--ts)',
-              font: { size: 12, family: "'Outfit', sans-serif" }
-            },
             beginAtZero: true,
-            grid: { drawOnChartArea: false }, // Prevent gridline overlap
+            grid: { drawOnChartArea: false },
             border: { display: false },
             ticks: {
-              stepSize: 1, // Whole numbers only
-              callback: function (value) {
-                return value;
+              stepSize: 1,
+              font: { family: "'Outfit', sans-serif", size: 11 },
+              color: 'var(--ts)',
+              callback: function (val) {
+                return val;
               }
             }
           },
           x: {
-            title: {
-              display: true,
-              text: xAxisTitle,
-              color: 'var(--ts)',
-              font: { size: 12, family: "'Outfit', sans-serif" }
-            },
             grid: { display: false },
-            border: { display: false }
+            border: { display: false },
+            ticks: {
+              font: { family: "'Outfit', sans-serif", size: 11 },
+              color: 'var(--ts)'
+            }
           }
         }
       }

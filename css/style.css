@@ -1571,6 +1571,81 @@ body {
   padding: 1.75rem;
 }
 
+/* Productivity Trends - Interactive Header & Controls */
+.chart-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 1.25rem;
+}
+
+.chart-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.chart-title-flex {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trend-icon-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(37, 99, 235, 0.12);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  flex-shrink: 0;
+}
+
+.chart-controls-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Minimal Live Stats Strip */
+.trend-stats-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(150, 150, 150, 0.05);
+  border: 1px solid var(--gb);
+  margin-bottom: 1.25rem;
+}
+
+.tss-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tss-lbl {
+  font-size: 0.68rem;
+  color: var(--ts);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tss-val {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--tp);
+  letter-spacing: -0.2px;
+}
+
 .green-gradient {
   background: var(--glass);
   border: 1px solid var(--gb);
@@ -2973,6 +3048,30 @@ label {
   /* Chart widgets */
   .chart-widget {
     padding: 1.25rem 1rem;
+  }
+
+  .chart-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .chart-controls-group {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .trend-stats-strip {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .chart-canvas-container {
+    height: 240px !important;
   }
 
   .chart-widget .w-title {
