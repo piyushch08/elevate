@@ -559,13 +559,6 @@ function updateRings() {
     const offset = circumference - (dailyScore / 100) * circumference;
     scoreCircle.style.strokeDashoffset = offset;
   }
-  const scoreMsg = document.getElementById('dash-score-status');
-  if (scoreMsg) {
-    if (dailyScore >= 80) scoreMsg.textContent = 'Unstoppable Momentum 🔥';
-    else if (dailyScore >= 50) scoreMsg.textContent = 'Great Progress 🚀';
-    else if (dailyScore >= 20) scoreMsg.textContent = 'Building Rhythm ⚡';
-    else scoreMsg.textContent = 'Ready to Start 🎯';
-  }
 
   if (typeof Chart !== 'undefined') {
     clearTimeout(chartUpdateTimeout);
