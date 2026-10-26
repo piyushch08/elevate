@@ -405,7 +405,7 @@ if (auth) {
 
         console.log(
           "Authenticated user:",
-          user.email || user.phoneNumber || user.uid
+          user.email || user.displayName || user.uid
         );
 
 
@@ -419,14 +419,13 @@ if (auth) {
 
 
         // Update username
-        const resolvedName = pendingPhoneDisplayName ||
-          user.displayName ||
+        const resolvedName = user.displayName ||
           (window.D && window.D.profile && window.D.profile.name && window.D.profile.name !== 'Explorer' ? window.D.profile.name : null) ||
-          user.phoneNumber ||
+          (user.email ? user.email.split('@')[0] : null) ||
           "User";
 
-        if (window.D && window.D.profile && (pendingPhoneDisplayName || user.displayName)) {
-          window.D.profile.name = pendingPhoneDisplayName || user.displayName;
+        if (window.D && window.D.profile && user.displayName) {
+          window.D.profile.name = user.displayName;
         }
 
         const uNameEl = document.getElementById("u-name");
@@ -497,10 +496,6 @@ if (auth) {
 
               // Sync persistent profile data to UI
               if (window.D.profile) {
-                if (pendingPhoneDisplayName && pendingPhoneDisplayName !== window.D.profile.name) {
-                  window.D.profile.name = pendingPhoneDisplayName;
-                  if (window.saveToFirestore) window.saveToFirestore();
-                }
                 if (window.D.profile.name) {
                   const nameEl = document.getElementById("u-name");
                   if (nameEl) nameEl.textContent = window.D.profile.name;
@@ -530,7 +525,7 @@ if (auth) {
             else {
               console.log("New user. Creating Firestore profile...");
 
-              const newUserName = pendingPhoneDisplayName || user.displayName || 'Explorer';
+              const newUserName = user.displayName || (user.email ? user.email.split('@')[0] : 'Explorer');
 
               // Prevent data leak from another authenticated user
               if (window.D && window.D.lastUid && window.D.lastUid !== 'guest' && window.D.lastUid !== user.uid) {
@@ -618,9 +613,6 @@ if (auth) {
         const appBody = document.getElementById('app-body');
         if (appBody) appBody.style.display = 'none';
         
-        if (authEmailGoogleView) authEmailGoogleView.style.display = 'block';
-        if (authPhoneView) authPhoneView.style.display = 'none';
-
         const uNameEl = document.getElementById("u-name");
         if (uNameEl) {
           uNameEl.textContent = "Guest";
@@ -643,16 +635,6 @@ if (auth) {
 
         if (loginEmailInp) loginEmailInp.value = '';
         if (loginPasswordInp) loginPasswordInp.value = '';
-        if (loginPhoneInp) loginPhoneInp.value = '';
-        if (loginPhoneCodeInp) loginPhoneCodeInp.value = '';
-        if (loginPhoneNameInp) loginPhoneNameInp.value = '';
-        clearRecaptcha();
-        if (resendTimer) clearInterval(resendTimer);
-
-        if (btnPhoneVerify) {
-          btnPhoneVerify.disabled = false;
-          btnPhoneVerify.innerHTML = authMode === 'login' ? 'Verify & Sign In' : 'Verify & Create Account';
-        }
 
         if (btnLogout) {
           btnLogout.disabled = false;
