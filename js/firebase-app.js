@@ -8,9 +8,7 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  updateProfile,
-  RecaptchaVerifier,
-  signInWithPhoneNumber
+  updateProfile
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
 import {
