@@ -550,15 +550,19 @@
 
             <!-- Progress Breakdown Donut -->
             <div class="widget chart-widget">
-              <div class="flex-b w-title" style="margin-bottom: 1.5rem;">
-                <div style="margin:0; text-transform:none; letter-spacing:0;">
-                  <h3 class="dash-title" style="font-size:1.25rem;margin-bottom:4px"><i class="ri-pie-chart-2-line"
-                      style="color:#10b981;margin-right:6px"></i>Breakdown</h3>
-                  <span class="muted" style="font-weight:400">Today's breakdown</span>
+              <div class="chart-header-row">
+                <div class="chart-title-group">
+                  <div class="chart-title-flex">
+                    <span class="trend-icon-badge breakdown-badge"><i class="ri-pie-chart-2-line"></i></span>
+                    <h3 class="dash-title">Breakdown</h3>
+                  </div>
+                  <span class="muted text-xs">Today's activity share</span>
                 </div>
-                <div class="chart-segment" id="breakdown-segment">
-                  <button class="cs-btn active" data-period="today" onclick="setBreakdownPeriod('today')">Today</button>
-                  <button class="cs-btn" data-period="weekly" onclick="setBreakdownPeriod('weekly')">Week</button>
+                <div class="chart-controls-group">
+                  <div class="chart-segment" id="breakdown-segment">
+                    <button class="cs-btn active" data-period="today" onclick="setBreakdownPeriod('today')">Today</button>
+                    <button class="cs-btn" data-period="weekly" onclick="setBreakdownPeriod('weekly')">Week</button>
+                  </div>
                 </div>
                 <select id="breakdown-period" style="display:none;" onchange="updatePieChart()">
                   <option value="today">Today</option>
@@ -578,10 +582,8 @@
           <div class="grid g4 mt2"
             style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); align-items: stretch;">
             <div class="widget dash-activity-widget">
-              <div class="flex-b w-title" style="margin-bottom: 1rem;">
-                <div style="margin:0;">
-                  <h3 class="dash-title"><i class="ri-list-check" style="color:#10b981"></i> Recent Tasks</h3>
-                </div>
+              <div class="dash-card-header">
+                <h3 class="dash-title"><span class="activity-ico-badge act-tasks"><i class="ri-checkbox-circle-line"></i></span> Recent Tasks</h3>
                 <button class="btn sm" onclick="goTo('todo')">View All</button>
               </div>
               <div class="task-list" id="dash-tasks">
@@ -590,10 +592,8 @@
             </div>
 
             <div class="widget dash-activity-widget">
-              <div class="flex-b w-title" style="margin-bottom: 1rem;">
-                <div style="margin:0;">
-                  <h3 class="dash-title"><i class="ri-leaf-line" style="color:#06b6d4"></i> Active Habits</h3>
-                </div>
+              <div class="dash-card-header">
+                <h3 class="dash-title"><span class="activity-ico-badge act-habits"><i class="ri-seedling-line"></i></span> Active Habits</h3>
                 <button class="btn sm" onclick="goTo('habits')">View All</button>
               </div>
               <div id="dash-habits">
@@ -602,10 +602,8 @@
             </div>
 
             <div class="widget dash-activity-widget">
-              <div class="flex-b w-title" style="margin-bottom: 1rem;">
-                <div style="margin:0;">
-                  <h3 class="dash-title"><i class="ri-sticky-note-line" style="color:#f59e0b"></i> Recent Notes</h3>
-                </div>
+              <div class="dash-card-header">
+                <h3 class="dash-title"><span class="activity-ico-badge act-notes"><i class="ri-sticky-note-line"></i></span> Recent Notes</h3>
                 <button class="btn sm" onclick="goTo('notes')">View All</button>
               </div>
               <div id="dash-notes">
@@ -614,11 +612,8 @@
             </div>
 
             <div class="widget dash-activity-widget">
-              <div class="flex-b w-title" style="margin-bottom: 1rem;">
-                <div style="margin:0;">
-                  <h3 class="dash-title"><i class="ri-calendar-event-line" style="color:#8b5cf6"></i> Upcoming Events
-                  </h3>
-                </div>
+              <div class="dash-card-header">
+                <h3 class="dash-title"><span class="activity-ico-badge act-events"><i class="ri-calendar-event-line"></i></span> Upcoming Events</h3>
                 <button class="btn sm" onclick="goTo('calendar')">View All</button>
               </div>
               <div id="dash-events">
@@ -627,18 +622,13 @@
             </div>
           </div>
 
-          <div class="dash-footer"
-            style="margin-top: 3rem; text-align: center; border-top: 1px solid var(--gb); padding-top: 1.5rem; padding-bottom: 2rem; color: var(--ts);">
-            <span class="copyright" style="font-size: 0.85rem;">&copy; 2026 Piyush Chauhan. All rights reserved.</span>
-            <div class="social-links"
-              style="font-size: 1.25rem; display: flex; justify-content: center; gap: 15px; margin-top: 10px;">
+          <div class="dash-footer">
+            <span class="copyright">&copy; 2026 Piyush Chauhan. All rights reserved.</span>
+            <div class="social-links">
               <a href="mailto:piyush.ch407@gmail.com" title="Email" class="social-link"><i class="ri-mail-line"></i></a>
-              <a href="https://github.com/piyushch08" target="_blank" title="GitHub" class="social-link"><i
-                  class="ri-github-line"></i></a>
-              <a href="https://www.instagram.com/piyu5h.08/" target="_blank"
-                title="Instagram" class="social-link"><i class="ri-instagram-line"></i></a>
-              <a href="https://www.linkedin.com/in/piyush-chauhan-353822385" target="_blank" title="LinkedIn"
-                class="social-link"><i class="ri-linkedin-box-line"></i></a>
+              <a href="https://github.com/piyushch08" target="_blank" title="GitHub" class="social-link"><i class="ri-github-line"></i></a>
+              <a href="https://www.instagram.com/piyu5h.08/" target="_blank" title="Instagram" class="social-link"><i class="ri-instagram-line"></i></a>
+              <a href="https://www.linkedin.com/in/piyush-chauhan-353822385" target="_blank" title="LinkedIn" class="social-link"><i class="ri-linkedin-box-line"></i></a>
             </div>
           </div>
         </section>
