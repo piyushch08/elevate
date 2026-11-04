@@ -370,201 +370,79 @@
 
         <!-- DASHBOARD -->
         <section class="page active" id="page-dashboard">
-          <!-- HERO BANNER -->
-          <div class="dash-hero">
-            <div class="dash-hero-glow"></div>
-            <div class="dash-hero-main">
-              <h1 class="dash-hero-title" id="greeting-title">Welcome back! 👋</h1>
-              <p class="dash-hero-sub" id="greeting-sub">Track your progress and elevate your daily potential.</p>
-
-              <!-- Quick Action Pills -->
-              <div class="dash-quick-actions">
-                <button class="qa-btn" onclick="openM('m-task')">
-                  <i class="ri-add-circle-fill"></i> New Task
-                </button>
-                <button class="qa-btn" onclick="goTo('study')">
-                  <i class="ri-timer-flash-fill"></i> Focus Timer
-                </button>
-                <button class="qa-btn" onclick="openM('m-meal')">
-                  <i class="ri-restaurant-fill"></i> Log Meal
-                </button>
-                <button class="qa-btn" onclick="openM('m-habit')">
-                  <i class="ri-seedling-fill"></i> New Habit
-                </button>
-              </div>
+          <div class="dash-header flex-b" style="margin-bottom:1.5rem">
+            <div>
+              <h1 class="page-title" id="greeting-title">Welcome back! 👋</h1>
+              <p class="page-sub" id="greeting-sub">Loading…</p>
             </div>
-
-            <!-- Hero Right Stats: Daily Ring & Streak -->
-            <div class="dash-hero-stats">
-              <div class="dash-score-card" title="Overall Daily Productivity Score">
-                <div class="score-ring-wrap">
-                  <svg class="score-ring-svg" viewBox="0 0 88 88">
-                    <circle class="score-ring-bg" cx="44" cy="44" r="36"></circle>
-                    <circle class="score-ring-progress" id="dash-score-circle" cx="44" cy="44" r="36"></circle>
-                  </svg>
-                  <div class="score-ring-inner">
-                    <span class="score-ring-val" id="dash-score-pct">0%</span>
-                    <span class="score-ring-lbl">SCORE</span>
-                  </div>
-                </div>
-                <div class="score-details">
-                  <span class="score-title">Daily Score</span>
-                  <span class="score-sub">Focus · Tasks · Habits</span>
-                </div>
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+              <div class="dash-streak" title="View Streak Calendar" onclick="openStreakCalendar()" style="display:flex; align-items:center; gap:8px; padding:10px 18px; background:linear-gradient(135deg, rgba(255,152,0,0.1), rgba(255,152,0,0.05)); border:1px solid rgba(255,152,0,0.2); border-radius:12px; font-weight:700; font-size:1.1rem; color:var(--warn); cursor:pointer;">
+                <i class="ri-fire-fill" style="font-size:1.6rem"></i> <span id="dash-streak-count">1</span> Day Streak
               </div>
-
-              <div class="dash-streak-card" title="View Streak Calendar" onclick="openStreakCalendar()">
-                <div class="streak-icon-wrap">
-                  <i class="ri-fire-fill"></i>
-                </div>
-                <div class="streak-details">
-                  <div class="streak-count"><span id="dash-streak-count">1</span> <small>Days</small></div>
-                  <div class="streak-lbl">Active Streak 🔥</div>
-                </div>
-                <button id="dash-restore-btn" onclick="event.stopPropagation(); restoreStreak()"
-                  class="streak-restore-pill" style="display:none;">
-                  <i class="ri-restart-line"></i> Restore (<span id="dash-restores-left">3</span>)
-                </button>
-              </div>
+              <button id="dash-restore-btn" onclick="restoreStreak()" style="display:none; background:var(--warn); color:#fff; border:none; border-radius:8px; padding:6px 12px; font-weight:700; cursor:pointer; font-size:0.85rem; box-shadow:0 2px 4px rgba(255,152,0,0.3); transition: transform 0.2s;">
+                <i class="ri-restart-line"></i> Restore Streak (<span id="dash-restores-left">3</span> left)
+              </button>
             </div>
           </div>
 
-          <!-- 4 STAT CARDS -->
           <div class="grid g4 stat-cards-row">
-            <!-- Focus Hours -->
-            <div class="widget stat-card stat-card-cyan" onclick="goTo('study')">
+            <div class="widget stat-card dark-green-card">
               <div class="sc-head">
-                <div class="sc-ico"><i class="ri-timer-flash-line"></i></div>
-                <span class="sc-tag">Study Goal</span>
+                <div class="sc-ico"><i class="ri-timer-line"></i></div>
               </div>
               <div class="sc-label">Focus Hours Today</div>
-              <div class="sc-val"><span id="stat-focus">0</span> <small>h</small></div>
-              <div class="sc-progress-wrap">
-                <div class="sc-progress-bar" id="stat-focus-bar" style="width:0%"></div>
-              </div>
-              <div class="sc-footer" id="stat-focus-sub"><i class="ri-flag-line"></i> Daily study target</div>
+              <div class="sc-val"><span id="stat-focus">0</span> <small
+                  style="font-size:0.5em;font-weight:400">h</small></div>
             </div>
-
-            <!-- Tasks Completed -->
-            <div class="widget stat-card stat-card-emerald" onclick="goTo('todo')">
+            <div class="widget stat-card">
               <div class="sc-head">
-                <div class="sc-ico"><i class="ri-checkbox-circle-line"></i></div>
-                <span class="sc-tag">Todo List</span>
+                <div class="sc-ico"><i class="ri-list-check"></i></div>
               </div>
               <div class="sc-label">Tasks Completed</div>
               <div class="sc-val" id="stat-tasks">0</div>
-              <div class="sc-progress-wrap">
-                <div class="sc-progress-bar" id="stat-tasks-bar" style="width:0%"></div>
-              </div>
-              <div class="sc-footer" id="stat-tasks-sub"><i class="ri-check-line"></i> Active tasks</div>
             </div>
-
-            <!-- Nutrition / Meals -->
-            <div class="widget stat-card stat-card-amber" onclick="goTo('diet')">
+            <div class="widget stat-card">
               <div class="sc-head">
-                <div class="sc-ico"><i class="ri-restaurant-2-line"></i></div>
-                <span class="sc-tag">Nutrition</span>
+                <div class="sc-ico"><i class="ri-restaurant-line"></i></div>
               </div>
-              <div class="sc-label">Meals Logged</div>
+              <div class="sc-label">Meals Today</div>
               <div class="sc-val" id="stat-meals">0</div>
-              <div class="sc-progress-wrap">
-                <div class="sc-progress-bar" id="stat-meals-bar" style="width:0%"></div>
-              </div>
-              <div class="sc-footer" id="stat-meals-sub"><i class="ri-restaurant-line"></i> Daily diet</div>
             </div>
-
-            <!-- Weekly Workouts -->
-            <div class="widget stat-card stat-card-violet" onclick="goTo('exercise')">
+            <div class="widget stat-card">
               <div class="sc-head">
                 <div class="sc-ico"><i class="ri-fire-line"></i></div>
-                <span class="sc-tag">Fitness</span>
               </div>
-              <div class="sc-label">Weekly Consistency</div>
-              <div class="sc-val"><span id="stat-active">0</span> <small>days</small></div>
-              <div class="sc-progress-wrap">
-                <div class="sc-progress-bar" id="stat-active-bar" style="width:0%"></div>
-              </div>
-              <div class="sc-footer" id="stat-active-sub"><i class="ri-run-line"></i> 7-day target</div>
+              <div class="sc-label">Weekly Workouts</div>
+              <div class="sc-val" id="stat-active">0</div>
             </div>
           </div>
 
-          <!-- CHARTS ROW -->
           <div class="grid g2-7-3 mt2" style="align-items: stretch;">
-            <!-- Progress Line/Bar Chart -->
             <div class="widget chart-widget">
-              <div class="chart-header-row">
-                <div class="chart-title-group">
-                  <div class="chart-title-flex">
-                    <span class="trend-icon-badge"><i class="ri-pulse-line"></i></span>
-                    <h3 class="dash-title">Productivity Trends</h3>
-                  </div>
-                  <span class="muted text-xs">Real-time focus and session metrics</span>
+              <div class="flex-b w-title" style="margin-bottom: 1.5rem;">
+                <div style="margin:0; text-transform:none; letter-spacing:0;">
+                  <h3 class="dash-title" style="font-size:1.25rem;margin-bottom:4px">User Progress</h3>
+                  <span class="muted" style="font-weight:400">Track your progress</span>
                 </div>
-
-                <div class="chart-controls-group">
-                  <!-- Metric Filter -->
-                  <div class="chart-segment" id="metric-segment">
-                    <button class="cs-btn active" data-metric="all" onclick="setChartMetric('all')">All</button>
-                    <button class="cs-btn" data-metric="focus" onclick="setChartMetric('focus')">Focus</button>
-                    <button class="cs-btn" data-metric="sessions" onclick="setChartMetric('sessions')">Sessions</button>
-                  </div>
-                  <!-- Period Filter -->
-                  <div class="chart-segment" id="progress-segment">
-                    <button class="cs-btn active" data-period="weekly"
-                      onclick="setProgressPeriod('weekly')">Week</button>
-                    <button class="cs-btn" data-period="monthly" onclick="setProgressPeriod('monthly')">Month</button>
-                    <button class="cs-btn" data-period="yearly" onclick="setProgressPeriod('yearly')">Year</button>
-                  </div>
-                </div>
-                <select id="progress-period" style="display:none;" onchange="updateProgressChart()">
+                <select id="progress-period" class="sm-select" onchange="updateProgressChart()">
                   <option value="weekly">This week</option>
                   <option value="monthly">This month</option>
                   <option value="yearly">This year</option>
                 </select>
               </div>
-
-              <!-- Minimal Stats Strip -->
-              <div class="trend-stats-strip" id="trend-stats-strip">
-                <div class="tss-item">
-                  <span class="tss-lbl">Total Focus</span>
-                  <span class="tss-val" id="tss-total">0.0h</span>
-                </div>
-                <div class="tss-item">
-                  <span class="tss-lbl">Daily Avg</span>
-                  <span class="tss-val" id="tss-avg">0.0h</span>
-                </div>
-                <div class="tss-item">
-                  <span class="tss-lbl">Sessions</span>
-                  <span class="tss-val" id="tss-sessions">0</span>
-                </div>
-                <div class="tss-item">
-                  <span class="tss-lbl">Peak Time</span>
-                  <span class="tss-val" id="tss-peak">—</span>
-                </div>
-              </div>
-
-              <div class="chart-canvas-container" style="position: relative; height: 270px; width: 100%;">
+              <div style="position: relative; height: 300px; width: 100%;">
                 <canvas id="progressChart"></canvas>
               </div>
             </div>
 
-            <!-- Progress Breakdown Donut -->
-            <div class="widget chart-widget">
-              <div class="chart-header-row">
-                <div class="chart-title-group">
-                  <div class="chart-title-flex">
-                    <span class="trend-icon-badge breakdown-badge"><i class="ri-pie-chart-2-line"></i></span>
-                    <h3 class="dash-title">Breakdown</h3>
-                  </div>
-                  <span class="muted text-xs">Today's activity share</span>
+            <div class="widget chart-widget green-gradient">
+              <div class="flex-b w-title" style="margin-bottom: 1.5rem;">
+                <div style="margin:0; text-transform:none; letter-spacing:0;">
+                  <h3 class="dash-title" style="font-size:1.25rem;margin-bottom:4px">Progress Breakdown</h3>
+                  <span class="muted" style="font-weight:400;color:var(--ts) !important">Today's
+                    breakdown</span>
                 </div>
-                <div class="chart-controls-group">
-                  <div class="chart-segment" id="breakdown-segment">
-                    <button class="cs-btn active" data-period="today" onclick="setBreakdownPeriod('today')">Today</button>
-                    <button class="cs-btn" data-period="weekly" onclick="setBreakdownPeriod('weekly')">Week</button>
-                  </div>
-                </div>
-                <select id="breakdown-period" style="display:none;" onchange="updatePieChart()">
+                <select id="breakdown-period" class="sm-select" onchange="updatePieChart()">
                   <option value="today">Today</option>
                   <option value="weekly">This week</option>
                 </select>
@@ -578,22 +456,21 @@
             </div>
           </div>
 
-          <!-- RECENT ACTIVITY ROW -->
-          <div class="grid g4 mt2"
-            style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); align-items: stretch;">
-            <div class="widget dash-activity-widget">
-              <div class="dash-card-header">
-                <h3 class="dash-title"><span class="activity-ico-badge act-tasks"><i class="ri-checkbox-circle-line"></i></span> Recent Tasks</h3>
+          <!-- NEW RELEVANT INFO ROW -->
+          <div class="grid g4 mt2" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); align-items: stretch;">
+            <div class="widget">
+              <div class="flex-b w-title" style="margin-bottom: 1rem;">
+                <div style="margin:0;"><h3 class="dash-title"><i class="ri-list-check"></i> Recent Tasks</h3></div>
                 <button class="btn sm" onclick="goTo('todo')">View All</button>
               </div>
               <div class="task-list" id="dash-tasks">
                 <!-- Populated by app.js -->
               </div>
             </div>
-
-            <div class="widget dash-activity-widget">
-              <div class="dash-card-header">
-                <h3 class="dash-title"><span class="activity-ico-badge act-habits"><i class="ri-seedling-line"></i></span> Active Habits</h3>
+            
+            <div class="widget">
+              <div class="flex-b w-title" style="margin-bottom: 1rem;">
+                <div style="margin:0;"><h3 class="dash-title"><i class="ri-leaf-line"></i> Active Habits</h3></div>
                 <button class="btn sm" onclick="goTo('habits')">View All</button>
               </div>
               <div id="dash-habits">
@@ -601,9 +478,9 @@
               </div>
             </div>
 
-            <div class="widget dash-activity-widget">
-              <div class="dash-card-header">
-                <h3 class="dash-title"><span class="activity-ico-badge act-notes"><i class="ri-sticky-note-line"></i></span> Recent Notes</h3>
+            <div class="widget">
+              <div class="flex-b w-title" style="margin-bottom: 1rem;">
+                <div style="margin:0;"><h3 class="dash-title"><i class="ri-sticky-note-line"></i> Recent Notes</h3></div>
                 <button class="btn sm" onclick="goTo('notes')">View All</button>
               </div>
               <div id="dash-notes">
@@ -611,9 +488,9 @@
               </div>
             </div>
 
-            <div class="widget dash-activity-widget">
-              <div class="dash-card-header">
-                <h3 class="dash-title"><span class="activity-ico-badge act-events"><i class="ri-calendar-event-line"></i></span> Upcoming Events</h3>
+            <div class="widget">
+              <div class="flex-b w-title" style="margin-bottom: 1rem;">
+                <div style="margin:0;"><h3 class="dash-title"><i class="ri-calendar-event-line"></i> Upcoming Events</h3></div>
                 <button class="btn sm" onclick="goTo('calendar')">View All</button>
               </div>
               <div id="dash-events">
@@ -622,13 +499,18 @@
             </div>
           </div>
 
-          <div class="dash-footer">
-            <span class="copyright">&copy; 2026 Piyush Chauhan. All rights reserved.</span>
-            <div class="social-links">
+          <div class="dash-footer"
+            style="margin-top: 3rem; text-align: center; border-top: 1px solid var(--gb); padding-top: 1.5rem; padding-bottom: 2rem; color: var(--ts);">
+            <span class="copyright" style="font-size: 0.85rem;">&copy; 2026 Piyush Chauhan. All rights reserved.</span>
+            <div class="social-links"
+              style="font-size: 1.25rem; display: flex; justify-content: center; gap: 15px; margin-top: 10px;">
               <a href="mailto:piyush.ch407@gmail.com" title="Email" class="social-link"><i class="ri-mail-line"></i></a>
-              <a href="https://github.com/piyushch08" target="_blank" title="GitHub" class="social-link"><i class="ri-github-line"></i></a>
-              <a href="https://www.instagram.com/piyu5h.08/" target="_blank" title="Instagram" class="social-link"><i class="ri-instagram-line"></i></a>
-              <a href="https://www.linkedin.com/in/piyush-chauhan-353822385" target="_blank" title="LinkedIn" class="social-link"><i class="ri-linkedin-box-line"></i></a>
+              <a href="https://github.com/piyushch08" target="_blank" title="GitHub" class="social-link"><i
+                  class="ri-github-line"></i></a>
+              <a href="https://www.instagram.com/piyu5h.08/" target="_blank"
+                title="Instagram" class="social-link"><i class="ri-instagram-line"></i></a>
+              <a href="https://www.linkedin.com/in/piyush-chauhan-353822385" target="_blank" title="LinkedIn"
+                class="social-link"><i class="ri-linkedin-box-line"></i></a>
             </div>
           </div>
         </section>
