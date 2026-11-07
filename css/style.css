@@ -2709,3 +2709,21 @@ button,
 a {
   touch-action: manipulation;
 }
+/* ===== STREAK CALENDAR HIGHLIGHTS ===== */
+.cal-cell.cal-streak-active {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.22), rgba(239, 68, 68, 0.18)) !important;
+  color: var(--warn) !important;
+  font-weight: 700 !important;
+  border: 1px solid rgba(245, 158, 11, 0.45) !important;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+}
+.cal-cell.cal-streak-active:hover {
+  transform: scale(1.15) translateY(-2px);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35);
+}
+.cal-cell.cal-today.cal-streak-active {
+  background: linear-gradient(135deg, #f59e0b, #ef4444) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.45);
+}

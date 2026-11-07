@@ -483,7 +483,17 @@ if (auth) {
               console.log("Planner data loaded from Firestore");
 
               if (remoteData && remoteData.planner && window.D) {
+                const localUsage = window.D.streakUsage;
                 Object.assign(window.D, remoteData.planner);
+                const todayStr = new Date().toDateString();
+                if (localUsage && localUsage.date === todayStr) {
+                  if (!window.D.streakUsage || window.D.streakUsage.date !== todayStr) {
+                    window.D.streakUsage = localUsage;
+                  } else {
+                    window.D.streakUsage.seconds = Math.max(window.D.streakUsage.seconds || 0, localUsage.seconds || 0);
+                    window.D.streakUsage.completed = window.D.streakUsage.completed || localUsage.completed;
+                  }
+                }
               }
               
               // Apply daily reset logic based on incoming cloud data
@@ -537,7 +547,7 @@ if (auth) {
                   tasks: [], events: [], deadlines: [], studyLog: [], meals: [],
                   exercises: [{ name: 'Bench Press', sets: '4×8', done: false }, { name: 'Overhead Press', sets: '3×10', done: false }, { name: 'Tricep Pushdown', sets: '3×12', done: false }],
                   streak: [0, 0, 0, 0, 0, 0, 0], habits: [], notes: [],
-                  dailyStreak: 1, lastStreakDate: new Date().toDateString(),
+                  dailyStreak: 0, lastStreakDate: '', streakUsage: { date: new Date().toDateString(), seconds: 0, completed: false }, streakHistory: [], streakRestores: 3, lostStreak: 0,
                   filter: 'all', theme: 'dark',
                   calY: new Date().getFullYear(), calM: new Date().getMonth(), calEvents: {},
                   timerSec: 25 * 60, timerBase: 25 * 60, timerOn: false, workoutOn: false,

@@ -7,7 +7,9 @@ const D = window.D = {
   tasks: [], events: [], deadlines: [], studyLog: [], meals: [],
   exercises: [{ name: 'Bench Press', sets: '4×8', done: false }, { name: 'Overhead Press', sets: '3×10', done: false }, { name: 'Tricep Pushdown', sets: '3×12', done: false }],
   streak: [0, 0, 0, 0, 0, 0, 0], habits: [], notes: [],
-  dailyStreak: 1, lastStreakDate: new Date().toDateString(),
+  dailyStreak: 0, lastStreakDate: '',
+  streakUsage: { date: new Date().toDateString(), seconds: 0, completed: false },
+  streakHistory: [], streakRestores: 3, lostStreak: 0,
   filter: 'all', theme: 'dark',
   calY: new Date().getFullYear(), calM: new Date().getMonth(), calEvents: {},
   timerSec: 25 * 60, timerBase: 25 * 60, timerOn: false, workoutOn: false,
@@ -38,6 +40,7 @@ window.checkNewDay = function () {
   const today = new Date().toDateString();
   let updated = false;
 
+  // Monthly streak restore reset (3 restores per calendar month)
   const currentMonth = today.substring(4, 7) + today.substring(11, 15);
   if (D.restoreMonth !== currentMonth) {
     D.restoreMonth = currentMonth;
@@ -45,31 +48,41 @@ window.checkNewDay = function () {
     updated = true;
   }
 
-  if (D.lastStreakDate !== today) {
-    if (D.lastStreakDate) {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      if (yesterday.toDateString() === D.lastStreakDate) {
-        D.dailyStreak = (D.dailyStreak || 0) + 1;
-        D.lostStreak = 0;
-      } else {
-        if ((D.dailyStreak || 0) > 1) {
-          D.lostStreak = D.dailyStreak;
-        }
-        D.dailyStreak = 1;
-      }
-    } else {
-      D.dailyStreak = 1;
-    }
-    D.lastStreakDate = today;
+  // Ensure streak structures exist
+  if (!Array.isArray(D.streakHistory)) {
+    D.streakHistory = [];
+  }
+  if (!D.streakUsage || D.streakUsage.date !== today) {
+    D.streakUsage = { date: today, seconds: 0, completed: false };
     updated = true;
+  }
+
+  // Check if today was already contributed
+  if (D.lastStreakDate === today || D.streakHistory.includes(today)) {
+    D.streakUsage.completed = true;
+  }
+
+  // Continuity check: Did the user miss yesterday?
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toDateString();
+
+  if (D.lastStreakDate && D.lastStreakDate !== today && D.lastStreakDate !== yesterdayStr) {
+    // Yesterday was missed, streak lapsed
+    if ((D.dailyStreak || 0) > 0) {
+      D.lostStreak = D.dailyStreak;
+      D.dailyStreak = 0;
+      updated = true;
+    }
   }
 
   if (D.lastActiveDate !== today) {
     D.today = { study: 0, cal: 0, prot: 0, carb: 0, water: 0 };
     if (getWeekStart(new Date()) > getWeekStart(new Date(D.lastActiveDate))) {
       D.streak = [0, 0, 0, 0, 0, 0, 0];
-      D.habits.forEach(h => h.days = [0, 0, 0, 0, 0, 0, 0]);
+      if (Array.isArray(D.habits)) {
+        D.habits.forEach(h => h.days = [0, 0, 0, 0, 0, 0, 0]);
+      }
     }
 
     // Reset daily checklists
@@ -140,6 +153,40 @@ window.streakCalNav = function (dir) {
   renderStreakCalendar();
 };
 
+window.renderStreakTodayProgress = function () {
+  const today = new Date().toDateString();
+  const isDoneToday = (D.lastStreakDate === today) || (D.streakUsage && D.streakUsage.completed);
+  const secs = (D.streakUsage && D.streakUsage.date === today) ? (D.streakUsage.seconds || 0) : 0;
+  
+  const statusEl = document.getElementById('streak-today-status');
+  const progEl = document.getElementById('streak-today-progress');
+  const hintEl = document.getElementById('streak-today-hint');
+  
+  if (!statusEl || !progEl) return;
+
+  if (isDoneToday) {
+    const mins = Math.max(5, Math.floor(secs / 60));
+    statusEl.innerHTML = '<span style="color:var(--success);"><i class="ri-checkbox-circle-fill"></i> Completed</span>';
+    progEl.style.width = '100%';
+    progEl.style.background = 'var(--success)';
+    if (hintEl) {
+      hintEl.innerHTML = '<span style="color:var(--success); font-weight:600;">Contribution Earned! 🔥</span> Today\'s 5-minute contribution is completed. Keep up the great work!';
+    }
+  } else {
+    const mins = Math.floor(secs / 60);
+    const remSecs = secs % 60;
+    const pct = Math.min(100, Math.round((secs / 300) * 100));
+    statusEl.textContent = `${mins}m ${remSecs < 10 ? '0' : ''}${remSecs}s / 5m`;
+    progEl.style.width = `${pct}%`;
+    progEl.style.background = 'linear-gradient(90deg, #f59e0b, #ef4444)';
+    if (hintEl) {
+      const leftSecs = Math.max(0, 300 - secs);
+      const leftM = Math.ceil(leftSecs / 60);
+      hintEl.textContent = `Use the website for ${leftM} more minute${leftM > 1 ? 's' : ''} to complete today's contribution and increase your streak!`;
+    }
+  }
+};
+
 window.renderStreakCalendar = function () {
   const grid = document.getElementById('streak-cal-grid');
   const lbl = document.getElementById('streak-cal-label');
@@ -150,7 +197,9 @@ window.renderStreakCalendar = function () {
   lbl.textContent = `${months[streakCalM]} ${streakCalY}`;
 
   const countEl = document.getElementById('streak-cal-count');
-  if (countEl) countEl.textContent = D.dailyStreak || 0;
+  if (countEl) countEl.textContent = (typeof D.dailyStreak === 'number') ? D.dailyStreak : 0;
+
+  renderStreakTodayProgress();
 
   const frag = document.createDocumentFragment();
   ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(dy => {
@@ -164,56 +213,110 @@ window.renderStreakCalendar = function () {
 
   const days = new Date(streakCalY, streakCalM + 1, 0).getDate();
   const today = new Date();
+  const history = Array.isArray(D.streakHistory) ? D.streakHistory : [];
 
-  // Calculate date boundaries for streak
-  let lastActive = new Date(); // If lastStreakDate exists, use it. Else today.
+  let lastActive = null;
   if (D.lastStreakDate) {
     lastActive = new Date(D.lastStreakDate);
+    lastActive.setHours(23, 59, 59, 999);
   }
-  lastActive.setHours(23, 59, 59, 999); // End of the streak day
-
-  // The streak started `D.dailyStreak` days before lastActive
-  let streakStart = new Date(lastActive);
-  streakStart.setDate(streakStart.getDate() - ((D.dailyStreak || 1) - 1));
-  streakStart.setHours(0, 0, 0, 0);
+  let streakStart = null;
+  if (lastActive && (D.dailyStreak || 0) > 0) {
+    streakStart = new Date(lastActive);
+    streakStart.setDate(streakStart.getDate() - ((D.dailyStreak || 1) - 1));
+    streakStart.setHours(0, 0, 0, 0);
+  }
 
   for (let day = 1; day <= days; day++) {
     const cell = document.createElement('div'); cell.className = 'cal-cell';
     const isToday = day === today.getDate() && streakCalM === today.getMonth() && streakCalY === today.getFullYear();
     if (isToday) cell.classList.add('cal-today');
 
-    // Check if within streak
     const cellDate = new Date(streakCalY, streakCalM, day);
-    if (cellDate >= streakStart && cellDate <= lastActive) {
-      cell.style.background = 'rgba(255,152,0,0.15)';
-      cell.style.color = 'var(--warn)';
-      cell.style.fontWeight = 'bold';
-      cell.style.border = '1px solid rgba(255,152,0,0.3)';
+    const cellDateStr = cellDate.toDateString();
+
+    const isContributed = history.includes(cellDateStr) ||
+      (streakStart && lastActive && cellDate >= streakStart && cellDate <= lastActive);
+
+    if (isContributed) {
+      cell.classList.add('cal-streak-active');
+      cell.innerHTML = `<span>${day} <i class="ri-fire-fill" style="font-size:0.75rem; vertical-align:middle;"></i></span>`;
+    } else {
+      cell.innerHTML = `<span>${day}</span>`;
     }
 
-    cell.innerHTML = `<span>${day}</span>`;
     frag.appendChild(cell);
   }
   grid.appendChild(frag);
 };
 
+window.awardDailyStreak = function (todayDate) {
+  const today = todayDate || new Date().toDateString();
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toDateString();
+
+  if (D.lastStreakDate === today) return;
+
+  if (D.lastStreakDate === yesterdayStr) {
+    D.dailyStreak = (D.dailyStreak || 0) + 1;
+    D.lostStreak = 0;
+  } else {
+    D.dailyStreak = 1;
+    D.lostStreak = 0;
+  }
+
+  D.lastStreakDate = today;
+  if (!Array.isArray(D.streakHistory)) D.streakHistory = [];
+  if (!D.streakHistory.includes(today)) {
+    D.streakHistory.push(today);
+  }
+  if (D.streakUsage) {
+    D.streakUsage.completed = true;
+  }
+
+  save();
+  renderDailyStreak();
+  renderStreakCalendar();
+
+  toast(`🔥 5-min contribution complete! Streak increased: ${D.dailyStreak} day${D.dailyStreak > 1 ? 's' : ''}!`, 'success');
+};
+
 window.restoreStreak = function () {
   if (D.lostStreak > 0 && D.streakRestores > 0) {
-    D.dailyStreak = D.lostStreak + 1;
+    const today = new Date().toDateString();
+    const todayContributed = (D.lastStreakDate === today) || (D.streakUsage && D.streakUsage.completed);
+    D.dailyStreak = D.lostStreak + (todayContributed ? 1 : 0);
     D.streakRestores -= 1;
     D.lostStreak = 0;
     save();
-    renderAll();
+    renderDailyStreak();
+    renderStreakCalendar();
     toast("Streak Restored! 🔥", "success");
   }
 };
 
 window.renderDailyStreak = function () {
-  const streak = D.dailyStreak || 1;
+  const streak = (typeof D.dailyStreak === 'number') ? D.dailyStreak : 0;
   const el = document.getElementById('topbar-streak');
   if (el) el.textContent = streak;
   const elDash = document.getElementById('dash-streak-count');
   if (elDash) elDash.textContent = streak;
+
+  const today = new Date().toDateString();
+  const isDoneToday = (D.lastStreakDate === today) || (D.streakUsage && D.streakUsage.completed);
+  const secs = (D.streakUsage && D.streakUsage.date === today) ? (D.streakUsage.seconds || 0) : 0;
+  const mins = Math.floor(secs / 60);
+  const remSecs = secs % 60;
+  
+  const statusHint = isDoneToday
+    ? `Today's 5-min contribution complete! (${mins}m active)`
+    : `Today: ${mins}m ${remSecs < 10 ? '0' : ''}${remSecs}s / 5m active`;
+
+  const topbarStreakEl = document.querySelector('.tb-streak');
+  if (topbarStreakEl) topbarStreakEl.title = `Daily Streak: ${streak} days • ${statusHint}`;
+  const dashStreakEl = document.querySelector('.dash-streak');
+  if (dashStreakEl) dashStreakEl.title = `Daily Streak: ${streak} days • ${statusHint} (Click to view calendar)`;
 
   const restoreBtn = document.getElementById('dash-restore-btn');
   if (restoreBtn) {
@@ -254,6 +357,75 @@ window.renderDailyStreak = function () {
     rankEl.textContent = ranks[level - 1];
   }
 };
+
+// Activity tracker for genuine active website usage
+let lastUserActivityTime = Date.now();
+['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'].forEach(evt => {
+  window.addEventListener(evt, () => {
+    lastUserActivityTime = Date.now();
+  }, { passive: true });
+});
+
+window.updateStreakUsage = function () {
+  if (document.hidden) return;
+
+  const appBody = document.getElementById('app-body');
+  if (!appBody || appBody.style.display === 'none') return;
+
+  // Active user check (within last 60 seconds)
+  if ((Date.now() - lastUserActivityTime) > 60000) return;
+
+  const today = new Date().toDateString();
+  if (!D.streakUsage || D.streakUsage.date !== today) {
+    D.streakUsage = { date: today, seconds: 0, completed: (D.lastStreakDate === today) };
+  }
+
+  D.streakUsage.seconds = (D.streakUsage.seconds || 0) + 1;
+
+  // 5 minutes requirement = 300 seconds
+  const REQUIRED_SECONDS = 300;
+  if (D.streakUsage.seconds >= REQUIRED_SECONDS && !D.streakUsage.completed && D.lastStreakDate !== today) {
+    window.awardDailyStreak(today);
+  }
+
+  // Periodic debounce save every 15 seconds
+  if (D.streakUsage.seconds % 15 === 0) {
+    save();
+  }
+
+  // Live update progress in modal if open
+  const streakModal = document.getElementById('m-streak');
+  if (streakModal && !streakModal.classList.contains('hide') && streakModal.style.display !== 'none') {
+    renderStreakTodayProgress();
+  }
+};
+
+// Manual test helper for developers / debug
+window.addStreakTestTime = function (seconds = 300) {
+  const today = new Date().toDateString();
+  if (!D.streakUsage || D.streakUsage.date !== today) {
+    D.streakUsage = { date: today, seconds: 0, completed: (D.lastStreakDate === today) };
+  }
+  D.streakUsage.seconds = (D.streakUsage.seconds || 0) + seconds;
+  if (D.streakUsage.seconds >= 300 && !D.streakUsage.completed && D.lastStreakDate !== today) {
+    window.awardDailyStreak(today);
+  } else {
+    save();
+    renderDailyStreak();
+    renderStreakCalendar();
+  }
+};
+
+window.addEventListener('beforeunload', () => {
+  if (D.streakUsage) {
+    try { localStorage.setItem('elevate2', JSON.stringify(D)); } catch (e) {}
+  }
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && D.streakUsage) {
+    try { localStorage.setItem('elevate2', JSON.stringify(D)); } catch (e) {}
+  }
+});
 
 const renderedPages = new Set(['dashboard']);
 
@@ -367,6 +539,7 @@ function toggleSidebar() {
 let timerInterval;
 let cachedTbTime = null;
 function tick() {
+  updateStreakUsage();
   const isHidden = document.hidden;
   if (!isHidden) {
     const now = new Date();
